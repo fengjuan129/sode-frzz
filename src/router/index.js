@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-// import Home from '../views/Home.vue';
-import loadable from '../libs/loadable';
+import asyncLoader from '../libs/asyncLoader';
 
 Vue.use(Router);
 
@@ -13,7 +12,7 @@ export default new Router({
       path: '/',
       name: 'home',
       // component: Home,
-      component: loadable(() => import('../views/Home.vue')),
+      component: asyncLoader(() => import(/* webpackChunkName: "home" */ '../views/Home.vue')),
     },
     {
       path: '/about',
@@ -22,7 +21,7 @@ export default new Router({
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       // component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
-      component: loadable(() => import(/* webpackChunkName: "about" */ '../views/About.vue')),
+      component: asyncLoader(() => import(/* webpackChunkName: "about" */ '../views/About.vue')),
     },
   ],
 });

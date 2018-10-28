@@ -1,10 +1,10 @@
 <template>
-  <div v-loading="true" class="container"></div>
+  <div class="container">Error!!!!!!!!!!!!!!!</div>
 </template>
 
 <script>
 export default {
-  name: 'Loading',
+  name: 'Error',
 };
 </script>
 
@@ -12,6 +12,8 @@ export default {
 .container {
   height: 100%;
   text-align: center;
+  background-color: red;
+  font-size: 30px;
 }
 </style>
 
