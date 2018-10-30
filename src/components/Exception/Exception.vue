@@ -1,10 +1,14 @@
 <template>
-  <div class="container">Error!!!!!!!!!!!!!!!</div>
+  <div class="container">{{ type }} Error</div>
 </template>
 
 <script>
 export default {
-  name: 'Error',
+  name: 'Exception',
+  props: {
+    type: Number,
+    default: 500,
+  },
 };
 </script>
 

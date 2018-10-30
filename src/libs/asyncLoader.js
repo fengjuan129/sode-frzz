@@ -1,5 +1,5 @@
-import Loading from '../components/Loading.vue';
-import Error from '../components/Error.vue';
+import Loading from '../components/Loading';
+import Exception from '../components/Exception';
 
 /**
  * 组件动态加载器
@@ -13,7 +13,7 @@ export default asyncComponent => {
     // 异步组件加载时显示的组件
     loading: Loading,
     // 组件加载失败时显示的组件
-    error: Error,
+    error: Exception,
     // 超过3秒视为加载失败
     timeout: 3000,
   });
