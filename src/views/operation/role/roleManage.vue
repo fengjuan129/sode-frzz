@@ -27,7 +27,7 @@
               :width='column.width'
               :align='column.align'
               :prop='column.key'>
-              <template scope="scope">
+              <template scope="">
               </template>
             </el-table-column>
           </el-table>
