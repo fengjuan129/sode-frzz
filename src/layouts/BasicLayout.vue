@@ -10,7 +10,7 @@
       <el-main>
         <router-view></router-view>
       </el-main>
-      <el-footer>Footer</el-footer>
+      <!-- <el-footer>Footer</el-footer> -->
     </el-container>
   </el-container>
 </template>
@@ -48,9 +48,9 @@ export default {
 }
 
 .el-main {
-  background-color: #e9eef3;
+  background-color: #fff;
   color: #333;
-  text-align: center;
+  /* text-align: center; */
 }
 
 .btn-exit {

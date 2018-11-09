@@ -14,10 +14,10 @@ export default {
     // 模拟数据来源（remote || local）
     // 来源为 remote 时，模拟数据由远程mock server提供，此时必须配置url
     // 来源为 local 时，模拟数据使用项目内 mock 目录下的配置生成
-    mode: 'local',
+    mode: 'remote',
     // 远程模拟数据加载基础路径
     // ! 仅当 mode 为 remote 时生效
-    url: 'http://192.168.90.234:3000/mock/29',
+    url: 'http://192.168.23.59:3000/mock/38',
   },
   // 内部应用唯一身份标识
   client_id: 'Y2xpZW50XzI6MTIzNDU2',

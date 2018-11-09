@@ -7,6 +7,7 @@ import 'nprogress/nprogress.css';
 import Exception from '../components/Exception';
 import asyncLoader from '../libs/asyncLoader';
 import { getToken } from '../libs/token';
+import testModuleRouter from './testModule'; // 测试使用 18/10/31 weiD
 
 Vue.use(Router);
 
@@ -40,8 +41,44 @@ const router = new Router({
             import(/* webpackChunkName: "hello" */ '../components/HelloWorld')
           ),
         },
+        // 测试使用
+        ...testModuleRouter,
+        {
+          /**
+           * 用户管理
+           */
+          path: '/org/user',
+          name: 'orgUser',
+          component: asyncLoader(() => import('../views/org/user')),
+          meta: {
+            type: 'private',
+          },
+        },
+        /**
+         * 组织机构管理
+         */
+        {
+          path: '/org/dept',
+          name: 'orgDept',
+          component: asyncLoader(() => import('../views/org/dept')),
+          meta: {
+            type: 'private',
+          },
+        },
+        /**
+         * 角色管理
+         */
+        {
+          path: '/operation/role',
+          name: 'operationRole',
+          component: asyncLoader(() => import('../views/operation/role')),
+          meta: {
+            type: 'private',
+          },
+        },
       ],
     },
+
     // 配置404路由
     // !此路由只能配置在路由表最后，顺序不可改变
     {
