@@ -62,10 +62,6 @@ export default {
     loadDepTypeInfo() {
       if (!this.id) return;
       DeptApi.getDeptTypeInfo(this.id).then(res => {
-        /**
-         * TODO: 假数据随机生成ID，重新赋值ID
-         */
-        res.id = this.id;
         this.$set(this, 'deptTypeForm', res);
       });
     },
@@ -73,16 +69,14 @@ export default {
     save(deptTypeForm) {
       this.$refs[deptTypeForm].validate(valid => {
         if (!valid) return;
-        DeptApi.addDeptType(this.deptTypeForm).then(res => {
+        DeptApi.editDeptType(this.deptTypeForm).then(res => {
           let message = '';
           if (this.id) {
             message = '修改成功';
           } else {
-            this.deptTypeForm.id = res.id;
             message = '保存成功';
           }
-          console.log(this.deptTypeForm);
-          this.$emit('save', this.deptTypeForm);
+          this.$emit('save', res);
           this.close();
           this.$message({
             message,

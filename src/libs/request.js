@@ -10,7 +10,9 @@ const { mock } = config;
 
 // 如果启用了远程mock功能，设置url基础路径为远程mock地址
 if (mock.enabled && mock.mode === 'remote') {
-  axios.defaults.baseURL = mock.url;
+  axios.defaults.baseURL = `${mock.url}/api`;
+} else {
+  axios.defaults.baseURL = '/api';
 }
 
 // 如果当前不是生产环境，且返回数据中有约定的模拟状态码字段“__statusCode”，则用其替换http状态码（此功能仅用于本地mock模拟报错）

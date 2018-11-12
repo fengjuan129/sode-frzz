@@ -10,9 +10,11 @@
       </el-col>
 
       <el-col :span='12'>
-        <el-form-item label="编码" prop='code'>
+        <el-form-item label="编码">
           <!-- 修改是 编码不能修改 -->
-          <el-input v-model="deptEditForm.code" :disabled="id ? true : false"></el-input>
+          <!-- 18/11/12 后端要求编码不能填写，后台自动生成 -->
+          <!-- <el-input v-model="deptEditForm.code" :disabled="id ? true : false"></el-input> -->
+          <el-input v-model="deptEditForm.code" disabled></el-input>
         </el-form-item>
       </el-col>
 
@@ -77,6 +79,7 @@ export default {
     return {
       deptEditForm: {
         isCorporation: false,
+        isEnable: true,
       },
       // 验证规则
       deptEditRules: {
@@ -107,11 +110,6 @@ export default {
   methods: {
     loadDeptInfo() {
       DeptApi.loadDeptInfo(this.id).then(res => {
-        /**
-         * TODO 测试数据
-         */
-        res.id = this.id;
-        res.parentCode = this.parentCode;
         res.parentName = this.parentName;
         this.deptEditForm = res;
       });
@@ -119,10 +117,7 @@ export default {
     save(deptEditForm) {
       this.$refs['deptEditForm'].validate(valid => {
         if (!valid) return;
-        /**
-         * TODO 测试
-         */
-        this.deptEditForm.id = this.id || Math.random();
+
         this.$emit('save', this.deptEditForm);
 
         this.$message({

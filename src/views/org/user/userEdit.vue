@@ -15,16 +15,17 @@ import { valid } from 'semver';
         </el-col>
 
         <el-col :span='12'>
-          <el-form-item label='账号' prop='userName'>
-            <el-input v-model='userEditForm.userName' :disabled="id ? true : false"></el-input>
+          <el-form-item label='账号' prop='username'>
+            <el-input v-model='userEditForm.username' :disabled="id ? true : false"></el-input>
           </el-form-item>
         </el-col>
 
         <el-col :span='12'>
-          <el-form-item prop='deptCode' class='t-select-dep'>
+          <el-form-item prop='orgCode' class='t-select-dep'>
             <template>
               <a href="javascript: void(0)" slot='label' @click='dialogState = true'>部门</a>
               <el-input v-model='userEditForm.deptName' disabled placeholder="请选择部门"></el-input>
+              <input type="hidden" v-model="userEditForm.orgCode">
             </template>
             <!--<el-input v-model='userEditForm.deptCode' :disabled="id ? true : false"></el-input>
             <div class='t-mask' @click='selectDep' v-if='id ? false : true'></div>-->
@@ -54,8 +55,8 @@ import { valid } from 'semver';
         <el-col :span='12'>
           <el-form-item label='是否启用'>
             <el-select v-model="userEditForm.isEnabled">
-              <el-option label="启用" :value="1"></el-option>
-              <el-option label="禁用" :value="2"></el-option>
+              <el-option label="启用" :value="true"></el-option>
+              <el-option label="禁用" :value="false"></el-option>
             </el-select>
           </el-form-item>
         </el-col>
@@ -91,11 +92,13 @@ import Mock from 'mockjs';
 import UserApi from '@/api/user';
 import SelectDept from '@/components/SelectDept';
 export default {
-  props: ['id', 'isOpen'],
+  props: ['id', 'isOpen', 'rootName'],
   data() {
     return {
       dialogState: false,
-      userEditForm: {},
+      userEditForm: {
+        isEnabled: true,
+      },
       /**
        * TODO: 数据字典
        */
@@ -111,7 +114,7 @@ export default {
        * ! 验证规则的 key 需要与 表单的valueKey 对应。。。。
        */
       userEditRules: {
-        userName: [
+        username: [
           { required: true, message: '此项为必填选项', trigger: 'blur' },
           { min: 6, max: 32, message: '账号长度为 6 - 32个字符', trigger: 'blur' },
         ],
@@ -119,7 +122,7 @@ export default {
           { required: true, message: '此项为必填选项', trigger: 'blur' },
           { max: 32, message: '姓名长度不能超过32个字符', trigger: 'blur' },
         ],
-        deptCode: [{ required: true, message: '此项为必填选项', trigger: 'blur' }],
+        orgCode: [{ required: true, message: '此项为必填选项', trigger: 'blur' }],
         certId: [{ required: true, message: '此项为必填选项', trigger: 'blur' }],
       },
     };
@@ -137,8 +140,11 @@ export default {
        */
       if (!this.id) return;
       UserApi.getUserMsg(this.id).then(res => {
+        // console.log(res);
         // this.$refs['userEditForm'].resetFields();
         this.userEditForm = res;
+        this.userEditForm.deptName = this.rootName; // 后端为提供部门名称，父组件传入
+        console.log(this.rootName);
       });
     },
 
@@ -159,13 +165,12 @@ export default {
       });
     },
     setDept(deptMsg) {
-      console.log(deptMsg);
       /**
        * TODO 更具后端返回数据在做处理
        */
       this.userEditForm.deptName = deptMsg.name;
-      this.userEditForm.orgCode = deptMsg.orgCode;
-      this.userEditForm.deptCode = deptMsg.deptCode;
+      this.userEditForm.orgCode = deptMsg.code;
+      this.userEditForm.deptCode = deptMsg.code;
     },
     close() {
       this.$emit('close');

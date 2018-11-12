@@ -12,7 +12,7 @@
 
           <el-col :span='12'>
             <el-form-item label='账号:'>
-              {{userMsg.userName}}
+              {{userMsg.username}}
             </el-form-item>
           </el-col>
 

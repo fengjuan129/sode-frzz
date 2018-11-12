@@ -1,7 +1,7 @@
 <!-- 账号管理页面 -->
 <template>
   <div>
-    <el-tabs type="border-card" @tab-click='changeTab' v-if='organizationType.length > 1'>
+    <el-tabs type="border-card" @tab-click='changeTab'>
       <el-tab-pane v-for='item in organizationType' 
         :key='item.id' 
         :label="item.typename" 
@@ -27,6 +27,7 @@
               highlight-current
               :props="tree.defaultProps"
               @node-click='treeNodeClick'
+              node-key='id'
               ref='userLazyTree'>
             </el-tree>
 
@@ -80,9 +81,10 @@
                   <el-input v-model="userForm.userName" placeholder="账号"></el-input>
                 </el-form-item>
 
-                <el-form-item label='姓名'>
+                <el-form-item label='类型'>
                   <el-select v-model="userForm.status" placeholder="类型">
-                    <el-option v-for='item in userStatus' :key='item.id' :label="item.tit" :value='item.id'></el-option>
+                    <el-option v-for='item in userStatus' :key='item.id' :label="item.tit" :value='item.value'></el-option>
+                    <el-option label='锁定' value='locked'></el-option>
                   </el-select>
                 </el-form-item>
 
@@ -106,8 +108,8 @@
                   <el-table-column label="状态">
                     <template slot-scope="scope">
                         <!-- 显示规则：锁定有先 -->
-                        <span>{{ scope.row.isLocked == 0 ? '锁定' : 
-                                  scope.row.isEnabled == 1 ? '启用': '禁用'}}
+                        <span>{{ scope.row.isLocked == true ? '锁定' : 
+                                  scope.row.isEnabled == true ? '启用': '禁用'}}
                         </span>
                     </template>
                   </el-table-column>
@@ -122,10 +124,10 @@
                         </a>
                         <el-dropdown-menu slot="dropdown">
                           <!-- command 属性不能修改，固定写法 -->
-                          <!--isEnabled: 0 禁用 isEnabled： 1 启用   isLocked：0 锁定 isLocked：1 未锁定-->
-                          <el-dropdown-item command='1' v-if='scope.row.isEnabled == 0 && scope.row.isLocked != 0'>启用</el-dropdown-item>
-                          <el-dropdown-item command='2' v-if='scope.row.isEnabled == 1 && scope.row.isLocked != 0'>禁用</el-dropdown-item>
-                          <el-dropdown-item command='3' v-if='scope.row.isLocked == 0'>解锁</el-dropdown-item>
+                          <!--isEnabled: false 禁用 isEnabled： true 启用   isLocked：true 锁定 false 未锁定-->
+                          <el-dropdown-item command='1' v-if='scope.row.isEnabled == false && scope.row.isLocked != true'>启用</el-dropdown-item>
+                          <el-dropdown-item command='2' v-if='scope.row.isEnabled == true && scope.row.isLocked != true'>禁用</el-dropdown-item>
+                          <el-dropdown-item command='3' v-if='scope.row.isLocked == true'>解锁</el-dropdown-item>
                           <el-dropdown-item command='4'>重置密码</el-dropdown-item>
                           <el-dropdown-item command='5'>账号迁移</el-dropdown-item>
                         </el-dropdown-menu>
@@ -157,11 +159,16 @@
     <!-- tab end -->
     <LockRuleConfig :isOpen='dialogMsg.lockRule' @close='dialogMsg.lockRule = false'/>
     <!-- 锁定用户弹框 END 保存成功后刷新列表 -->
-    <UserEdit :isOpen='dialogMsg.userEdit' :id='curUser.id' @save='getUserListByOption' @close='dialogMsg.userEdit = false' v-if='dialogMsg.userEdit'/>
+    <UserEdit :isOpen='dialogMsg.userEdit' 
+      :id='curUser.id' 
+      @save='getUserListByOption' 
+      @close='dialogMsg.userEdit = false' 
+      :rootName='activeTabName'
+      v-if='dialogMsg.userEdit'/>
     <!-- 修改用户信息 弹框 END -->
     <UserView :isOpen='dialogMsg.userView' :id='seeCurUser.id' @close='dialogMsg.userView = false'/>
     <!-- 查看用户信息 END -->
-    <PasswordRuleConfig :isOpen='dialogMsg.passwordRuleConfig' @close='dialogMsg.passwordRuleConfig = false'/>
+    <!-- <PasswordRuleConfig :isOpen='dialogMsg.passwordRuleConfig' @close='dialogMsg.passwordRuleConfig = false'/> -->
     <!-- 密码强度规则编辑页面 END -->
 
     <SelectDept :multiple='false' 
@@ -182,6 +189,8 @@ import PasswordRuleConfig from './passwordRuleConfig.vue';
  * 接口列表
  */
 import UserApi from '@/api/user.js';
+import DeptApi from '@/api/dept.js';
+import { setInterval, clearInterval } from 'timers';
 export default {
   name: 'UserManage',
   data() {
@@ -199,6 +208,7 @@ export default {
       },
       organizationType: [], // 组织机构类型
       activeTab: '', // 当前选中Tab
+      activeTabName: '', // 18/11/12 保存当前选项卡名称，编辑时传入只组件
       userForm: {},
       page: {
         // 分页信息
@@ -207,7 +217,7 @@ export default {
         total: 0,
       },
       // TODO: userType,secretLev 为数据字典
-      userStatus: [{ id: 1, tit: '启用' }, { id: 2, tit: '禁用' }, { id: 3, tit: '锁定' }],
+      userStatus: [{ id: 1, tit: '启用', value: true }, { id: 2, tit: '禁用', value: false }],
       secretLev: [
         { id: 1, tit: '公开' },
         { id: 2, tit: '秘密' },
@@ -249,12 +259,11 @@ export default {
      * 获取组织机构类型
      */
     getOrganizationType() {
-      UserApi.loadOrganization().then(res => {
+      DeptApi.getDeptType().then(res => {
         this.organizationType = res;
         this.activeTab = res[0].code;
-        this.organizationId = res[0].id;
+        this.activeTabName = res[0].typename;
         this.getTree();
-        this.getUserListByOption();
       });
     },
     /**
@@ -264,7 +273,7 @@ export default {
       let { tree } = this;
       if (tree.keyword) {
         tree.isLazy = false;
-        UserApi.loadOrgTree(tree.keyword, this.activeTab).then(res => {
+        DeptApi.getTreeByKeywork(tree.keyword, this.activeTab).then(res => {
           tree.searchTreeData = this.$store.state.createTerrData(res);
         });
       } else {
@@ -283,21 +292,28 @@ export default {
      * 加载第一级tree节点
      */
     lazyTreeInit(resolve) {
-      UserApi.loadLazyTree(this.activeTab).then(res => {
-        res.forEach(item => {
-          /**
-           * 懒加载 hasChildren 是否包含子节点，默认有
-           */
-          item.hasChildren = true;
-        });
-        resolve(res);
-      });
+      let timer = setInterval(() => {
+        if (this.activeTab) {
+          clearInterval(timer);
+          DeptApi.getLazyTree(this.activeTab, -1).then(res => {
+            res.forEach(item => {
+              /**
+               * 懒加载 hasChildren 是否包含子节点，默认有
+               */
+              item.hasChildren = true;
+            });
+            resolve(res);
+            this.$refs['userLazyTree'].setCurrentKey(res[0].id);
+            this.organizationId = res[0].code;
+          });
+        }
+      }, 80);
     },
     /**
      * 加载子节点
      */
     getLeaf(node, resolve) {
-      UserApi.loadLazyTree(node.data.deptCode).then(res => {
+      DeptApi.getLazyTree(this.activeTab, node.data.code).then(res => {
         resolve(res);
 
         return;
@@ -329,20 +345,31 @@ export default {
       /**
        * !懒加载数据判断是否可加载数据字段 node.hasChildren
        */
-      if (node.children) return;
+      // if (node.children) return;
       this.userForm = {};
-      this.organizationId = node.id; // 触发 watch
+      this.organizationId = node.code; // 触发 watch
     },
     /**
      * 用户列表
+     * @param {Boolean} isClear 是否清空搜索项
+     * @param {object} page 分页条件
      */
-    getUserListByOption(isClear) {
+    getUserListByOption(isClear, page = { pageSize: 20 }) {
       if (isClear) {
         this.userForm = {};
+      } else {
+        const { status } = this.userForm;
+        if (status !== undefined && status === 'locked') {
+          this.userForm.isLocked = true;
+          this.userForm.isEnabled && delete this.userForm.isEnabled;
+        } else {
+          this.userForm.isEnabled = status;
+          this.userForm.isLocked && delete this.userForm.isLocked;
+        }
       }
 
       UserApi.loadUserList(
-        Object.assign({}, this.userForm, { depId: this.organizationId }, this.page)
+        Object.assign({}, this.userForm, { deptCode: this.organizationId }, page)
       ).then(res => {
         this.userList = res.users;
         this.page.current = res.current;
@@ -356,8 +383,14 @@ export default {
     reloadLazyTree() {
       let children = this.$refs.userLazyTree.root.childNodes;
       children.splice(0, children.length);
-      UserApi.loadLazyTree(this.activeTab).then(res => {
+      DeptApi.getLazyTree(this.activeTab, -1).then(res => {
         this.$refs.userLazyTree.root.doCreateChildren(res);
+        if (res.length) {
+          this.$refs['userLazyTree'].setCurrentKey(res[0].id);
+          this.organizationId = res[0].code;
+        } else {
+          this.userList = [];
+        }
       });
     },
 
@@ -391,6 +424,7 @@ export default {
       this.reloadLazyTree();
       this.tree.searchTreeData = [];
       this.isLazy = true;
+      this.activeTabName = tab.label;
     },
     /**
      * 接收 SelectUser 子组件信息
@@ -402,7 +436,6 @@ export default {
      * 表格复选框数据改变是获取
      */
     tableSelectChange(list) {
-      // console.log(list);
       this.curUser = list;
     },
     /**
@@ -418,13 +451,20 @@ export default {
     curPageChange(val) {
       if (val === this.page.current) return;
       this.page.current = val;
-      this.getUserListByOption();
+      this.getUserListByOption(false, {
+        current: val,
+        pageSize: this.page.pageSize,
+      });
     },
 
     filterSecretLev(row, column) {
-      return this.secretLev.find(item => {
-        return item.id == row.securityLevel;
-      })['tit'];
+      if (row.securityLevel) {
+        return this.secretLev.find(item => {
+          return item.id == row.securityLevel;
+        })['tit'];
+      } else {
+        return '';
+      }
     },
 
     /**
@@ -478,19 +518,19 @@ export default {
         this.curUser.forEach(item => {
           switch (parseInt(type)) {
             case 1: // 只添加 状态为禁用的选项
-              if (item.isEnabled == 0 && item.isLocked != 0) {
+              if (item.isEnabled == false && item.isLocked != true) {
                 idsArr.push(item.id);
                 curArr.push(item);
               }
               break;
             case 2: // 只添加状态为启用的选项
-              if (item.isEnabled == 1 && item.isLocked != 0) {
+              if (item.isEnabled == true && item.isLocked != true) {
                 idsArr.push(item.id);
                 curArr.push(item);
               }
               break;
             case 3: // 只添加状态为锁定的选项
-              if (item.isLocked == 0) {
+              if (item.isLocked == true) {
                 idsArr.push(item.id);
                 curArr.push(item);
               }
@@ -581,13 +621,13 @@ export default {
      * @param {array} curList 选中项
      */
     disableUser(disableType, ids, curList) {
-      let status = disableType == 'enable' ? 1 : 0;
+      let status = disableType == 'enable' ? 'Y' : 'N';
       UserApi.disableUser(ids, status).then(res => {
         /**
          * 更新视图
          */
         curList.forEach(item => {
-          item.isEnabled = status;
+          item.isEnabled = status === 'Y' ? true : false;
         });
 
         this.$message({
@@ -605,9 +645,9 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          UserApi.lockUser(ids, 1).then(res => {
+          UserApi.lockUser(ids, 'N').then(res => {
             curList.forEach(item => {
-              item.isLocked = 1;
+              item.isLocked = false;
             });
             this.$message({
               message: '修改成功',

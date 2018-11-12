@@ -8,6 +8,7 @@ export default new Vuex.Store({
     /**
      * 组装 Tree 数据，后端只返回 list集合
      * @param {arr} list tree列表
+     * 18/11/12 weid 修改 子、父关联参数 code 、parentCode
      */
     createTerrData(list) {
       if (!list.length) return [];
@@ -15,12 +16,12 @@ export default new Vuex.Store({
       const [treeMap, returnTree] = [{}, []];
 
       for (let i = 0, len = list.length; i < len; i += 1) {
-        treeMap[list[i].id] = list[i];
+        treeMap[list[i].code] = list[i];
       }
 
       for (let i = 0, len = list.length; i < len; i += 1) {
         const item = list[i];
-        const parent = treeMap[item.pid];
+        const parent = treeMap[item.parentCode];
 
         if (parent) {
           (parent.children || (parent.children = [])).push(item);

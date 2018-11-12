@@ -6,9 +6,13 @@ export default {
    * 懒加载组织机构
    * @param {string} parentCode 父组织机构编码
    */
-  getLazyTree(parentCode) {
-    return request(`/v1/orgcenter/org/lazytree?${qs.stringify({ parentCode })}`, {
+  getLazyTree(typeCode, parentCode) {
+    return request('/v1/usercenter/org/lazytree', {
       method: 'get',
+      params: {
+        typeCode,
+        parentCode,
+      },
     });
   },
 
@@ -16,16 +20,22 @@ export default {
    * 加载组织机构类别
    */
   getDeptType() {
-    return request('/v1/orgcenter/org/types', {
+    return request('/v1/usercenter/org/types', {
       method: 'get',
     });
   },
   /**
    * 全加载树，搜索使用
+   * @param {string} name 关键词
+   * @param {string} typeCode 机构类型
    */
-  getTreeByKeywork(parentCode, keyword) {
-    return request(`//v1/orgcenter/org/tree?${qs.stringify({ parentCode, keyword })}`, {
+  getTreeByKeywork(name, typeCode) {
+    return request('/v1/usercenter/org/tree', {
       method: 'get',
+      params: {
+        name,
+        typeCode,
+      },
     });
   },
   /**
@@ -33,18 +43,20 @@ export default {
    * @param { string } id 机构类别 ID
    */
   getDeptTypeInfo(id) {
-    return request(`//v1/orgcenter/org/type/${id}`, {
+    return request(`/v1/usercenter/org/type/${id}`, {
       method: 'get',
     });
   },
   /**
    * 新增组织机构类型
    * @param {Object} params 名称，编码，备注
+   * 修改提交发放为 PUT  新增为 POST
    */
-  addDeptType(params) {
-    return request('/v1/orgcenter/org/type', {
-      method: 'post',
-      params,
+  editDeptType(params) {
+    const { id } = params;
+    return request('/v1/usercenter/org/type', {
+      method: id ? 'put' : 'post',
+      data: params,
     });
   },
   /**
@@ -52,7 +64,7 @@ export default {
    * @param {string} id 组织机构ID
    */
   deleteDeptType(id) {
-    return request(`//v1/orgcenter/org/type/${id}`, {
+    return request(`/v1/usercenter/org/type/${id}`, {
       method: 'delete',
     });
   },
@@ -60,7 +72,7 @@ export default {
    * 加载组织机构详情
    */
   loadDeptInfo(id) {
-    return request(`/v1/orgcenter/org/dept/${id}`, {
+    return request(`/v1/usercenter/org/dept/${id}`, {
       method: 'get',
     });
   },
@@ -69,11 +81,27 @@ export default {
    * 更新组织机构状态
    */
   setDeptDisable(id, state) {
-    return request(`//v1/orgcenter/org/dept/${id}/state`, {
+    return request(`/v1/usercenter/org/dept/${id}/${state}`, {
       method: 'put',
-      params: {
-        state,
-      },
+    });
+  },
+  /**
+   * 编辑组织机构
+   */
+  editDept(dept) {
+    const { id } = dept;
+    return request('/v1/usercenter/org/dept', {
+      method: id ? 'put' : 'post',
+      data: dept,
+    });
+  },
+  /**
+   * 删除组织机构
+   * @param {string} id 机构ID
+   */
+  deleteDept(id) {
+    return request(`/v1/usercenter/org/dept/${id}`, {
+      method: 'delete',
     });
   },
 };

@@ -7,7 +7,7 @@
       width='400px'>
 
       <div class="select-user-container">
-        <el-tabs type="card" @tab-click='changeTab' v-model='activeTab' v-if='tabData.length > 1'>
+        <el-tabs type="card" @tab-click='changeTab' v-model='activeTab'>
           <el-tab-pane v-for='item in tabData' :key='item.id' :label="item.typename" :code='item.code' :name="item.code"></el-tab-pane>
         
           <div class='select-user-search-bar'>
@@ -92,7 +92,7 @@ export default {
      * 懒加载第一级
      */
     loadLazyTreeRoot(resolve) {
-      DeptApi.getLazyTree().then(res => {
+      DeptApi.getLazyTree(this.activeTab, -1).then(res => {
         resolve(res);
       });
     },
@@ -100,7 +100,7 @@ export default {
      * 加载子节点
      */
     loadLazyTreeChild(node, resolve) {
-      DeptApi.getLazyTree(node.data.deptCode).then(res => {
+      DeptApi.getLazyTree(this.activeTab, node.data.code).then(res => {
         resolve(res);
       });
     },
@@ -114,7 +114,6 @@ export default {
     },
     /**
      * elementUi Tree 组件不支持动态切换全加载、懒加载，使用两颗树处理
-     * TODO: 根据后端返回数据，手动修改 TREE 数据，待测试
      */
     getTree() {
       if (this.keyword.trim() == '') {
@@ -138,7 +137,7 @@ export default {
     reloadLazyTree() {
       let children = this.$refs.lazyTree.root.childNodes;
       children.splice(0, children.length);
-      DeptApi.getLazyTree(this.activeTab).then(res => {
+      DeptApi.getLazyTree(this.activeTab, -1).then(res => {
         this.$refs.lazyTree.root.doCreateChildren(res);
       });
     },
@@ -154,10 +153,9 @@ export default {
       let curUser = this.$refs[this.isLazy ? 'lazyTree' : 'searchTree'][
         this.multiple ? 'getCheckedNodes' : 'getCurrentNode'
       ]();
-
-      if (curUser.length === 0) {
+      if (curUser === null || curUser.length === 0) {
         this.$message({
-          message: '请选择后再提交',
+          message: '请选择部门后再提交',
           type: 'warning',
         });
         return;
@@ -170,13 +168,13 @@ export default {
       /**
        * !使用 setCheckedNodes、setCurrentNode 树节点必须设置 node-key
        */
-      if (this.multiple) {
-        this.$refs.lazyTree.setCheckedNodes([]);
-        this.$refs.searchTree.setCheckedNodes([]);
-      } else {
-        this.$refs.lazyTree.setCurrentNode([]);
-        this.$refs.searchTree.setCurrentNode([]);
-      }
+      // if (this.multiple) {
+      //   this.$refs.lazyTree.setCheckedNodes([]);
+      //   this.$refs.searchTree.setCheckedNodes([]);
+      // } else {
+      //   this.$refs.lazyTree.setCurrentNode([]);
+      //   this.$refs.searchTree.setCurrentNode([]);
+      // }
     },
   },
 

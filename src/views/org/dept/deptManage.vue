@@ -64,7 +64,7 @@
       :id='dialogStatus.deptTypeId'
       @close='dialogStatus.deptTypeEdit = false' 
       @delete='deleteDeptType'
-      @save='addDeptType'
+      @save='editDeptType'
       v-if='dialogStatus.deptTypeEdit'/>
     <!-- 组织机构类型 END -->
     <!-- C测试 -->
@@ -73,7 +73,7 @@
       :parentCode='upDateDeptMsg.code'
       :parentName='upDateDeptMsg.name'
       @close='dialogStatus.deptEdit = false'
-      @save='addDept' 
+      @save='editDept' 
       v-if='dialogStatus.deptEdit'/>
     <!-- 组织机构编辑 END -->
 
@@ -113,7 +113,7 @@ export default {
         {
           text: '编码',
           dataIndex: 'code',
-          width: 100,
+          width: 150,
           align: 'center',
         },
         {
@@ -169,6 +169,7 @@ export default {
           returnTree.push(item);
         }
       }
+
       return Utils.MSDataTransfer.treeToArray(returnTree, null, null, this.defaultExpandAll);
     },
   },
@@ -184,29 +185,27 @@ export default {
         // 组织机构 Key 为 name   机构Key 为 typename  添加name属性
         res.forEach(item => {
           item.name = item.typename;
+          item.isRoot = true;
         });
 
-        let firstData = res[0];
-        this.tabs.tabData = res;
-        this.tabs.tabActiveCode = firstData.code;
-        this.tabs.tabActiveInfo = firstData;
-        this.upDateDeptMsg = Object.assign({}, firstData);
+        if (res.length) {
+          let firstData = res[0];
+          this.tabs.tabData = res;
+          this.tabs.tabActiveCode = firstData.code;
+          this.tabs.tabActiveInfo = firstData;
+          this.upDateDeptMsg = Object.assign({}, firstData);
 
-        // Tree 第一级菜单
-        this.loadDeptByParentId(firstData.code);
+          // Tree 第一级菜单
+          this.loadDeptByParentId(firstData.code, -1);
+        }
       });
     },
     /**
      * 加载 tree 数据
      * @param {string} parentCode 父Code
      */
-    loadDeptByParentId(parentCode) {
-      DeptApi.getLazyTree(parentCode).then(res => {
-        if (parentCode) {
-          res.forEach(item => {
-            item.parentCode = parentCode;
-          });
-        }
+    loadDeptByParentId(typeCode, parentCode) {
+      DeptApi.getLazyTree(typeCode, parentCode).then(res => {
         this.deptList = [...this.deptList, ...res];
       });
     },
@@ -227,12 +226,12 @@ export default {
       this.upDateDeptMsg = Object.assign({}, tab.$attrs['data-info']);
       // tab切换时 刷新Tree
       this.deptList = [];
-      this.loadDeptByParentId(tab.name);
+      this.loadDeptByParentId(tab.name, -1);
     },
     /**
      * 添加机构类型
      */
-    addDeptType(deptTypeInfo) {
+    editDeptType(deptTypeInfo) {
       // 有id 修改,添加无 ID
       if (this.dialogStatus.deptTypeId) {
         for (let i = 0, len = this.tabs.tabData.length; i < len; i++) {
@@ -244,6 +243,8 @@ export default {
         }
       } else {
         deptTypeInfo.name = deptTypeInfo.typename;
+        deptTypeInfo.isRoot = true;
+
         this.tabs.tabData.push(deptTypeInfo);
 
         this.deptList = []; // 清空 Tree
@@ -271,7 +272,7 @@ export default {
        */
       if (tabData.length) {
         this.tabs.tabActiveCode = tabData[0].code;
-        this.loadDeptByParentId(this.tabs.tabActiveCode);
+        this.loadDeptByParentId(this.tabs.tabActiveCode, -1);
       }
     },
 
@@ -303,9 +304,9 @@ export default {
     sendRowData(curRow) {
       curRow._expanded = !curRow._expanded;
       this.activeTr = curRow;
+      this.upDateDeptMsg = Object.assign({}, curRow);
       if (curRow.isLoaded) return;
-      this.upDateDeptMsg = curRow;
-      this.loadDeptByParentId(curRow.code);
+      this.loadDeptByParentId(this.tabs.tabActiveCode, curRow.code);
       curRow.isLoaded = true;
     },
     /**
@@ -328,43 +329,51 @@ export default {
         type: 'error',
       })
         .then(() => {
-          let { children, _parent } = row;
-          /**
-           * !删除 Tree 上的引用，dataTranslate.js  根据 item.children 处理数据，删除子类及父级目标子类
-           */
-          children && delete row.children;
+          DeptApi.deleteDept(row.id).then(res => {
+            let { children, _parent } = row;
+            /**
+             * !删除 Tree 上的引用，dataTranslate.js  根据 item.children 处理数据，删除子类及父级目标子类
+             */
+            children && delete row.children;
 
-          if (_parent && _parent.children && _parent.children.length) {
-            for (let i = 0, len = _parent.children.length; i < len; i++) {
-              let item = _parent.children[i];
-              if (item.id === row.id) {
-                _parent.children.splice(i, 1);
-                break;
+            if (_parent && _parent.children && _parent.children.length) {
+              for (let i = 0, len = _parent.children.length; i < len; i++) {
+                let item = _parent.children[i];
+                if (item.id === row.id) {
+                  _parent.children.splice(i, 1);
+                  break;
+                }
               }
             }
-          }
 
-          this.deleteDeptById(row.id);
+            this.deleteDeptById(row.id);
 
-          this.$message({
-            type: 'success',
-            message: '删除成功!',
+            this.$message({
+              type: 'success',
+              message: '删除成功!',
+            });
           });
         })
         .catch(() => {});
     },
 
     /**
-     * 添加组织机构
+     * 编辑组织机构
      */
-    addDept(deptInfo) {
-      // 有 ID 为修改，无ID 新增
-      if (this.upDateDeptMsg.id) {
-        Object.assign(this.findDeptById(deptInfo.id, this.treeData), deptInfo);
-      } else {
-        deptInfo.pid = this.upDateDeptMsg.id;
-        this.deptList.unshift(deptInfo);
+    editDept(deptInfo) {
+      // 后端要求，在根节点添加机构时，parentCode 为 -1
+      if (this.upDateDeptMsg.isRoot !== undefined && this.upDateDeptMsg.isRoot) {
+        deptInfo.parentCode = -1;
+        deptInfo.code = this.upDateDeptMsg.code;
       }
+      DeptApi.editDept(deptInfo).then(res => {
+        // 有 ID 为修改，无ID 新增
+        if (this.upDateDeptMsg.id) {
+          Object.assign(this.findDeptById(deptInfo.id, this.treeData), res);
+        } else {
+          this.$set(this, 'deptList', [res, ...this.deptList]);
+        }
+      });
     },
 
     /**
@@ -373,13 +382,14 @@ export default {
      */
     disableDept(state, row, index) {
       // TODO: 必须先将组织机构下所有启用账号迁移到新部门，才能禁用该组织机构; 调用接口判断
+      // 18/11/12 后端判断，不需要条用接口
 
       this.$confirm(`是否${state ? '启用' : '禁用'}组织机构?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
       })
         .then(() => {
-          DeptApi.setDeptDisable(row.id, state).then(res => {
+          DeptApi.setDeptDisable(row.id, state ? 'Y' : 'N').then(res => {
             if (state) {
               this.setParentsState(row, true);
             } else {
