@@ -1,6 +1,6 @@
-<!-- page2 -->
+<!-- 服务管理页面 -->
 <template>
-  <div><h1 style='text-align: center; padding: 30px 0;'>page2</h1></div>
+  <div>服务管理页面</div>
 </template>
 
 <script>
@@ -18,3 +18,5 @@ export default {
   methods: {},
 };
 </script>
+<style lang='less' scoped>
+</style>

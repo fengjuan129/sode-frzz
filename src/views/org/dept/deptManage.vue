@@ -176,6 +176,7 @@ export default {
 
   mounted() {
     this.loadDeptType();
+    console.log(this.treeData);
   },
 
   methods: {

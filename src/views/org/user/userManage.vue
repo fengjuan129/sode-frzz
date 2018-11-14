@@ -173,7 +173,7 @@
 
     <SelectDept :multiple='false' 
       :isOpen='dialogMsg.selectDept' 
-      :rootCode='1' 
+      :rootCode='activeTab' 
       @close='dialogMsg.selectDept = false'
       @select="moveUser2Dept"/>
   </div>
@@ -275,6 +275,8 @@ export default {
         tree.isLazy = false;
         DeptApi.getTreeByKeywork(tree.keyword, this.activeTab).then(res => {
           tree.searchTreeData = this.$store.state.createTerrData(res);
+          this.$refs['userLazyTree'].setCurrentKey(tree.searchTreeData[0].id);
+          this.organizationId = tree.searchTreeData[0].code;
         });
       } else {
         tree.isLazy = true;
@@ -609,7 +611,9 @@ export default {
               type: 'success',
             });
             // 本页全删除后，重新获取列表
-            this.userList.length == 0 && this.getUserListByOption();
+            if (this.userList.length === 0) {
+              this.getUserListByOption();
+            }
           });
         })
         .catch();

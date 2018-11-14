@@ -3,55 +3,56 @@
   <el-dialog title='组织机构编辑' :visible.sync='isOpen' width="30%" :before-close="close">
 
     <el-form :model="deptEditForm" :rules="deptEditRules" ref='deptEditForm' size='small' label-width='80px' status-icon>
-      <el-col :span='12'>
-        <el-form-item label="名称" prop='name'>
-          <el-input v-model="deptEditForm.name" autocomplete="off"></el-input>
-        </el-form-item>
-      </el-col>
+      <el-row :gutter="30">
+        <el-col :span='12'>
+          <el-form-item label="名称" prop='name'>
+            <el-input v-model="deptEditForm.name" autocomplete="off"></el-input>
+          </el-form-item>
+        </el-col>
+        <!--<el-col :span='12'>-->
+          <!-- <el-form-item label="编码"> -->
+            <!-- 修改是 编码不能修改 -->
+            <!-- 18/11/12 后端要求编码不能填写，后台自动生成 -->
+            <!-- <el-input v-model="deptEditForm.code" :disabled="id ? true : false"></el-input> -->
+            <!-- <el-input v-model="deptEditForm.code" disabled></el-input> -->
+          <!-- </el-form-item> -->
+        <!-- </el-col> -->
 
-      <el-col :span='12'>
-        <el-form-item label="编码">
-          <!-- 修改是 编码不能修改 -->
-          <!-- 18/11/12 后端要求编码不能填写，后台自动生成 -->
-          <!-- <el-input v-model="deptEditForm.code" :disabled="id ? true : false"></el-input> -->
-          <el-input v-model="deptEditForm.code" disabled></el-input>
-        </el-form-item>
-      </el-col>
+        <el-col :span='12'>
+          <el-form-item label="上级部门">
+            <el-input v-model="deptEditForm.parentName" disabled></el-input>
+          </el-form-item>
+        </el-col>
 
-      <el-col :span='12'>
-        <el-form-item label="上级部门">
-          <el-input v-model="deptEditForm.parentName" disabled></el-input>
-        </el-form-item>
-      </el-col>
+        <el-col :span='12'>
+          <el-form-item label="是否启用">
+            <el-select v-model="deptEditForm.isEnable">
+              <el-option v-for='item in enableStatus' :key='item.id' :value='item.val' :label="item.txt"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
 
-      <el-col :span='12'>
-        <el-form-item label="是否启用">
-          <el-select v-model="deptEditForm.isEnable">
-            <el-option v-for='item in enableStatus' :key='item.id' :value='item.val' :label="item.txt"></el-option>
-          </el-select>
-        </el-form-item>
-      </el-col>
+        <el-col :span='12'>
+          <el-form-item label="是否法人">
+            <el-select v-model="deptEditForm.isCorporation">
+              <el-option label='否' :value='false'></el-option>
+              <el-option label='是' :value='true'></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
 
-      <el-col :span='12'>
-        <el-form-item label="是否法人">
-          <el-select v-model="deptEditForm.isCorporation">
-            <el-option label='否' :value='false'></el-option>
-            <el-option label='是' :value='true'></el-option>
-          </el-select>
-        </el-form-item>
-      </el-col>
-
-      <el-col :span='12'>
-        <el-form-item label="排序" prop="sort">
-          <el-input v-model.number="deptEditForm.sort"></el-input>
-        </el-form-item>
-      </el-col>
-
-      <el-col :span='24'>
-        <el-form-item label="备注">
-          <el-input type='textarea' :autosize='{ minRows: 4, maxRows: 6}' v-model='deptEditForm.description'></el-input>
-        </el-form-item>
-      </el-col>
+        <el-col :span='12'>
+          <el-form-item label="排序" prop="sort">
+            <el-input v-model.number="deptEditForm.sort"></el-input>
+          </el-form-item>
+        </el-col>
+        
+        <el-col :span='24'>
+          <el-form-item label="备注">
+            <el-input type='textarea' :autosize='{ minRows: 4, maxRows: 6}' v-model='deptEditForm.description'></el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
 
     </el-form>
 

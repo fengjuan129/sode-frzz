@@ -144,7 +144,6 @@ export default {
         // this.$refs['userEditForm'].resetFields();
         this.userEditForm = res;
         this.userEditForm.deptName = this.rootName; // 后端为提供部门名称，父组件传入
-        console.log(this.rootName);
       });
     },
 

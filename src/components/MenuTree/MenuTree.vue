@@ -28,66 +28,17 @@ export default {
               label: '角色管理',
               routerLink: '/operation/role',
             },
-          ],
-        },
-
-        {
-          label: '一级 1',
-          children: [
             {
-              label: '二级 1-1',
-              children: [
-                {
-                  label: '三级 1-1-1',
-                  routerLink: '/page1',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: '一级 2',
-          children: [
-            {
-              label: '二级 2-1',
-              children: [
-                {
-                  label: '三级 2-1-1',
-                  routerLink: '/page2',
-                },
-              ],
+              label: '菜单管理',
+              routerLink: '/operation/res/menu',
             },
             {
-              label: '二级 2-2',
-              children: [
-                {
-                  label: '三级 2-2-1',
-                  routerLink: '/page3',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          label: '一级 3',
-          children: [
-            {
-              label: '二级 3-1',
-              children: [
-                {
-                  label: '三级 3-1-1',
-                  routerLink: '/page4',
-                },
-              ],
+              label: '服务管理',
+              routerLink: '/operation/res/api',
             },
             {
-              label: '二级 3-2',
-              children: [
-                {
-                  label: '三级 3-2-1',
-                  routerLink: '/page5',
-                },
-              ],
+              label: '自定义资源管理',
+              routerLink: '/operation/res/custom',
             },
           ],
         },
@@ -99,30 +50,6 @@ export default {
     };
   },
   methods: {
-    /**
-     * 将数据转为 tree 结构
-     */
-    // data2TreeData(data) {
-    //   let treeMap = {},
-    //     returnTree = [];
-
-    //   for (let i = 0, len = data.length; i < len; i++) {
-    //     let item = data[i];
-    //     treeMap[item.id] = item;
-    //   }
-
-    //   for (let i = 0, len = data.length; i < len; i++) {
-    //     let item = data.tree[i],
-    //       parent = treeMap[item.pid];
-
-    //     if (parent) {
-    //       (parent.children || (parent.children = [])).push(item);
-    //     } else {
-    //       returnTree.push(item);
-    //     }
-    //   }
-    //   return returnTree;
-    // },
     handleNodeClick(data) {
       if (!data.routerLink) return;
       this.$router.push(`${data.routerLink}`);

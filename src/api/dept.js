@@ -1,5 +1,4 @@
 import request from '../libs/request';
-import qs from 'qs';
 
 export default {
   /**
@@ -7,7 +6,7 @@ export default {
    * @param {string} parentCode 父组织机构编码
    */
   getLazyTree(typeCode, parentCode) {
-    return request('/v1/usercenter/org/lazytree', {
+    return request('/v1/core/org/lazytree', {
       method: 'get',
       params: {
         typeCode,
@@ -20,7 +19,7 @@ export default {
    * 加载组织机构类别
    */
   getDeptType() {
-    return request('/v1/usercenter/org/types', {
+    return request('/v1/core/org/types', {
       method: 'get',
     });
   },
@@ -30,7 +29,7 @@ export default {
    * @param {string} typeCode 机构类型
    */
   getTreeByKeywork(name, typeCode) {
-    return request('/v1/usercenter/org/tree', {
+    return request('/v1/core/org/tree', {
       method: 'get',
       params: {
         name,
@@ -43,7 +42,7 @@ export default {
    * @param { string } id 机构类别 ID
    */
   getDeptTypeInfo(id) {
-    return request(`/v1/usercenter/org/type/${id}`, {
+    return request(`/v1/core/org/type/${id}`, {
       method: 'get',
     });
   },
@@ -54,7 +53,7 @@ export default {
    */
   editDeptType(params) {
     const { id } = params;
-    return request('/v1/usercenter/org/type', {
+    return request('/v1/core/org/type', {
       method: id ? 'put' : 'post',
       data: params,
     });
@@ -64,7 +63,7 @@ export default {
    * @param {string} id 组织机构ID
    */
   deleteDeptType(id) {
-    return request(`/v1/usercenter/org/type/${id}`, {
+    return request(`/v1/core/org/type/${id}`, {
       method: 'delete',
     });
   },
@@ -72,7 +71,7 @@ export default {
    * 加载组织机构详情
    */
   loadDeptInfo(id) {
-    return request(`/v1/usercenter/org/dept/${id}`, {
+    return request(`/v1/core/org/dept/${id}`, {
       method: 'get',
     });
   },
@@ -81,7 +80,7 @@ export default {
    * 更新组织机构状态
    */
   setDeptDisable(id, state) {
-    return request(`/v1/usercenter/org/dept/${id}/${state}`, {
+    return request(`/v1/core/org/dept/${id}/${state}`, {
       method: 'put',
     });
   },
@@ -90,7 +89,7 @@ export default {
    */
   editDept(dept) {
     const { id } = dept;
-    return request('/v1/usercenter/org/dept', {
+    return request('/v1/core/org/dept', {
       method: id ? 'put' : 'post',
       data: dept,
     });
@@ -100,7 +99,7 @@ export default {
    * @param {string} id 机构ID
    */
   deleteDept(id) {
-    return request(`/v1/usercenter/org/dept/${id}`, {
+    return request(`/v1/core/org/dept/${id}`, {
       method: 'delete',
     });
   },

@@ -7,29 +7,20 @@
       width='400px'>
 
       <div class="select-user-container">
-        <el-tabs type="card" @tab-click='changeTab' v-model='activeTab' style='margin: -20px -20px 0 -20px;' v-if='tabData.length > 1'>
-        <el-tab-pane v-for='item in tabData' :key='item.id' :label="item.typename" :code='item.code' :name="item.code"></el-tab-pane>
+        <el-tabs type="card" @tab-click='changeTab' v-model='activeTab'>
+        <el-tab-pane v-for='item in tabData' 
+          :key='item.id' 
+          :label="item.typename" 
+          :code='item.code' 
+          :name="item.code"></el-tab-pane>
       </el-tabs>
       <div class='select-user-search-bar'>
         <el-input v-model="keyword" placeholder="输入关键词" style='width: 70%' size='mini' @keydown.13.native="getTree"></el-input>
         <el-button type='primary' style='float: right;' size='mini ' @click='getTree'>查询</el-button>
       </div>
       <div class='select-user-tree'>
-        <!-- 懒加载加载 不能使 v-IF -->
-        <el-tree
-          v-show='isLazy'
-          :show-checkbox='multiple'
-          lazy
-          :load='loadTreeChild'
-          node-key='id'
-          :props="tree.defaultProps"
-          highlight-current
-          ref='lazyTree'>
-        </el-tree>
-
         <!-- 全加载 -->
         <el-tree
-          v-show='!isLazy'
           node-key='id'
           :data='tree.organizationTree'
           :props="tree.defaultProps"
@@ -51,6 +42,8 @@
 
 <script>
 import UserApi from '@/api/user';
+import DeptApi from '@/api/dept';
+import { data2treeArr } from '@/libs/utils.js';
 export default {
   /**
    * multiple: 是否允许多选。多选时显示checkbox
@@ -60,7 +53,6 @@ export default {
   data() {
     return {
       keyword: '',
-      isLazy: true,
       tree: {
         organizationTree: [],
         defaultProps: {
@@ -81,78 +73,28 @@ export default {
      * 加装组织机构
      */
     loadOrganization() {
-      UserApi.loadOrganization().then(res => {
+      DeptApi.getDeptType().then(res => {
         this.tabData = res;
         this.activeTab = res[0].code;
       });
     },
-    /**
-     * 懒加载第一级
-     */
-    loadLazyTreeRoot(resolve) {
-      UserApi.loadLazyTree().then(res => {
-        resolve(res);
-      });
-    },
-    /**
-     * 加载子节点
-     */
-    loadLazyTreeChild(node, resolve) {
-      UserApi.loadLazyTree(node.data.deptCode).then(res => {
-        resolve(res);
-      });
-    },
-    /**
-     * 搜索全加载
-     */
-    searchTree() {
-      UserApi.loadOrgTree(this.keyword, this.activeTab).then(res => {
-        this.tree.organizationTree = this.$store.state.createTerrData(res);
-      });
-    },
-    /**
-     * elementUi Tree 组件不支持动态切换全加载、懒加载，使用两颗树处理
-     * TODO: 根据后端返回数据，手动修改 TREE 数据，待测试
-     */
+
     getTree() {
-      if (this.keyword.trim() == '') {
-        this.isLazy = true;
-      } else {
-        this.isLazy = false;
-        this.searchTree();
-      }
-    },
-    /**
-     * 懒加载
-     */
-    loadTreeChild(node, resolve) {
-      if (node.level === 0) {
-        this.loadLazyTreeRoot(resolve);
-      }
-      if (node.level >= 1) {
-        this.loadLazyTreeChild(node, resolve);
-      }
-    },
-    reloadLazyTree() {
-      let children = this.$refs.lazyTree.root.childNodes;
-      children.splice(0, children.length);
-      UserApi.loadLazyTree(this.activeTab).then(res => {
-        this.$refs.lazyTree.root.doCreateChildren(res);
+      // TODO 后端接口未定
+      UserApi.getUserByDeptType(this.activeTab, this.keyword).then(res => {
+        this.tree.organizationTree = data2treeArr(res);
       });
     },
 
     changeTab(tab) {
       this.keyword = '';
       this.activeTab = tab.$attrs.code;
-      this.reloadLazyTree();
-      this.isLazy = true;
       this.tree.organizationTree = [];
     },
     submitUser() {
-      let curUser = this.$refs[this.isLazy ? 'lazyTree' : 'searchTree'][
+      let curUser = this.$refs['searchTree'][
         this.multiple ? 'getCheckedNodes' : 'getCurrentNode'
       ]();
-
       if (curUser.length === 0) {
         this.$message({
           message: '请选择后再提交',
@@ -161,7 +103,7 @@ export default {
         return;
       }
       this.$emit('select', curUser);
-      console.log(curUser);
+      this.close();
     },
     close() {
       this.$emit('close');
@@ -169,19 +111,16 @@ export default {
        * !使用 setCheckedNodes、setCurrentNode 树节点必须设置 node-key
        */
       if (this.multiple) {
-        this.$refs.lazyTree.setCheckedNodes([]);
         this.$refs.searchTree.setCheckedNodes([]);
       } else {
-        this.$refs.lazyTree.setCurrentNode([]);
         this.$refs.searchTree.setCurrentNode([]);
       }
     },
   },
 
   watch: {
-    rootCode(val) {
-      this.loadLazyTreeRoot();
-      console.log(`从新加载TREE,id${val}`);
+    activeTab(val) {
+      this.getTree();
     },
   },
 };

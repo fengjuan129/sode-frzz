@@ -53,6 +53,7 @@
 
 <script>
 import DeptApi from '@/api/dept';
+import { data2TreeArr } from '@/libs/utils.js';
 export default {
   /**
    * multiple: 是否允许多选。多选时显示checkbox
@@ -85,7 +86,7 @@ export default {
     loadOrganization() {
       DeptApi.getDeptType().then(res => {
         this.tabData = res;
-        this.activeTab = res[0].code;
+        this.activeTab = this.rootCode || res[0].code;
       });
     },
     /**
@@ -93,7 +94,7 @@ export default {
      */
     loadLazyTreeRoot(resolve) {
       DeptApi.getLazyTree(this.activeTab, -1).then(res => {
-        resolve(res);
+        resolve && resolve(res);
       });
     },
     /**
@@ -109,7 +110,7 @@ export default {
      */
     searchTree() {
       DeptApi.getTreeByKeywork(this.keyword, this.activeTab).then(res => {
-        this.tree.organizationTree = this.$store.state.createTerrData(res);
+        this.tree.organizationTree = data2TreeArr(res);
       });
     },
     /**
@@ -168,20 +169,19 @@ export default {
       /**
        * !使用 setCheckedNodes、setCurrentNode 树节点必须设置 node-key
        */
-      // if (this.multiple) {
-      //   this.$refs.lazyTree.setCheckedNodes([]);
-      //   this.$refs.searchTree.setCheckedNodes([]);
-      // } else {
-      //   this.$refs.lazyTree.setCurrentNode([]);
-      //   this.$refs.searchTree.setCurrentNode([]);
-      // }
+      if (this.multiple) {
+        this.$refs.lazyTree.setCheckedNodes([]);
+        this.$refs.searchTree.setCheckedNodes([]);
+      } else {
+        this.$refs.lazyTree.setCurrentNode([]);
+        this.$refs.searchTree.setCurrentNode([]);
+      }
     },
   },
 
   watch: {
     rootCode(val) {
       this.loadLazyTreeRoot();
-      console.log(`从新加载TREE,id${val}`);
     },
   },
 };
