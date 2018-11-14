@@ -1,5 +1,3 @@
-/* eslint-disable */
-// TODO: 修复放开上一行注释后eslint无法校验通过的问题
 import Vue from 'vue';
 import Router from 'vue-router';
 import NProgress from 'nprogress';
