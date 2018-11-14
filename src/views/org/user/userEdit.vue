@@ -81,16 +81,16 @@ import { valid } from 'semver';
       </el-dialog>
 
 
-      <SelectDept :isOpen='dialogState' 
+      <SelectDept :isOpen='dialogState'
         @close='dialogState = false'
         @select="setDept"/>
   </div>
 </template>
 
 <script>
-import Mock from 'mockjs';
 import UserApi from '@/api/user';
 import SelectDept from '@/components/SelectDept';
+
 export default {
   props: ['id', 'isOpen', 'rootName'],
   data() {
@@ -103,11 +103,11 @@ export default {
        * TODO: 数据字典
        */
       secretLev: [
-        { id: 1, tit: '公开' },
-        { id: 2, tit: '秘密' },
-        { id: 3, tit: '绝密' },
-        { id: 4, tit: '秘密1' },
-        { id: 5, tit: '公开2' },
+        { id: '1', tit: '公开' },
+        { id: '2', tit: '秘密' },
+        { id: '3', tit: '绝密' },
+        { id: '4', tit: '秘密1' },
+        { id: '5', tit: '公开2' },
       ],
       /**
        * 表单验证规则
@@ -116,7 +116,12 @@ export default {
       userEditRules: {
         username: [
           { required: true, message: '此项为必填选项', trigger: 'blur' },
-          { min: 6, max: 32, message: '账号长度为 6 - 32个字符', trigger: 'blur' },
+          {
+            min: 6,
+            max: 32,
+            message: '账号长度为 6 - 32个字符',
+            trigger: 'blur',
+          },
         ],
         realName: [
           { required: true, message: '此项为必填选项', trigger: 'blur' },

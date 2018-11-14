@@ -36,7 +36,7 @@
 
           <el-col :span='12'>
             <el-form-item label='密级:'>
-              {{secretLevTxt}}
+              {{secretLev[userMsg.securityLevel]}}
             </el-form-item>
           </el-col>
 
@@ -70,6 +70,7 @@
 
 <script>
 import UserApi from '@/api/user';
+
 export default {
   props: ['id', 'isOpen'],
   data() {
@@ -85,15 +86,6 @@ export default {
     };
   },
 
-  computed: {
-    secretLevTxt(id) {
-      if (!this.userMsg.securityLevel) return;
-      return this.secretLev.find(item => {
-        return item.id == this.userMsg.securityLevel;
-      })['tit'];
-    },
-  },
-
   methods: {
     getUserById() {
       UserApi.getUserMsg(this.id).then(res => {
@@ -107,7 +99,7 @@ export default {
   },
 
   watch: {
-    id(val) {
+    id() {
       if (!this.isOpen || !this.id) return;
       this.getUserById();
     },

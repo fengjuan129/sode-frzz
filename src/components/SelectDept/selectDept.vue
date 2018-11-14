@@ -9,7 +9,7 @@
       <div class="select-user-container">
         <el-tabs type="card" @tab-click='changeTab' v-model='activeTab'>
           <el-tab-pane v-for='item in tabData' :key='item.id' :label="item.typename" :code='item.code' :name="item.code"></el-tab-pane>
-        
+
           <div class='select-user-search-bar'>
         <el-input v-model="keyword" placeholder="输入关键词" style='width: 70%' size='mini' @keydown.13.native="getTree"></el-input>
         <el-button type='primary' style='float: right;' size='mini ' @click='getTree'>查询</el-button>
@@ -39,7 +39,7 @@
           ref='searchTree'>
         </el-tree>
       </div>
-        
+
         </el-tabs>
       </div>
 
@@ -53,7 +53,8 @@
 
 <script>
 import DeptApi from '@/api/dept';
-import { data2TreeArr } from '@/libs/utils.js';
+import { data2TreeArr } from '@/libs/utils';
+
 export default {
   /**
    * multiple: 是否允许多选。多选时显示checkbox
@@ -73,7 +74,7 @@ export default {
       },
       tabData: [],
       activeTab: '',
-      checkedUser: '', //保存选中人员
+      checkedUser: '', // 保存选中人员
     };
   },
   mounted() {
@@ -94,7 +95,7 @@ export default {
      */
     loadLazyTreeRoot(resolve) {
       DeptApi.getLazyTree(this.activeTab, -1).then(res => {
-        resolve && resolve(res);
+        if (resolve) resolve(res);
       });
     },
     /**
@@ -117,7 +118,7 @@ export default {
      * elementUi Tree 组件不支持动态切换全加载、懒加载，使用两颗树处理
      */
     getTree() {
-      if (this.keyword.trim() == '') {
+      if (this.keyword.trim() === '') {
         this.isLazy = true;
       } else {
         this.isLazy = false;
@@ -136,7 +137,7 @@ export default {
       }
     },
     reloadLazyTree() {
-      let children = this.$refs.lazyTree.root.childNodes;
+      const children = this.$refs.lazyTree.root.childNodes;
       children.splice(0, children.length);
       DeptApi.getLazyTree(this.activeTab, -1).then(res => {
         this.$refs.lazyTree.root.doCreateChildren(res);
@@ -151,7 +152,7 @@ export default {
       this.tree.organizationTree = [];
     },
     submitUser() {
-      let curUser = this.$refs[this.isLazy ? 'lazyTree' : 'searchTree'][
+      const curUser = this.$refs[this.isLazy ? 'lazyTree' : 'searchTree'][
         this.multiple ? 'getCheckedNodes' : 'getCurrentNode'
       ]();
       if (curUser === null || curUser.length === 0) {
@@ -180,7 +181,7 @@ export default {
   },
 
   watch: {
-    rootCode(val) {
+    rootCode() {
       this.loadLazyTreeRoot();
     },
   },

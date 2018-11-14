@@ -1,5 +1,5 @@
-import request from '../libs/request';
 import qs from 'qs';
+import request from '../libs/request';
 
 export default {
   /**

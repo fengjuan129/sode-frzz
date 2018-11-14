@@ -2,19 +2,19 @@
 <template>
   <div>
     <el-tabs type="border-card" @tab-click='changeTab'>
-      <el-tab-pane v-for='item in organizationType' 
-        :key='item.id' 
-        :label="item.typename" 
+      <el-tab-pane v-for='item in organizationType'
+        :key='item.id'
+        :label="item.typename"
         :code='item.code'>
       </el-tab-pane>
 
       <el-row :gutter="30">
           <el-col :span='4'>
             <div class='select-user-search-bar'>
-            <el-input v-model="tree.keyword" 
-              placeholder="输入关键词" 
-              style='width: 70%' 
-              size='mini' 
+            <el-input v-model="tree.keyword"
+              placeholder="输入关键词"
+              style='width: 70%'
+              size='mini'
               @keydown.13.native="getTree"></el-input>
             <el-button type='primary' style='float: right;' size='mini ' @click='getTree'>查询</el-button>
           </div>
@@ -48,7 +48,7 @@
 
               <div class='btns-container'>
                 <el-button size='mini' @click='addUser'>新增</el-button>
-                
+
                   <el-dropdown trigger="click" style="margin: 0 10px;" @command='updateMore'>
                     <span class="el-dropdown-link">
                       <el-button size='mini'>批量操作<i class="el-icon-arrow-down el-icon--right"></i></el-button>
@@ -108,7 +108,7 @@
                   <el-table-column label="状态">
                     <template slot-scope="scope">
                         <!-- 显示规则：锁定有先 -->
-                        <span>{{ scope.row.isLocked == true ? '锁定' : 
+                        <span>{{ scope.row.isLocked == true ? '锁定' :
                                   scope.row.isEnabled == true ? '启用': '禁用'}}
                         </span>
                     </template>
@@ -117,7 +117,7 @@
                     <template slot-scope="scope" @click='curUser = scope.row'>
                       <el-button type='text' @click='seeUser(scope)'>查看</el-button>
                       <el-button type='text' @click='updateUser(scope)'>编辑</el-button>
-                      
+
                       <el-dropdown trigger="click" style='margin: 0 10px;' @command='updateRow'>
                         <a href="javascript: void(0)" class="el-dropdown-link el-button--text" @click='curUser = scope.row'>
                           更多<i class="el-icon-arrow-down el-icon--right"></i>
@@ -159,10 +159,10 @@
     <!-- tab end -->
     <LockRuleConfig :isOpen='dialogMsg.lockRule' @close='dialogMsg.lockRule = false'/>
     <!-- 锁定用户弹框 END 保存成功后刷新列表 -->
-    <UserEdit :isOpen='dialogMsg.userEdit' 
-      :id='curUser.id' 
-      @save='getUserListByOption' 
-      @close='dialogMsg.userEdit = false' 
+    <UserEdit :isOpen='dialogMsg.userEdit'
+      :id='curUser.id'
+      @save='getUserListByOption'
+      @close='dialogMsg.userEdit = false'
       :rootName='activeTabName'
       v-if='dialogMsg.userEdit'/>
     <!-- 修改用户信息 弹框 END -->
@@ -171,31 +171,30 @@
     <!-- <PasswordRuleConfig :isOpen='dialogMsg.passwordRuleConfig' @close='dialogMsg.passwordRuleConfig = false'/> -->
     <!-- 密码强度规则编辑页面 END -->
 
-    <SelectDept :multiple='false' 
-      :isOpen='dialogMsg.selectDept' 
-      :rootCode='activeTab' 
+    <SelectDept :multiple='false'
+      :isOpen='dialogMsg.selectDept'
+      :rootCode='activeTab'
       @close='dialogMsg.selectDept = false'
       @select="moveUser2Dept"/>
   </div>
 </template>
 
 <script>
+import UserApi from '@/api/user'; // 用户管理接口
+import DeptApi from '@/api/dept'; // 组织机构管理接口
+import { setInterval, clearInterval } from 'timers';
+import { data2treeArr } from '@/libs/utils';
 import SelectDept from '@/components/SelectDept';
-import LockRuleConfig from './lockRuleConfig';
+import LockRuleConfig from './lockRuleConfig.vue';
 import UserEdit from './userEdit.vue';
 import UserView from './userView.vue';
 import PasswordRuleConfig from './passwordRuleConfig.vue';
-/**
- * 接口列表
- */
-import UserApi from '@/api/user.js';
-import DeptApi from '@/api/dept.js';
-import { setInterval, clearInterval } from 'timers';
+
 export default {
   name: 'UserManage',
   data() {
     return {
-      isDevlopment: process.env.NODE_ENV === 'development' ? true : false, // 是否为开发环境
+      isDevlopment: process.env.NODE_ENV === 'development', // 是否为开发环境
       tree: {
         keyword: '',
         isLazy: false, // 控制显示 Tree
@@ -270,12 +269,13 @@ export default {
      *  获取Tree列表
      */
     getTree() {
-      let { tree } = this;
+      const { tree } = this;
       if (tree.keyword) {
         tree.isLazy = false;
         DeptApi.getTreeByKeywork(tree.keyword, this.activeTab).then(res => {
-          tree.searchTreeData = this.$store.state.createTerrData(res);
-          this.$refs['userLazyTree'].setCurrentKey(tree.searchTreeData[0].id);
+          tree.searchTreeData = data2treeArr(res);
+          if (tree.searchTreeData.length === 0) return;
+          this.$refs.userLazyTree.setCurrentKey(tree.searchTreeData[0].id);
           this.organizationId = tree.searchTreeData[0].code;
         });
       } else {
@@ -294,18 +294,12 @@ export default {
      * 加载第一级tree节点
      */
     lazyTreeInit(resolve) {
-      let timer = setInterval(() => {
+      const timer = setInterval(() => {
         if (this.activeTab) {
           clearInterval(timer);
           DeptApi.getLazyTree(this.activeTab, -1).then(res => {
-            res.forEach(item => {
-              /**
-               * 懒加载 hasChildren 是否包含子节点，默认有
-               */
-              item.hasChildren = true;
-            });
             resolve(res);
-            this.$refs['userLazyTree'].setCurrentKey(res[0].id);
+            this.$refs.userLazyTree.setCurrentKey(res[0].id);
             this.organizationId = res[0].code;
           });
         }
@@ -317,26 +311,6 @@ export default {
     getLeaf(node, resolve) {
       DeptApi.getLazyTree(this.activeTab, node.data.code).then(res => {
         resolve(res);
-
-        return;
-        this.testLazyTree += 1; // !测试使用父节点有子节点时，不触发点击事件
-        res = this.testLazyTree > 2 ? [] : res;
-        /**
-         * 如果有返回数据，将其设置为有子节点
-         * 没有将当前选中节点 hasChildren = false, 用于点击时判断是否可执行方法，并加载该节点对应的用户列表
-         */
-        if (res.length) {
-          res.forEach(item => {
-            item.hasChildren = true; // 将子节点设置默认有子节点
-          });
-          node.data.hasChildren = true;
-          resolve(res);
-        } else {
-          node.data.hasChildren = false;
-          this.organizationId = node.id;
-          this.getUserListByOption(true);
-          resolve(res);
-        }
       });
     },
 
@@ -344,10 +318,6 @@ export default {
      * 全加载tree 点击节点
      */
     treeNodeClick(node) {
-      /**
-       * !懒加载数据判断是否可加载数据字段 node.hasChildren
-       */
-      // if (node.children) return;
       this.userForm = {};
       this.organizationId = node.code; // 触发 watch
     },
@@ -356,22 +326,30 @@ export default {
      * @param {Boolean} isClear 是否清空搜索项
      * @param {object} page 分页条件
      */
-    getUserListByOption(isClear, page = { pageSize: 20 }) {
+    getUserListByOption(isClear, page = { pageSize: 20, current: 1 }) {
+      const searchOption = {}; // 18/11/14 处理eslint 不能使用 delete 删除属性，保存搜索条件
       if (isClear) {
         this.userForm = {};
       } else {
         const { status } = this.userForm;
+        const keys = Object.keys(this.userForm); // eslint 不允许使用 for..in for...of
+
+        for (let i = 0, len = keys.length; i < len; i += 1) {
+          const key = keys[i];
+          if (key !== 'isLocked' && key !== 'isEnabled' && key !== 'status') {
+            searchOption[key] = this.userForm[key];
+          }
+        }
+        // 启用、禁用 为同一字段，与锁定字段不同
         if (status !== undefined && status === 'locked') {
-          this.userForm.isLocked = true;
-          this.userForm.isEnabled && delete this.userForm.isEnabled;
+          searchOption.isLocked = true;
         } else {
-          this.userForm.isEnabled = status;
-          this.userForm.isLocked && delete this.userForm.isLocked;
+          searchOption.isEnabled = status;
         }
       }
 
       UserApi.loadUserList(
-        Object.assign({}, this.userForm, { deptCode: this.organizationId }, page)
+        Object.assign({}, searchOption, { deptCode: this.organizationId }, page)
       ).then(res => {
         this.userList = res.users;
         this.page.current = res.current;
@@ -383,12 +361,12 @@ export default {
      * 切换组织机构时重新渲染懒加载树
      */
     reloadLazyTree() {
-      let children = this.$refs.userLazyTree.root.childNodes;
+      const children = this.$refs.userLazyTree.root.childNodes;
       children.splice(0, children.length);
       DeptApi.getLazyTree(this.activeTab, -1).then(res => {
         this.$refs.userLazyTree.root.doCreateChildren(res);
         if (res.length) {
-          this.$refs['userLazyTree'].setCurrentKey(res[0].id);
+          this.$refs.userLazyTree.setCurrentKey(res[0].id);
           this.organizationId = res[0].code;
         } else {
           this.userList = [];
@@ -414,13 +392,15 @@ export default {
      * 修改用户信息
      */
     updateUser(scope) {
-      this.curUser.id !== scope.row.id && (this.curUser = scope.row);
+      if (this.curUser.id !== scope.row.id) {
+        this.curUser = scope.row;
+      }
       this.dialogMsg.userEdit = true;
     },
     /**
      * tabs 组件点击时触发,重新加载Tree，显示懒加载树
      */
-    changeTab(tab, event) {
+    changeTab(tab) {
       this.tree.keyword = '';
       this.activeTab = tab.$attrs.code;
       this.reloadLazyTree();
@@ -444,29 +424,27 @@ export default {
      * 分页组件 页数发生变化时
      */
     pageSizeChange(val) {
-      this.page.pageSize = val;
-      this.getUserListByOption();
+      this.getUserListByOption(false, {
+        pageSize: val,
+        current: 1,
+      });
     },
     /**
      * 分页组件选中页面时
      */
     curPageChange(val) {
       if (val === this.page.current) return;
-      this.page.current = val;
       this.getUserListByOption(false, {
         current: val,
         pageSize: this.page.pageSize,
       });
     },
 
-    filterSecretLev(row, column) {
+    filterSecretLev(row) {
       if (row.securityLevel) {
-        return this.secretLev.find(item => {
-          return item.id == row.securityLevel;
-        })['tit'];
-      } else {
-        return '';
+        return this.secretLev.find(item => `${item.id}` === row.securityLevel).tit;
       }
+      return '';
     },
 
     /**
@@ -474,13 +452,14 @@ export default {
      * @param eventType 1: 账号锁定规则
      */
     setUp(eventType) {
-      switch (parseInt(eventType)) {
+      switch (parseInt(eventType, 10)) {
         case 1:
           this.dialogMsg.lockRule = true;
           break;
         case 2:
           this.dialogMsg.passwordRuleConfig = true;
           break;
+        default:
       }
     },
 
@@ -489,7 +468,7 @@ export default {
      * @param eventType 1：启用 2：禁用 3：解锁 4：重置密码 5：账号迁移
      */
     updateRow(eventType) {
-      switch (parseInt(eventType)) {
+      switch (parseInt(eventType, 10)) {
         case 1:
           this.disableUser('enable', [this.curUser.id], [this.curUser]);
           break;
@@ -505,6 +484,7 @@ export default {
         case 5:
           this.moveUser([this.curUser.id], [this.curUser]);
           break;
+        default:
       }
     },
     /**
@@ -513,26 +493,27 @@ export default {
      * @returns 选中的 ID列表
      */
     filterSelectOptionByType(type) {
-      let idsArr = [], // 选中ID
-        curArr = []; // 选中项，保存成功后使用
+      // ids 选中ID
+      // curArr 选中项，保存成功后使用
+      const [idsArr, curArr] = [[], []];
 
-      this.curUser.length &&
+      if (this.curUser.length) {
         this.curUser.forEach(item => {
-          switch (parseInt(type)) {
+          switch (parseInt(type, 10)) {
             case 1: // 只添加 状态为禁用的选项
-              if (item.isEnabled == false && item.isLocked != true) {
+              if (item.isEnabled === false && item.isLocked !== true) {
                 idsArr.push(item.id);
                 curArr.push(item);
               }
               break;
             case 2: // 只添加状态为启用的选项
-              if (item.isEnabled == true && item.isLocked != true) {
+              if (item.isEnabled === true && item.isLocked !== true) {
                 idsArr.push(item.id);
                 curArr.push(item);
               }
               break;
             case 3: // 只添加状态为锁定的选项
-              if (item.isLocked == true) {
+              if (item.isLocked === true) {
                 idsArr.push(item.id);
                 curArr.push(item);
               }
@@ -542,6 +523,7 @@ export default {
               curArr.push(item);
           }
         });
+      }
 
       return {
         idsArr,
@@ -565,7 +547,7 @@ export default {
         return;
       }
 
-      switch (parseInt(eventType)) {
+      switch (parseInt(eventType, 10)) {
         case 1:
           this.disableUser('enable', idsArr, filterList.curArr);
           break;
@@ -603,7 +585,7 @@ export default {
         cancelButtonText: '取消',
       })
         .then(() => {
-          UserApi.deleteUser(idsArr).then(res => {
+          UserApi.deleteUser(idsArr).then(() => {
             this.removeUsers(idsArr);
 
             this.$message({
@@ -625,13 +607,13 @@ export default {
      * @param {array} curList 选中项
      */
     disableUser(disableType, ids, curList) {
-      let status = disableType == 'enable' ? 'Y' : 'N';
-      UserApi.disableUser(ids, status).then(res => {
+      const status = disableType === 'enable' ? 'Y' : 'N';
+      UserApi.disableUser(ids, status).then(() => {
         /**
          * 更新视图
          */
         curList.forEach(item => {
-          item.isEnabled = status === 'Y' ? true : false;
+          item.isEnabled = status === 'Y';
         });
 
         this.$message({
@@ -649,7 +631,7 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          UserApi.lockUser(ids, 'N').then(res => {
+          UserApi.lockUser(ids, 'N').then(() => {
             curList.forEach(item => {
               item.isLocked = false;
             });
@@ -669,7 +651,7 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          UserApi.resetPwd(ids).then(res => {
+          UserApi.resetPwd(ids).then(() => {
             this.$message({
               message: '重置成功',
               type: 'success',
@@ -682,7 +664,7 @@ export default {
      * 获取目标组织机构
      */
     moveUser2Dept(secectDeptMsg) {
-      UserApi.moveUsers(this.moveUsersMsg.ids, secectDeptMsg.code).then(res => {
+      UserApi.moveUsers(this.moveUsersMsg.ids, secectDeptMsg.code).then(() => {
         this.removeUsers(this.moveUsersMsg.ids);
 
         if (this.userList.length === 0) this.getUserListByOption(true);
@@ -717,10 +699,10 @@ export default {
      */
     removeUsers(idsArr, userList = this.userList) {
       idsArr.forEach(item => {
-        for (let i = 0; i < userList.length; i++) {
-          let user = userList[i];
+        for (let i = 0; i < userList.length; i += 1) {
+          const user = userList[i];
 
-          if (item == user.id) {
+          if (item === user.id) {
             userList.splice(i, 1);
             break;
           }

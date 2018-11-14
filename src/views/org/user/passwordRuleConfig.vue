@@ -1,7 +1,7 @@
 <!-- 密码强度规则编辑页面 -->
 <template>
   <div>
-    <el-dialog 
+    <el-dialog
       title='设置 - 密码强度规则'
       :visible.sync='isOpen'
       :before-close="close"
@@ -60,8 +60,8 @@ export default {
     save() {
       if (
         this.pwdRuleForm.length &&
-        (this.pwdRuleForm.size == '' ||
-          (this.pwdRuleForm.size != '' && isNaN(this.pwdRuleForm.size)))
+        (this.pwdRuleForm.size === '' ||
+          (this.pwdRuleForm.size !== '' && Number.isNaN(this.pwdRuleForm.size)))
       ) {
         this.$alert('密码长度必须为数字');
         return;

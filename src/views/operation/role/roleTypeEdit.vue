@@ -22,7 +22,7 @@
           </el-form-item>
         </el-col>
       </el-row>
-      
+
     </el-form>
     <!-- roleTypeForm END -->
 
@@ -36,6 +36,7 @@
 
 <script>
 import DeptApi from '@/api/dept';
+
 export default {
   // props: ['isOpen', 'id'],
   data() {
@@ -100,7 +101,7 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          DeptApi.deleteDeptType(this.id).then(res => {
+          DeptApi.deleteDeptType(this.id).then(() => {
             this.$message({
               message: '删除成功',
               type: 'success',

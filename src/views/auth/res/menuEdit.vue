@@ -2,12 +2,12 @@
 <template>
   <el-dialog title='菜单编辑' :visible.sync='isOpen' width="30%" :before-close="close">
 
-      <el-form 
-        :model="menuEditForm" 
-        ref="menuEditForm" 
-        :rules='menuEditRules' 
-        size='small' 
-        label-width='80px' 
+      <el-form
+        :model="menuEditForm"
+        ref="menuEditForm"
+        :rules='menuEditRules'
+        size='small'
+        label-width='80px'
         status-icon>
         <el-row :gutter="30">
 
@@ -82,9 +82,9 @@
 
           <el-col :span='24'>
             <el-form-item label="备注">
-              <el-input type='textarea' 
-                :autosize='{ minRows: 4, maxRows: 6}' 
-                autocomplete='off' 
+              <el-input type='textarea'
+                :autosize='{ minRows: 4, maxRows: 6}'
+                autocomplete='off'
                 v-model="menuEditForm.description">
               </el-input>
             </el-form-item>
@@ -125,7 +125,7 @@ export default {
 
   methods: {
     save() {
-      this.$refs['menuEditForm'].validate(valid => {
+      this.$refs.menuEditForm.validate(valid => {
         if (!valid) return;
         console.log(1);
         this.$emit('save');

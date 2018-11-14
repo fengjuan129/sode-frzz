@@ -4,9 +4,9 @@
     <el-tabs type="border-card" v-model="tabs.tabActiveCode" id='t-tabs' :before-leave='stopTabChange' @tab-click='tabChange'>
       <el-tab-pane v-for='item in tabs.tabData' :key='item.id' :name='item.code' :data-info='item'>
         <span slot='label'>
-          {{item.typename}} 
-          <i class='el-icon-edit' 
-            v-show='tabs.tabActiveCode == item.code' 
+          {{item.typename}}
+          <i class='el-icon-edit'
+            v-show='tabs.tabActiveCode == item.code'
             @click.stop="dialogStatus.deptTypeEdit = true; dialogStatus.deptTypeId = item.id"></i>
         </span>
       </el-tab-pane>
@@ -30,14 +30,14 @@
         :row-style="showTr">
         <el-table-column v-for="(column, index) in columns" :key="column.dataIndex" :label="column.text" :align="column.align" :width='column.width'>
           <template scope="scope">
-            <span v-if="spaceIconShow(index)" v-for="(space, levelIndex) in scope.row._level" class="ms-tree-space" :key='levelIndex'></span>
+            <span v-if="spaceIconShow(index)" v-for="(space, levelIndex) in scope.row.level" class="ms-tree-space" :key='levelIndex'></span>
             <span class="button is-outlined is-primary is-small" v-if="toggleIconShow(index,scope.row)">
-              <i v-if="!scope.row._expanded" class="el-icon-arrow-right t-icon" aria-hidden="true"></i>
-              <i v-if="scope.row._expanded" class="el-icon-arrow-down t-icon" aria-hidden="true"></i>
+              <i v-if="!scope.row.expanded" class="el-icon-arrow-right t-icon" aria-hidden="true"></i>
+              <i v-if="scope.row.expanded" class="el-icon-arrow-down t-icon" aria-hidden="true"></i>
             </span>
             <span v-else-if="index === 0" class="ms-tree-space"></span>
             <span v-if='column.dataIndex == "isEnable"'>
-              <i :class='scope.row[column.dataIndex] ? 
+              <i :class='scope.row[column.dataIndex] ?
                   "fs-20 success el-icon-circle-check" : "fs-20 danger el-icon-circle-close"'>
               </i>
             </span>
@@ -49,7 +49,7 @@
           <template scope="scope">
             <el-button size='mini' @click.stop='deptEdit(scope.row,scope.$index)'>修改</el-button>
             <el-button size='mini' @click.stop="deleteDept(scope.row,scope.$index)">删除</el-button>
-            <el-button size='mini' 
+            <el-button size='mini'
               @click.stop='disableDept(!scope.row["isEnable"],scope.row,scope.$index)'>{{scope.row["isEnable"] ? '禁用' : '启用'}}
             </el-button>
           </template>
@@ -58,22 +58,22 @@
 
       <!-- 表格树 END -->
     </el-tabs>
-    
+
     <!-- v-if 触发组件生命周期 -->
-    <DeptTypeEdit :isOpen='dialogStatus.deptTypeEdit' 
+    <DeptTypeEdit :isOpen='dialogStatus.deptTypeEdit'
       :id='dialogStatus.deptTypeId'
-      @close='dialogStatus.deptTypeEdit = false' 
+      @close='dialogStatus.deptTypeEdit = false'
       @delete='deleteDeptType'
       @save='editDeptType'
       v-if='dialogStatus.deptTypeEdit'/>
     <!-- 组织机构类型 END -->
     <!-- C测试 -->
-    <DeptEdit :isOpen='dialogStatus.deptEdit' 
+    <DeptEdit :isOpen='dialogStatus.deptEdit'
       :id='upDateDeptMsg.id'
       :parentCode='upDateDeptMsg.code'
       :parentName='upDateDeptMsg.name'
       @close='dialogStatus.deptEdit = false'
-      @save='editDept' 
+      @save='editDept'
       v-if='dialogStatus.deptEdit'/>
     <!-- 组织机构编辑 END -->
 
@@ -81,11 +81,10 @@
 </template>
 
 <script>
-import Utils from './treeTable/utils';
-import DeptTypeEdit from './deptTypeEdit';
-import DeptEdit from './deptEdit';
-// 接口
-import DeptApi from '@/api/dept.js';
+import DeptApi from '@/api/dept';
+import { data2treeGridArr } from '@/libs/utils';
+import DeptTypeEdit from './deptTypeEdit.vue';
+import DeptEdit from './deptEdit.vue';
 
 export default {
   data() {
@@ -145,32 +144,8 @@ export default {
 
   computed: {
     treeData() {
-      /**
-       * 组装成 Tree 结构
-       */
-      let list = [...this.deptList];
-      if (!list.length) return [];
-
-      const [treeMap, returnTree] = [{}, []];
-
-      for (let i = 0, len = list.length; i < len; i += 1) {
-        treeMap[list[i].code] = list[i];
-      }
-
-      for (let i = 0, len = list.length; i < len; i += 1) {
-        if (list[i].isAdd) continue; // 阻止重复添加
-        const item = list[i];
-        const parent = treeMap[item.parentCode];
-
-        if (parent) {
-          (parent.children || (parent.children = [])).push(item);
-          item.isAdd = true;
-        } else {
-          returnTree.push(item);
-        }
-      }
-
-      return Utils.MSDataTransfer.treeToArray(returnTree, null, null, this.defaultExpandAll);
+      //
+      return data2treeGridArr(this.deptList, 'code', 'parentCode', false);
     },
   },
 
@@ -190,7 +165,7 @@ export default {
         });
 
         if (res.length) {
-          let firstData = res[0];
+          const firstData = res[0];
           this.tabs.tabData = res;
           this.tabs.tabActiveCode = firstData.code;
           this.tabs.tabActiveInfo = firstData;
@@ -214,15 +189,15 @@ export default {
     /**
      * Tab切换时,点击添加按钮时阻止选中
      */
-    stopTabChange(activeName, oldActiveName) {
+    stopTabChange(activeName) {
       if (activeName === 'addDeptBtn') return false;
       return true;
     },
     /**
      * tabs 点击事件
      */
-    tabChange(tab, eventObj) {
-      if (tab.name === 'addDeptBtn' || tab.name == this.tabs.tabActiveInfo.id) return;
+    tabChange(tab) {
+      if (tab.name === 'addDeptBtn' || tab.name === this.tabs.tabActiveInfo.id) return;
       this.tabs.tabActiveInfo = tab.$attrs['data-info'];
       this.upDateDeptMsg = Object.assign({}, tab.$attrs['data-info']);
       // tab切换时 刷新Tree
@@ -235,8 +210,8 @@ export default {
     editDeptType(deptTypeInfo) {
       // 有id 修改,添加无 ID
       if (this.dialogStatus.deptTypeId) {
-        for (let i = 0, len = this.tabs.tabData.length; i < len; i++) {
-          let item = this.tabs.tabData[i];
+        for (let i = 0, len = this.tabs.tabData.length; i < len; i += 1) {
+          const item = this.tabs.tabData[i];
           if (item.id === deptTypeInfo.id) {
             Object.assign(item, deptTypeInfo);
             break;
@@ -257,9 +232,9 @@ export default {
      * 删除组织机构类型
      */
     deleteDeptType(id) {
-      let { tabData } = this.tabs;
-      for (let i = 0, len = tabData.length; i < len; i++) {
-        let item = tabData[i];
+      const { tabData } = this.tabs;
+      for (let i = 0, len = tabData.length; i < len; i += 1) {
+        const item = tabData[i];
         if (item.id === id) {
           tabData.splice(i, 1);
           break;
@@ -277,10 +252,10 @@ export default {
       }
     },
 
-    showTr(row, index) {
-      row = row.row;
-      let show = row._parent ? row._parent._expanded && row._parent._show : true;
-      row._show = show;
+    showTr(row) {
+      const curRow = row.row;
+      const show = curRow.parent ? curRow.parent.expanded && curRow.parent.show : true;
+      curRow.show = show;
       return show
         ? 'animation:treeTableShow 1s;-webkit-animation:treeTableShow 1s;'
         : 'display:none;';
@@ -303,7 +278,7 @@ export default {
      * 选中行发生变化时，向父组件发送选中行的数据
      */
     sendRowData(curRow) {
-      curRow._expanded = !curRow._expanded;
+      curRow.expanded = !curRow.expanded;
       this.activeTr = curRow;
       this.upDateDeptMsg = Object.assign({}, curRow);
       if (curRow.isLoaded) return;
@@ -313,7 +288,7 @@ export default {
     /**
      * 更新组织机构
      */
-    deptEdit(row, index) {
+    deptEdit(row) {
       this.upDateDeptMsg = Object.assign({}, row);
       this.dialogStatus.deptEdit = true;
     },
@@ -323,25 +298,28 @@ export default {
     updateDeptType() {
       this.dialogStatus.deptTypeEdit = true;
     },
-    deleteDept(row, index) {
+    deleteDept(row) {
       this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'error',
       })
         .then(() => {
-          DeptApi.deleteDept(row.id).then(res => {
-            let { children, _parent } = row;
+          DeptApi.deleteDept(row.id).then(() => {
+            const { children, parent } = row;
             /**
              * !删除 Tree 上的引用，dataTranslate.js  根据 item.children 处理数据，删除子类及父级目标子类
              */
-            children && delete row.children;
+            // children && delete row.children;
+            if (children && children.length) {
+              row.children.splice(0, children.length);
+            }
 
-            if (_parent && _parent.children && _parent.children.length) {
-              for (let i = 0, len = _parent.children.length; i < len; i++) {
-                let item = _parent.children[i];
+            if (parent && parent.children && parent.children.length) {
+              for (let i = 0, len = parent.children.length; i < len; i += 1) {
+                const item = parent.children[i];
                 if (item.id === row.id) {
-                  _parent.children.splice(i, 1);
+                  parent.children.splice(i, 1);
                   break;
                 }
               }
@@ -381,7 +359,7 @@ export default {
      * 禁用组织机构
      * @param state true 启用  false 禁用
      */
-    disableDept(state, row, index) {
+    disableDept(state, row) {
       // TODO: 必须先将组织机构下所有启用账号迁移到新部门，才能禁用该组织机构; 调用接口判断
       // 18/11/12 后端判断，不需要条用接口
 
@@ -390,7 +368,7 @@ export default {
         cancelButtonText: '取消',
       })
         .then(() => {
-          DeptApi.setDeptDisable(row.id, state ? 'Y' : 'N').then(res => {
+          DeptApi.setDeptDisable(row.id, state ? 'Y' : 'N').then(() => {
             if (state) {
               this.setParentsState(row, true);
             } else {
@@ -408,16 +386,16 @@ export default {
     },
 
     setParentsState(row, state) {
-      let parent = row._parent;
-      while (parent) {
-        parent.isEnable = state;
-        parent = parent._parent;
+      let parentObj = row.parent;
+      while (parentObj) {
+        parentObj.isEnable = state;
+        parentObj = parentObj.parent;
       }
     },
     setChildrensState(list, state) {
       if (!list || !list.length) return;
-      for (let i = 0, len = list.length; i < len; i++) {
-        let item = list[i];
+      for (let i = 0, len = list.length; i < len; i += 1) {
+        const item = list[i];
         item.isEnable = state;
 
         if (item.children && item.children.length) {
@@ -426,8 +404,8 @@ export default {
       }
     },
     deleteDeptById(id, list = this.deptList) {
-      for (let i = 0; i < list.length; i++) {
-        let item = list[i];
+      for (let i = 0; i < list.length; i += 1) {
+        const item = list[i];
 
         if (item.id === id) {
           list.splice(i, 1);
@@ -441,9 +419,9 @@ export default {
     findDeptById(id, list) {
       let target = '';
 
-      for (let i = 0, len = list.length; i < len; i++) {
-        let item = list[i];
-        if (item.id == id) {
+      for (let i = 0, len = list.length; i < len; i += 1) {
+        const item = list[i];
+        if (item.id === id) {
           target = item;
           break;
         }

@@ -24,12 +24,12 @@
         <!-- Tab -->
         <el-tabs type='border-card' :before-leave='stopTabChange' @tab-click='tabChange'>
           <el-tab-pane label='全部' name='all'></el-tab-pane>
-          <el-tab-pane v-for='item in tabs.tabData' 
-            :key='item.id' 
-            :name='item.code' 
+          <el-tab-pane v-for='item in tabs.tabData'
+            :key='item.id'
+            :name='item.code'
             :data-info='item'>
             <span slot='label'>
-              {{item.typename}} 
+              {{item.typename}}
               <i class='el-icon-edit' v-show='item.id === tabs.activeTab.id'></i>
             </span>
           </el-tab-pane>
@@ -66,7 +66,7 @@
                 <a href="javascript: void(0)" @click='editRole(scope.row,scope.$index)'>编辑</a>
                 <a href="javascript: void(0)" @click='deleteRole(scope.row,scope.$index)'>删除</a>
                 <a href="javascript: void(0)" @click='disableRole(scope.row,scope.$index)'>禁用</a>
-              </template>  
+              </template>
             </el-table-column>
           </el-table>
         </el-tabs>
@@ -80,11 +80,10 @@
   </div>
 </template>
 <script>
+// import DeptApi from '@/api/dept';
 import RoleTypeEdit from './roleTypeEdit.vue';
 import RoleEdit from './roleEdit.vue';
 
-// 接口
-import DeptApi from '@/api/dept';
 export default {
   data() {
     return {

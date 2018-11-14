@@ -46,7 +46,7 @@
             <el-input v-model.number="deptEditForm.sort"></el-input>
           </el-form-item>
         </el-col>
-        
+
         <el-col :span='24'>
           <el-form-item label="备注">
             <el-input type='textarea' :autosize='{ minRows: 4, maxRows: 6}' v-model='deptEditForm.description'></el-input>
@@ -64,12 +64,12 @@
 </template>
 
 <script>
-// 接口
-import DeptApi from '@/api/dept.js';
+import DeptApi from '@/api/dept';
+
 export default {
   props: ['id', 'parentCode', 'parentName', 'isOpen'],
   data() {
-    let checkSort = (rule, value, callback) => {
+    const checkSort = (rule, value, callback) => {
       if (value && !Number.isInteger(value)) {
         callback(new Error('请输入数字值'));
       } else {
@@ -115,8 +115,8 @@ export default {
         this.deptEditForm = res;
       });
     },
-    save(deptEditForm) {
-      this.$refs['deptEditForm'].validate(valid => {
+    save() {
+      this.$refs.deptEditForm.validate(valid => {
         if (!valid) return;
 
         this.$emit('save', this.deptEditForm);

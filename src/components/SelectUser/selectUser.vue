@@ -8,10 +8,10 @@
 
       <div class="select-user-container">
         <el-tabs type="card" @tab-click='changeTab' v-model='activeTab'>
-        <el-tab-pane v-for='item in tabData' 
-          :key='item.id' 
-          :label="item.typename" 
-          :code='item.code' 
+        <el-tab-pane v-for='item in tabData'
+          :key='item.id'
+          :label="item.typename"
+          :code='item.code'
           :name="item.code"></el-tab-pane>
       </el-tabs>
       <div class='select-user-search-bar'>
@@ -43,7 +43,8 @@
 <script>
 import UserApi from '@/api/user';
 import DeptApi from '@/api/dept';
-import { data2treeArr } from '@/libs/utils.js';
+import { data2treeArr } from '@/libs/utils';
+
 export default {
   /**
    * multiple: 是否允许多选。多选时显示checkbox
@@ -62,7 +63,7 @@ export default {
       },
       tabData: [],
       activeTab: '',
-      checkedUser: '', //保存选中人员
+      checkedUser: '', // 保存选中人员
     };
   },
   mounted() {
@@ -92,9 +93,7 @@ export default {
       this.tree.organizationTree = [];
     },
     submitUser() {
-      let curUser = this.$refs['searchTree'][
-        this.multiple ? 'getCheckedNodes' : 'getCurrentNode'
-      ]();
+      const curUser = this.$refs.searchTree[this.multiple ? 'getCheckedNodes' : 'getCurrentNode']();
       if (curUser.length === 0) {
         this.$message({
           message: '请选择后再提交',
@@ -119,7 +118,7 @@ export default {
   },
 
   watch: {
-    activeTab(val) {
+    activeTab() {
       this.getTree();
     },
   },

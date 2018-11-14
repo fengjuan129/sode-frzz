@@ -13,10 +13,10 @@
         :width='col.width'
         :align="col.align || 'left'">
         <template scope='scope'>
-          <span v-if="index === 0 ? true : false" v-for="(space, levelIndex) in scope.row._level" class="ms-tree-space" :key='levelIndex'></span>
+          <span v-if="index === 0 ? true : false" v-for="(space, levelIndex) in scope.row.level" class="ms-tree-space" :key='levelIndex'></span>
           <span class="button is-outlined is-primary is-small" v-if="toggleIconShow(index,scope.row)">
-            <i v-if="!scope.row._expanded" class="el-icon-arrow-right t-icon" aria-hidden="true"></i>
-            <i v-if="scope.row._expanded" class="el-icon-arrow-down t-icon" aria-hidden="true"></i>
+            <i v-if="!scope.row.expanded" class="el-icon-arrow-right t-icon" aria-hidden="true"></i>
+            <i v-if="scope.row.expanded" class="el-icon-arrow-down t-icon" aria-hidden="true"></i>
           </span>
 
           <span v-else-if="index === 0" class="ms-tree-space"></span>
@@ -48,13 +48,11 @@
 </template>
 
 <script>
-import { data2treeArr } from '@/libs/utils';
+import { getMenuTree, setMenu, deleteMenu } from '@/api/resources'; // 接口
+import Dic from '@/api/mockDictionary'; // 假数据字典
+import { data2treeGridArr } from '@/libs/utils';
 import MenuEdit from './menuEdit.vue';
 
-// 接口
-import { getMenuTree, setMenu, deleteMenu } from '@/api/resources.js';
-// 假数据字典
-import Dic from '@/api/mockDictionary.js';
 export default {
   data() {
     return {
@@ -83,7 +81,7 @@ export default {
         menuEdit: false,
       },
       // TODO 是否启用为数据字典
-      isEnable: Dic['isEnable'],
+      isEnable: Dic.isEnable,
     };
   },
 
@@ -93,41 +91,19 @@ export default {
 
   computed: {
     treeData() {
-      return this.tree2treeGirdArr(data2treeArr(this.menuList, 'id', 'parentId'));
+      return data2treeGridArr(this.menuList, 'id', 'parentId', false);
     },
   },
   mounted() {},
   methods: {
-    /**
-     * 将 tree 结构数据转为 treeGird 数据
-     */
-    tree2treeGirdArr(data, parent, expandedAll = false) {
-      let tmp = [];
-      Array.from(data).forEach(record => {
-        if (record._expanded === undefined) {
-          this.$set(record, '_expanded', expandedAll);
-        }
-        if (parent !== null && parent !== undefined) {
-          this.$set(record, '_parent', parent);
-          this.$set(record, '_level', parent._level + 1);
-        } else {
-          this.$set(record, '_level', 0);
-        }
-
-        tmp.push(record);
-
-        if (record.children && record.children.length > 0) {
-          let children = this.tree2treeGirdArr(record.children, record, expandedAll);
-          tmp = [...tmp, ...children];
-        }
-      });
-      return tmp;
+    getMenu() {
+      getMenuTree();
     },
     // 控制表格显示、隐藏
-    showTr(row, index) {
-      row = row.row;
-      let show = row._parent ? row._parent._expanded && row._parent._show : true;
-      row._show = show;
+    showTr(row) {
+      const curRow = row.row;
+      const show = curRow.parent ? curRow.parent.expanded && curRow.parent.show : true;
+      curRow.show = show;
       return show
         ? 'animation:treeTableShow 1s;-webkit-animation:treeTableShow 1s;'
         : 'display:none;';
@@ -141,38 +117,42 @@ export default {
     },
     // 点击行事件
     activeRow(curRow) {
-      curRow._expanded = !curRow._expanded;
+      curRow.expanded = !curRow.expanded;
     },
     // 提交保存
     subMenu(data) {
       console.log(data);
+      setMenu();
     },
     // 删除菜单
-    delMenu(curRow, index) {
+    delMenu(curRow) {
       this.$confirm('此操作将删除该菜单，是否继续', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
       })
         .then(() => {
-          let { children, _parent } = curRow;
-          // deleteMenu(curRow.id).then(res => {
-          if (_parent && _parent.children && _parent.children.length) {
-            for (let i = 0, len = _parent.children.length; i < len; i++) {
-              let item = _parent.children[i];
-              if (item.id === curRow.id) {
-                _parent.children.splice(i, 1);
-                break;
+          const { children, parent } = curRow;
+          deleteMenu(curRow.id).then(() => {
+            if (parent && parent.children && parent.children.length) {
+              for (let i = 0, len = parent.children.length; i < len; i += 1) {
+                const item = parent.children[i];
+                if (item.id === curRow.id) {
+                  parent.children.splice(i, 1);
+                  break;
+                }
               }
             }
-          }
-          children && delete curRow.children;
-          this.deleteDeptById(curRow.id);
 
-          this.$message({
-            message: '删除成功',
-            type: 'success',
+            if (children && children.length) {
+              curRow.children.splice(0, curRow.children.length);
+            }
+            this.deleteDeptById(curRow.id);
+
+            this.$message({
+              message: '删除成功',
+              type: 'success',
+            });
           });
-          // })
         })
         .catch(() => {});
     },
@@ -183,11 +163,12 @@ export default {
      */
     editMenu(type, curRow) {
       this.dialogs.menuEdit = true;
+      console.log(type, curRow);
     },
 
     deleteDeptById(id, list = this.menuList) {
-      for (let i = 0; i < list.length; i++) {
-        let item = list[i];
+      for (let i = 0; i < list.length; i += 1) {
+        const item = list[i];
 
         if (item.id === id) {
           list.splice(i, 1);

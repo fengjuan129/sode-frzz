@@ -6,7 +6,7 @@
       :visible.sync="isOpen"
       :before-close="close"
       width="25%">
-      
+
       <div class='form-container'>
         <el-form ref="lockRuleForm" :model="lockRuleForm" label-width="80px">
           <el-form-item label="错误次数">

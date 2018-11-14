@@ -20,4 +20,3 @@ export default {
   font-size: 30px;
 }
 </style>
-

@@ -2,10 +2,10 @@
 <template>
   <el-dialog title='组织机构编辑' :visible.sync='isOpen' width="30%" :before-close="close">
     <el-form :model="roleEditForm"
-      :rules="roleEditRules" 
-      ref='roleEditForm' 
-      size='small' 
-      label-width='80px' 
+      :rules="roleEditRules"
+      ref='roleEditForm'
+      size='small'
+      label-width='80px'
       status-icon>
       <el-row :gutter="30">
         <el-col :span='12'>
@@ -55,7 +55,7 @@
         <el-col :span='24'>
           <el-form-item label="备注">
             <el-input type='textarea'
-              :autosize='{ minRows: 4, maxRows: 6}' 
+              :autosize='{ minRows: 4, maxRows: 6}'
               v-model='roleEditForm.description'></el-input>
           </el-form-item>
         </el-col>
@@ -99,6 +99,7 @@ export default {
     save(roleEditForm) {
       this.$refs[roleEditForm].validate(valid => {
         if (!valid) return;
+        console.log(1);
       });
     },
   },
