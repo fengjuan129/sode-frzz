@@ -33,15 +33,8 @@ const router = new Router({
       },
       children: [
         {
-          path: 'hello',
-          component: asyncLoader(() =>
-            import(/* webpackChunkName: "hello" */ '../components/HelloWorld')
-          ),
-        },
-        {
           // 用户管理
           path: '/org/user',
-          name: 'orgUser',
           component: asyncLoader(() => import('../views/org/user')),
           meta: {
             type: 'private',
@@ -50,7 +43,6 @@ const router = new Router({
         // 组织机构管理
         {
           path: '/org/dept',
-          name: 'orgDept',
           component: asyncLoader(() => import('../views/org/dept')),
           meta: {
             type: 'private',
@@ -59,7 +51,6 @@ const router = new Router({
         // 角色管理
         {
           path: '/operation/role',
-          name: 'operationRole',
           component: asyncLoader(() => import('../views/operation/role')),
           meta: {
             type: 'private',
@@ -69,7 +60,6 @@ const router = new Router({
         // 菜单管理
         {
           path: '/operation/res/menu',
-          name: 'operationResMenu',
           component: asyncLoader(() => import('../views/auth/res/menuManage.vue')),
           meta: {
             type: 'private',
@@ -78,7 +68,6 @@ const router = new Router({
         // 服务管理
         {
           path: '/operation/res/api',
-          name: 'operationResApi',
           component: asyncLoader(() => import('../views/auth/res/apiManage.vue')),
           meta: {
             type: 'private',
@@ -86,18 +75,51 @@ const router = new Router({
         },
       ],
     },
-
-    // 配置404路由
+    // 配置发生异常时的路由
+    {
+      path: '/exception/403',
+      name: '403',
+      component: Exception,
+      props: {
+        // 为路由组件传参
+        type: 403,
+      },
+      meta: {
+        type: 'protected', // 配置为需登录才能访问
+      },
+    },
+    {
+      path: '/exception/404',
+      name: '404',
+      component: Exception,
+      props: {
+        type: 404,
+      },
+      meta: {
+        type: 'protected',
+      },
+    },
+    {
+      path: '/exception/500',
+      name: '500',
+      component: Exception,
+      props: {
+        type: 500,
+      },
+      meta: {
+        type: 'protected',
+      },
+    },
+    // 未匹配到任何路由时，默认返回404
     // !此路由只能配置在路由表最后，顺序不可改变
     {
       path: '*',
       component: Exception,
       props: {
-        // 为路由组件传参
         type: 404,
       },
       meta: {
-        type: 'protected', // 404页面配置为需登录才能访问
+        type: 'protected',
       },
     },
   ],
