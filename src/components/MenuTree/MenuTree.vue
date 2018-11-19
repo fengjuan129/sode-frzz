@@ -42,6 +42,10 @@ export default {
             },
           ],
         },
+        {
+          label: 'vuex模块化示例',
+          routerLink: '/demo',
+        },
       ],
       defaultProps: {
         children: 'children',

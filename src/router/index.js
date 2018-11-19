@@ -33,6 +33,14 @@ const router = new Router({
       },
       children: [
         {
+          // vuex模块化示例
+          path: '/demo',
+          component: asyncLoader(() => import('../views/demo')),
+          meta: {
+            type: 'private',
+          },
+        },
+        {
           // 用户管理
           path: '/org/user',
           component: asyncLoader(() => import('../views/org/user')),

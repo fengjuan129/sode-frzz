@@ -1,4 +1,5 @@
 import Mock from 'mockjs';
+import { parse } from 'qs';
 
 // 模拟用户数据
 const userDB = [
@@ -18,7 +19,7 @@ const userDB = [
 
 // 模拟用户登录接口
 Mock.mock('/api/v1/sso/authentication/token', 'post', ({ body }) => {
-  const bodyObj = JSON.parse(body);
+  const bodyObj = parse(body);
   const loginUser = userDB.find(user => {
     // TODO: 解决 userDB.find(user => user.username === bodyObj.username
     // && user.password === bodyObj.password) 写法无法通过eslint语法校验的问题
@@ -32,8 +33,9 @@ Mock.mock('/api/v1/sso/authentication/token', 'post', ({ body }) => {
     };
   }
   return {
-    __statusCode: 400,
+    error: 'login_error',
     code: 1001,
-    msg: 'password_error',
+    msg: '账号或密码错误',
+    __statusCode: 400,
   };
 });

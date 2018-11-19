@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { Notification } from 'element-ui';
-import router from '../router';
+import router from '../../router';
 
 /**
  * 错误处理插件
