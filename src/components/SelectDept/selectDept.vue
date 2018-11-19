@@ -53,7 +53,7 @@
 
 <script>
 import DeptApi from '@/api/dept';
-import { data2TreeArr } from '@/libs/utils';
+import { data2treeArr } from '@/libs/utils';
 
 export default {
   /**
@@ -111,7 +111,7 @@ export default {
      */
     searchTree() {
       DeptApi.getTreeByKeywork(this.keyword, this.activeTab).then(res => {
-        this.tree.organizationTree = data2TreeArr(res);
+        this.tree.organizationTree = data2treeArr(res);
       });
     },
     /**
