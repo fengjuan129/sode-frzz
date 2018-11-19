@@ -39,25 +39,31 @@ export default {
     return {
       // 表单
       formLogin: {
-        username: 'admin',
-        password: 'admin',
-        code: 'v9am',
+        // username: 'admin',
+        // password: 'admin',
+        username: '测试加密',
+        password: '123456',
       },
       // 校验
       rules: {
         username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
       },
     };
   },
   methods: {
     // TODO: 调用登录服务实现登录
     submit() {
-      const { username, password } = this.formLogin;
-      login(username, password).then(() => {
-        setToken(Date.now());
-        this.$router.replace('/');
+      this.$refs.loginForm.validate(valid => {
+        if (valid) {
+          const { username, password } = this.formLogin;
+          login(username, password)
+            .then(tokenData => {
+              setToken(tokenData);
+              this.$router.replace('/');
+            })
+            .catch(this.$errorHandler);
+        }
       });
     },
   },

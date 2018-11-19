@@ -19,7 +19,6 @@ export function login(username, password) {
     }),
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-      Authorization: `Basic ${config.client_id}`,
     },
   }).then(response => response.data);
 }
