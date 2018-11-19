@@ -19,14 +19,8 @@ const userDB = [
 
 // 模拟用户登录接口
 Mock.mock('/api/v1/sso/authentication/token', 'post', ({ body }) => {
-  const bodyObj = parse(body);
-  const loginUser = userDB.find(user => {
-    // TODO: 解决 userDB.find(user => user.username === bodyObj.username
-    // && user.password === bodyObj.password) 写法无法通过eslint语法校验的问题
-    const nameMatched = user.username === bodyObj.username;
-    const passwordMatched = user.password === bodyObj.password;
-    return nameMatched && passwordMatched;
-  });
+  const { username, password } = parse(body);
+  const loginUser = userDB.find(user => user.username === username && user.password === password);
   if (loginUser) {
     return {
       access_token: '@guid',

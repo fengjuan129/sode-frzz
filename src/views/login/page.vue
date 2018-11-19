@@ -32,6 +32,7 @@
 
 <script>
 import { setToken } from '@/libs/token';
+import { login } from '@/api/login';
 
 export default {
   data() {
@@ -53,8 +54,11 @@ export default {
   methods: {
     // TODO: 调用登录服务实现登录
     submit() {
-      setToken(Date.now());
-      this.$router.replace('/');
+      const { username, password } = this.formLogin;
+      login(username, password).then(() => {
+        setToken(Date.now());
+        this.$router.replace('/');
+      });
     },
   },
 };
