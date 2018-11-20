@@ -25,6 +25,7 @@
               lazy
               :load='loadTreeChild'
               highlight-current
+              v-if='organizationType.length'
               :props="tree.defaultProps"
               @node-click='treeNodeClick'
               node-key='id'
@@ -172,7 +173,7 @@
     <!-- 密码强度规则编辑页面 END -->
 
     <SelectDept :multiple='false'
-      :isOpen='dialogMsg.selectDept'
+      v-if='dialogMsg.selectDept'
       :rootCode='activeTab'
       @close='dialogMsg.selectDept = false'
       @select="moveUser2Dept"/>
@@ -182,7 +183,6 @@
 <script>
 import UserApi from '@/api/user'; // 用户管理接口
 import DeptApi from '@/api/dept'; // 组织机构管理接口
-import { setInterval, clearInterval } from 'timers';
 import { data2treeArr } from '@/libs/utils';
 import SelectDept from '@/components/SelectDept';
 import LockRuleConfig from './lockRuleConfig.vue';
@@ -262,6 +262,7 @@ export default {
         this.organizationType = res;
         this.activeTab = res[0].code;
         this.activeTabName = res[0].typename;
+
         this.getTree();
       });
     },
@@ -294,16 +295,11 @@ export default {
      * 加载第一级tree节点
      */
     lazyTreeInit(resolve) {
-      const timer = setInterval(() => {
-        if (this.activeTab) {
-          clearInterval(timer);
-          DeptApi.getLazyTree(this.activeTab, -1).then(res => {
-            resolve(res);
-            this.$refs.userLazyTree.setCurrentKey(res[0].id);
-            this.organizationId = res[0].code;
-          });
-        }
-      }, 80);
+      DeptApi.getLazyTree(this.activeTab, -1).then(res => {
+        resolve(res);
+        this.$refs.userLazyTree.setCurrentKey(res[0].id);
+        this.organizationId = res[0].code;
+      });
     },
     /**
      * 加载子节点

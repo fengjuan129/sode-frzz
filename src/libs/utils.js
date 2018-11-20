@@ -50,10 +50,10 @@ export function data2treeArr(listArr = [], key = 'code', parentKey = 'parentCode
   for (let i = 0, len = listArr.length; i < len; i += 1) {
     if (listArr[i].isAdd === undefined) {
       const item = listArr[i];
-      const parent = treeMap[item[parentKey]];
+      const parentObj = treeMap[item[parentKey]];
 
-      if (parent) {
-        (parent.children || (parent.children = [])).push(item);
+      if (parentObj) {
+        (parentObj.children || (parentObj.children = [])).push(item);
         item.isAdd = true; // 阻止重复添加
       } else {
         returnTree.push(item);

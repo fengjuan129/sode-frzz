@@ -43,7 +43,8 @@ const router = new Router({
         {
           // 用户管理
           path: '/org/user',
-          component: asyncLoader(() => import('../views/org/user')),
+          name: 'orgUser',
+          component: asyncLoader(() => import(/* webpackChunkName: "user" */ '../views/org/user')),
           meta: {
             type: 'private',
           },
@@ -51,15 +52,19 @@ const router = new Router({
         // 组织机构管理
         {
           path: '/org/dept',
-          component: asyncLoader(() => import('../views/org/dept')),
+          name: 'orgDept',
+          component: asyncLoader(() => import(/* webpackChunkName: "dept" */ '../views/org/dept')),
           meta: {
             type: 'private',
           },
         },
         // 角色管理
         {
-          path: '/core/role',
-          component: asyncLoader(() => import('../views/core/role/RoleManage.vue')),
+          path: '/operation/role',
+          name: 'operationRole',
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "role" */ '../views/operation/role')
+          ),
           meta: {
             type: 'private',
           },
@@ -68,7 +73,10 @@ const router = new Router({
         // 菜单管理
         {
           path: '/operation/res/menu',
-          component: asyncLoader(() => import('../views/auth/res/menuManage.vue')),
+          name: 'operationResMenu',
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "menuManage" */ '../views/auth/res/menuManage.vue')
+          ),
           meta: {
             type: 'private',
           },
@@ -76,7 +84,10 @@ const router = new Router({
         // 服务管理
         {
           path: '/operation/res/api',
-          component: asyncLoader(() => import('../views/auth/res/apiManage.vue')),
+          name: 'operationResApi',
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "apiManage" */ '../views/auth/res/apiManage.vue')
+          ),
           meta: {
             type: 'private',
           },
