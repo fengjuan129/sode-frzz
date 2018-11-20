@@ -71,6 +71,7 @@
 
 <script>
 export default {
+  name: 'RoleEdit',
   data() {
     return {
       isOpen: true,

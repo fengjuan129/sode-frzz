@@ -10,6 +10,15 @@ export function getPageQuery() {
 }
 
 /**
+ * 获取给定url中的指定参数
+ * @param {string} url url路径
+ * @param {string} param 要获取的参数
+ */
+export function getUrlParam(url, param) {
+  return parse(url.split('?')[1])[param];
+}
+
+/**
  * 将查询参数拼装到url中
  * @param {string} path 路径
  * @param {object} query 查询参数对象

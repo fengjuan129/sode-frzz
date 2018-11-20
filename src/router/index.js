@@ -58,8 +58,8 @@ const router = new Router({
         },
         // 角色管理
         {
-          path: '/operation/role',
-          component: asyncLoader(() => import('../views/operation/role')),
+          path: '/core/role',
+          component: asyncLoader(() => import('../views/core/role/RoleManage.vue')),
           meta: {
             type: 'private',
           },

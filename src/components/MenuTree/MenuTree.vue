@@ -26,7 +26,7 @@ export default {
           children: [
             {
               label: '角色管理',
-              routerLink: '/operation/role',
+              routerLink: '/core/role',
             },
             {
               label: '菜单管理',
