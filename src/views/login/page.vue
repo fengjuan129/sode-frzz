@@ -31,96 +31,40 @@
 </template>
 
 <script>
-/* eslint-disable */
-require('particles.js');
-import config from './config/default';
-// import { mapActions } from 'vuex';
-import { setToken } from '@/libs/token.js';
+import { setToken } from '@/libs/token';
+import { login } from '@/api/login';
+
 export default {
   data() {
     return {
-      // 快速选择用户
-      dialogVisible: false,
-      users: [
-        {
-          name: '管理员',
-          username: 'admin',
-          password: 'admin',
-        },
-        {
-          name: '编辑',
-          username: 'editor',
-          password: 'editor',
-        },
-        {
-          name: '用户1',
-          username: 'user1',
-          password: 'user1',
-        },
-      ],
       // 表单
       formLogin: {
-        username: 'admin',
-        password: 'admin',
-        code: 'v9am',
+        // username: 'admin',
+        // password: 'admin',
+        username: '测试加密',
+        password: '123456',
       },
       // 校验
       rules: {
         username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-        code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
       },
     };
   },
-  mounted() {
-    // 初始化例子插件
-    particlesJS('login', config);
-  },
-  beforeDestroy() {
-    // 销毁 particlesJS
-    // thanks https://github.com/d2-projects/d2-admin/issues/65
-    // ref https://github.com/VincentGarreau/particles.js/issues/63
-    if (pJSDom && pJSDom.length > 0) {
-      pJSDom[0].pJS.fn.vendors.destroypJS();
-      pJSDom = [];
-    }
-  },
   methods: {
-    // ...mapActions('d2admin/account', ['login']),
-    // /**
-    //  * @description 接收选择一个用户快速登录的事件
-    //  * @param {Object} user 用户信息
-    //  */
-    // handleUserBtnClick(user) {
-    //   this.formLogin.username = user.username;
-    //   this.formLogin.password = user.password;
-    //   this.submit();
-    // },
-    // /**
-    //  * @description 提交表单
-    //  */
-    // // 提交登录信息
-    // submit() {
-    //   this.$refs.loginForm.validate(valid => {
-    //     if (valid) {
-    //       // 登录
-    //       // 注意 这里的演示没有传验证码
-    //       // 具体需要传递的数据请自行修改代码
-    //       this.login({
-    //         vm: this,
-    //         username: this.formLogin.username,
-    //         password: this.formLogin.password,
-    //       });
-    //     } else {
-    //       // 登录表单校验失败
-    //       this.$message.error('表单校验失败');
-    //     }
-    //   });
-    // },
     // TODO: 调用登录服务实现登录
     submit() {
-      setToken(Date.now());
-      this.$router.replace('/');
+      this.$refs.loginForm.validate(valid => {
+        if (valid) {
+          const { username, password } = this.formLogin;
+          login(username, password)
+            .then(tokenData => {
+              setToken(tokenData);
+              this.$router.replace('/');
+            })
+            .catch(this.$errorHandler);
+        }
+      });
     },
   },
 };

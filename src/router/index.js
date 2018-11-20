@@ -33,10 +33,12 @@ const router = new Router({
       },
       children: [
         {
-          path: 'hello',
-          component: asyncLoader(() =>
-            import(/* webpackChunkName: "hello" */ '../components/HelloWorld')
-          ),
+          // vuex模块化示例
+          path: '/demo',
+          component: asyncLoader(() => import('../views/demo')),
+          meta: {
+            type: 'private',
+          },
         },
         {
           // 用户管理
@@ -92,18 +94,51 @@ const router = new Router({
         },
       ],
     },
-
-    // 配置404路由
+    // 配置发生异常时的路由
+    {
+      path: '/exception/403',
+      name: '403',
+      component: Exception,
+      props: {
+        // 为路由组件传参
+        type: 403,
+      },
+      meta: {
+        type: 'protected', // 配置为需登录才能访问
+      },
+    },
+    {
+      path: '/exception/404',
+      name: '404',
+      component: Exception,
+      props: {
+        type: 404,
+      },
+      meta: {
+        type: 'protected',
+      },
+    },
+    {
+      path: '/exception/500',
+      name: '500',
+      component: Exception,
+      props: {
+        type: 500,
+      },
+      meta: {
+        type: 'protected',
+      },
+    },
+    // 未匹配到任何路由时，默认返回404
     // !此路由只能配置在路由表最后，顺序不可改变
     {
       path: '*',
       component: Exception,
       props: {
-        // 为路由组件传参
         type: 404,
       },
       meta: {
-        type: 'protected', // 404页面配置为需登录才能访问
+        type: 'protected',
       },
     },
   ],

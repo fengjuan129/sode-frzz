@@ -24,10 +24,10 @@ export default {
         {
           label: '运维管理',
           children: [
-            // {
-            //   label: '角色管理',
-            //   routerLink: '/operation/role',
-            // },
+            {
+              label: '角色管理',
+              routerLink: '/core/role',
+            },
             {
               label: '菜单管理',
               routerLink: '/operation/res/menu',
@@ -41,6 +41,10 @@ export default {
             //   routerLink: '/operation/res/custom',
             // },
           ],
+        },
+        {
+          label: 'vuex模块化示例',
+          routerLink: '/demo',
         },
       ],
       defaultProps: {

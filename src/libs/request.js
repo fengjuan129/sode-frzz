@@ -2,15 +2,12 @@
 
 import axios from 'axios';
 // import hash from 'hash.js';
-import config from '../config';
 import { relogin } from '../api/login';
 import { getToken, setToken, clearToken } from './token';
 
-const { mock } = config;
-
 // 如果启用了远程mock功能，设置url基础路径为远程mock地址
-if (mock.enabled && mock.mode === 'remote') {
-  axios.defaults.baseURL = `${mock.url}/api`;
+if (process.env.VUE_APP_MOCK_ENABLED && process.env.VUE_APP_MOCK_MODE === 'remote') {
+  axios.defaults.baseURL = `${process.env.VUE_APP_MOCK_URL}/api`;
 } else {
   axios.defaults.baseURL = '/api';
 }

@@ -54,7 +54,7 @@
 
 <script>
 import DeptApi from '@/api/dept';
-import { data2TreeArr } from '@/libs/utils';
+import { data2treeArr } from '@/libs/utils';
 
 export default {
   /**

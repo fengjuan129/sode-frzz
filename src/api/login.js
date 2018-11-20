@@ -11,7 +11,7 @@ import config from '../config';
  * @returns {Promise}
  */
 export function login(username, password) {
-  return axios('/api/v1/sso/authentication/token', {
+  return axios('/v1/sso/authentication/token', {
     method: 'post',
     data: Qs.stringify({
       username,
@@ -19,7 +19,6 @@ export function login(username, password) {
     }),
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
-      Authorization: `Basic ${config.client_id}`,
     },
   }).then(response => response.data);
 }
@@ -31,7 +30,7 @@ export function login(username, password) {
 export function relogin() {
   // eslint-disable-next-line camelcase
   const { refresh_token } = getToken();
-  return axios('/api/v1/sso/oauth/token', {
+  return axios('/v1/sso/oauth/token', {
     method: 'post',
     data: Qs.stringify({
       grant_type: 'refresh_token',
@@ -45,7 +44,7 @@ export function relogin() {
 }
 
 export function test() {
-  return request('/api/v1/drip-client1/user', {
+  return request('/v1/drip-client1/user', {
     method: 'post',
   });
 }
