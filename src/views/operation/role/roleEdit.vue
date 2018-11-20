@@ -73,7 +73,7 @@
 export default {
   data() {
     return {
-      isOpen: true,
+      isOpen: false,
       id: 1,
       // TODO 启用状态为数据字典
       enableStatus: [],

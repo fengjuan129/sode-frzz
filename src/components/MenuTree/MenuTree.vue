@@ -24,10 +24,10 @@ export default {
         {
           label: '运维管理',
           children: [
-            {
-              label: '角色管理',
-              routerLink: '/operation/role',
-            },
+            // {
+            //   label: '角色管理',
+            //   routerLink: '/operation/role',
+            // },
             {
               label: '菜单管理',
               routerLink: '/operation/res/menu',
@@ -36,10 +36,10 @@ export default {
               label: '服务管理',
               routerLink: '/operation/res/api',
             },
-            {
-              label: '自定义资源管理',
-              routerLink: '/operation/res/custom',
-            },
+            // {
+            //   label: '自定义资源管理',
+            //   routerLink: '/operation/res/custom',
+            // },
           ],
         },
       ],

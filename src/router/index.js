@@ -42,7 +42,7 @@ const router = new Router({
           // 用户管理
           path: '/org/user',
           name: 'orgUser',
-          component: asyncLoader(() => import('../views/org/user')),
+          component: asyncLoader(() => import(/* webpackChunkName: "user" */ '../views/org/user')),
           meta: {
             type: 'private',
           },
@@ -51,7 +51,7 @@ const router = new Router({
         {
           path: '/org/dept',
           name: 'orgDept',
-          component: asyncLoader(() => import('../views/org/dept')),
+          component: asyncLoader(() => import(/* webpackChunkName: "dept" */ '../views/org/dept')),
           meta: {
             type: 'private',
           },
@@ -60,7 +60,9 @@ const router = new Router({
         {
           path: '/operation/role',
           name: 'operationRole',
-          component: asyncLoader(() => import('../views/operation/role')),
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "role" */ '../views/operation/role')
+          ),
           meta: {
             type: 'private',
           },
@@ -70,7 +72,9 @@ const router = new Router({
         {
           path: '/operation/res/menu',
           name: 'operationResMenu',
-          component: asyncLoader(() => import('../views/auth/res/menuManage.vue')),
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "menuManage" */ '../views/auth/res/menuManage.vue')
+          ),
           meta: {
             type: 'private',
           },
@@ -79,7 +83,9 @@ const router = new Router({
         {
           path: '/operation/res/api',
           name: 'operationResApi',
-          component: asyncLoader(() => import('../views/auth/res/apiManage.vue')),
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "apiManage" */ '../views/auth/res/apiManage.vue')
+          ),
           meta: {
             type: 'private',
           },

@@ -24,7 +24,8 @@
           node-key='id'
           :props="tree.defaultProps"
           highlight-current
-          ref='lazyTree'>
+          ref='lazyTree'
+          v-if='tabData.length > 0'>
         </el-tree>
 
         <!-- 全加载 -->
@@ -45,7 +46,7 @@
 
       <span slot='footer' class='dialog-footer'>
         <el-button @click='close'>取 消</el-button>
-        <el-button type='primary' @click='submitUser("userEditForm")'>确 定</el-button>
+        <el-button type='primary' @click='submitUser("userEditForm")' :disabled="tabData.length > 0">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -60,9 +61,21 @@ export default {
    * multiple: 是否允许多选。多选时显示checkbox
    * rootCode: 根节点的部门编码
    */
-  props: ['multiple', 'rootCode', 'isOpen'],
+  props: {
+    multiple: {
+      type: Boolean,
+      default: false,
+    },
+    rootCode: {
+      type: String,
+    },
+    selectedCodes: {
+      type: Array,
+    },
+  },
   data() {
     return {
+      isOpen: true,
       keyword: '',
       isLazy: true,
       tree: {
@@ -85,10 +98,18 @@ export default {
      * 加载组织机构
      */
     loadOrganization() {
-      DeptApi.getDeptType().then(res => {
-        this.tabData = res;
-        this.activeTab = this.rootCode || res[0].code;
-      });
+      DeptApi.getDeptType()
+        .then(res => {
+          this.tabData = res;
+          this.activeTab = this.rootCode || res[0].code;
+
+          if (this.selectedCodes && this.selectedCodes.length) {
+            this.isLazy = false;
+            // TODO 暂未选中 传入目标ID
+            this.searchTree();
+          }
+        })
+        .catch(this.$errorHandle);
     },
     /**
      * 懒加载第一级
@@ -109,9 +130,12 @@ export default {
     /**
      * 搜索全加载
      */
-    searchTree() {
+    searchTree(callback) {
       DeptApi.getTreeByKeywork(this.keyword, this.activeTab).then(res => {
         this.tree.organizationTree = data2TreeArr(res);
+        if (typeof callback === 'function') {
+          callback();
+        }
       });
     },
     /**
@@ -129,6 +153,7 @@ export default {
      * 懒加载
      */
     loadTreeChild(node, resolve) {
+      // console.log(node);
       if (node.level === 0) {
         this.loadLazyTreeRoot(resolve);
       }
@@ -177,12 +202,6 @@ export default {
         this.$refs.lazyTree.setCurrentNode([]);
         this.$refs.searchTree.setCurrentNode([]);
       }
-    },
-  },
-
-  watch: {
-    rootCode() {
-      this.loadLazyTreeRoot();
     },
   },
 };

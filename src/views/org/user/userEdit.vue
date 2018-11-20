@@ -1,5 +1,4 @@
 <!-- 账号编辑页面 -->
-import { valid } from 'semver';
 <template>
   <div>
     <el-dialog
@@ -83,7 +82,8 @@ import { valid } from 'semver';
 
       <SelectDept :isOpen='dialogState'
         @close='dialogState = false'
-        @select="setDept"/>
+        @select="setDept"
+        v-if='dialogState'/>
   </div>
 </template>
 
@@ -92,9 +92,10 @@ import UserApi from '@/api/user';
 import SelectDept from '@/components/SelectDept';
 
 export default {
-  props: ['id', 'isOpen', 'rootName'],
+  props: ['id', 'rootName'],
   data() {
     return {
+      isOpen: true,
       dialogState: false,
       userEditForm: {
         isEnabled: true,

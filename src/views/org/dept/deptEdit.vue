@@ -100,6 +100,7 @@ export default {
   },
 
   mounted() {
+    // 判断新增、修改 有 ID 修改，无 ID 新增
     if (!this.id && this.parentCode && this.parentName) {
       this.$set(this.deptEditForm, 'parentCode', this.parentCode);
       this.$set(this.deptEditForm, 'parentName', this.parentName);

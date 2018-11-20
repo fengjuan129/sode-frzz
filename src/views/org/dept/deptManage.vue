@@ -1,6 +1,6 @@
-<!-- 组织机构管理 -->
 <template>
   <div>
+    <!-- 组织机构管理 -->
     <el-tabs type="border-card" v-model="tabs.tabActiveCode" id='t-tabs' :before-leave='stopTabChange' @tab-click='tabChange'>
       <el-tab-pane v-for='item in tabs.tabData' :key='item.id' :name='item.code' :data-info='item'>
         <span slot='label'>
@@ -29,7 +29,7 @@
         @row-click='sendRowData'
         :row-style="showTr">
         <el-table-column v-for="(column, index) in columns" :key="column.dataIndex" :label="column.text" :align="column.align" :width='column.width'>
-          <template scope="scope">
+          <template slot-scope="scope">
             <span v-if="spaceIconShow(index)" v-for="(space, levelIndex) in scope.row.level" class="ms-tree-space" :key='levelIndex'></span>
             <span class="button is-outlined is-primary is-small" v-if="toggleIconShow(index,scope.row)">
               <i v-if="!scope.row.expanded" class="el-icon-arrow-right t-icon" aria-hidden="true"></i>
@@ -46,7 +46,7 @@
         </el-table-column>
 
         <el-table-column label="操作" align="center">
-          <template scope="scope">
+          <template slot-scope="scope">
             <el-button size='mini' @click.stop='deptEdit(scope.row,scope.$index)'>修改</el-button>
             <el-button size='mini' @click.stop="deleteDept(scope.row,scope.$index)">删除</el-button>
             <el-button size='mini'
@@ -67,7 +67,7 @@
       @save='editDeptType'
       v-if='dialogStatus.deptTypeEdit'/>
     <!-- 组织机构类型 END -->
-    <!-- C测试 -->
+
     <DeptEdit :isOpen='dialogStatus.deptEdit'
       :id='upDateDeptMsg.id'
       :parentCode='upDateDeptMsg.code'
@@ -137,21 +137,18 @@ export default {
   },
 
   components: {
-    // TreeGrid,
     DeptTypeEdit,
     DeptEdit,
   },
 
   computed: {
     treeData() {
-      //
       return data2treeGridArr(this.deptList, 'code', 'parentCode', false);
     },
   },
 
   mounted() {
     this.loadDeptType();
-    console.log(this.treeData);
   },
 
   methods: {
@@ -286,10 +283,12 @@ export default {
       curRow.isLoaded = true;
     },
     /**
-     * 更新组织机构
+     * 修改组织机构
      */
     deptEdit(row) {
       this.upDateDeptMsg = Object.assign({}, row);
+      // 更新  子组件接收参数 parentName
+      // this.updateDeptMsg.name = row.parent.name;
       this.dialogStatus.deptEdit = true;
     },
     /**
@@ -366,8 +365,8 @@ export default {
       this.$confirm(`是否${state ? '启用' : '禁用'}组织机构?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-      })
-        .then(() => {
+      }).then(
+        () => {
           DeptApi.setDeptDisable(row.id, state ? 'Y' : 'N').then(() => {
             if (state) {
               this.setParentsState(row, true);
@@ -381,8 +380,9 @@ export default {
               type: 'success',
             });
           });
-        })
-        .catch(() => {});
+        },
+        () => {}
+      );
     },
 
     setParentsState(row, state) {

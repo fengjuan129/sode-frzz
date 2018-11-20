@@ -1,7 +1,6 @@
 <!-- 菜单编辑页 -->
 <template>
   <el-dialog title='菜单编辑' :visible.sync='isOpen' width="30%" :before-close="close">
-
       <el-form
         :model="menuEditForm"
         ref="menuEditForm"
@@ -17,18 +16,20 @@
             </el-form-item>
           </el-col>
 
-          <el-col :span='12'>
+          <!-- <el-col :span='12'>
             <el-form-item label="菜单编码" prop='code'>
               <el-input autocomplete='off' v-model="menuEditForm.code"></el-input>
             </el-form-item>
-          </el-col>
+          </el-col> -->
 
           <el-col :span='12'>
             <el-form-item label="菜单类型" prop="menuType">
               <el-select v-model="menuEditForm.menuType">
-                <el-option label="xxx" value='1'></el-option>
-                <el-option label="xx2" value='2'></el-option>
-                <el-option label="xx3" value='3'></el-option>
+                <el-option v-for='item in menuType'
+                  :key='item.id'
+                  :label='item.name'
+                  :value='item.value'>
+                </el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -36,9 +37,11 @@
           <el-col :span='12'>
             <el-form-item label="授权方式" prop='authType'>
               <el-select v-model="menuEditForm.authType">
-                <el-option label="xxx" value='1'></el-option>
-                <el-option label="xx2" value='2'></el-option>
-                <el-option label="xx3" value='3'></el-option>
+                <el-option v-for='item in authType'
+                  :key='item.id'
+                  :label='item.name'
+                  :value='item.value'>
+                </el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -46,7 +49,7 @@
           <el-col :span='12'>
             <!-- TODO 后期实现为选择字体图标 没有字段 -->
             <el-form-item label="菜单图标">
-              <el-input autocomplete='off' v-model="menuEditForm.icon" placeholder="请输入图标类名"></el-input>
+              <el-input autocomplete='off' v-model="menuEditForm.imagePath" placeholder="请输入图标类名"></el-input>
             </el-form-item>
           </el-col>
 
@@ -59,8 +62,11 @@
           <el-col :span='12'>
             <el-form-item label="是否启用">
               <el-select v-model="menuEditForm.isEnable">
-                <el-option label="xx" :value='true'></el-option>
-                <el-option label="x1" :value='false'></el-option>
+                <el-option v-for='item in isEnable'
+                  :key='item.id'
+                  :label="item.name"
+                  :value='item.value'>
+                </el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -68,15 +74,18 @@
           <el-col :span='12'>
             <el-form-item label="是否可见">
               <el-select v-model="menuEditForm.isVisible">
-                <el-option label="xx" value='1'></el-option>
-                <el-option label="x1" value='2'></el-option>
+                <el-option v-for='item in isVisible'
+                  :key='item.id'
+                  :label="item.name"
+                  :value='item.value'>
+                </el-option>
               </el-select>
             </el-form-item>
           </el-col>
 
-          <el-col :span='24'>
+          <el-col :span='12'>
             <el-form-item label="菜单路径">
-              <el-input autocomplete='off' v-model="menuEditForm.rul"></el-input>
+              <el-input autocomplete='off' v-model="menuEditForm.url"></el-input>
             </el-form-item>
           </el-col>
 
@@ -100,35 +109,56 @@
 </template>
 
 <script>
+import Dic from '@/api/mockDictionary'; // 数据字典对象
+
 export default {
-  props: ['parentMenu', 'resType', 'menu'],
+  props: ['parentMenu', 'menu'],
   data() {
     return {
       isOpen: true,
       menuEditForm: {
-        isEnable: true,
+        isEnable: true, // 默认为启用
+        isVisible: true, // 默认可见
       },
+      // 表单验证规则
       menuEditRules: {
         name: [{ required: true, message: '请填写菜单名称', trigger: 'blur' }],
-        code: [{ required: true, message: '请填写菜单编码', trigger: 'blur' }],
+        // code: [{ required: true, message: '请填写菜单编码', trigger: 'blur' }],
         menuType: [{ required: true, message: '请选择菜单类型', trigger: 'blur' }],
         authType: [{ required: true, message: '请选择授权类型', trigger: 'blur' }],
       },
+      isEnable: Dic.isEnable, // TODO 是否启用为数据字典
+      isVisible: Dic.isVisible, // TODO 是否可见为数据字典
+      authType: Dic.authType, // TODO 授权方式为数据字典
+      menuType: Dic.menuType, // TODO 菜单类型为数据字典
     };
   },
 
-  components: {},
-
-  computed: {},
-
-  mounted() {},
+  mounted() {
+    this.initForm();
+  },
 
   methods: {
+    initForm() {
+      // parentMenu 没有为修改，有值为新增
+      if (this.parentMenu !== undefined) {
+        this.menuEditForm.parentId = this.parentMenu;
+      } else {
+        const keys = Object.keys(this.menu);
+        const cloneMenu = {};
+
+        keys.forEach(item => {
+          cloneMenu[item] = this.menu[item];
+        });
+
+        this.$set(this, 'menuEditForm', cloneMenu);
+      }
+    },
     save() {
       this.$refs.menuEditForm.validate(valid => {
         if (!valid) return;
-        console.log(1);
-        this.$emit('save');
+
+        this.$emit('save', this.menuEditForm);
         this.close();
       });
     },
