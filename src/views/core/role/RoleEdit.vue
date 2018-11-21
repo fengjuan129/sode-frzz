@@ -1,7 +1,7 @@
 <!-- 角色编辑页面 -->
 <template>
   <!-- 弹出窗口 -->
-  <el-dialog title='角色编辑' :visible='visible' :before-close="close" width="30%">
+  <el-dialog title='角色编辑' :visible='visible' :before-close="close" width="600px">
 
     <!-- 角色表单 -->
     <el-form :model="formRole" :rules="rules" ref="formRole" size="mini" label-width="90px">
@@ -12,7 +12,7 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="角色编码" prop="roleCode">
-          <el-input v-model="formRole.roleCode"></el-input>
+          <el-input v-model="formRole.roleCode" :disabled="mode === 'edit'"></el-input>
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -66,6 +66,7 @@ export default {
   },
   data() {
     return {
+      mode: 'create', // 页面打开模式
       // 角色表单
       formRole: {
         deptCode: '',
@@ -103,6 +104,7 @@ export default {
     // 如果传入了角色对象，表明为修改模式，此时将表单数据替换为传入对象的拷贝
     // ! 注意一定要拷贝传入的对象，否则子组件对对象的修改会影响父组件，除非设计效果就是这样
     if (this.role) {
+      this.mode = 'edit';
       this.formRole = { ...this.role };
     }
   },

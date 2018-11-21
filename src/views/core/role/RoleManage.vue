@@ -9,12 +9,12 @@
       <!-- 按钮栏（公共角色不能编辑，此时不显示按钮栏） -->
       <div v-if="activeTabKey !== 'public'" class="btn-container">
         <el-button size="mini" @click="createRole">新增</el-button>
-        <el-dropdown trigger="click" style="margin: 0 10px;">
+        <el-dropdown v-show="showBatchBtn" @command="handleBatchCommand" trigger="click" style="margin: 0 10px;">
           <el-button size="mini">批量操作<i class="el-icon-arrow-down el-icon--right"></i></el-button>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>删除</el-dropdown-item>
-            <el-dropdown-item>启用</el-dropdown-item>
-            <el-dropdown-item>禁用</el-dropdown-item>
+            <el-dropdown-item command="deleteRoles">删除</el-dropdown-item>
+            <el-dropdown-item command="enableRoles">启用</el-dropdown-item>
+            <el-dropdown-item command="disableRoles">禁用</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -104,6 +104,7 @@ export default {
       formSearch: { name: '', isEnable: '' }, // 查询条件
       isEnableCodeTable: [{ text: '启用', value: true }, { text: '禁用', value: false }], // TODO: 是否启用码表
       roles: [], // 角色数据
+      selection: [], // 勾选的角色数据
       // 编辑窗口相关配置及数据
       winEditRole: {
         visible: false, // 编辑窗口是否可见
@@ -120,6 +121,10 @@ export default {
       }
       // 否则标签页固定显示为公共角色和私有角色（此时为系统管理员使用）
       return [{ name: '公共角色', key: 'public' }, { name: '私有角色', key: 'private' }];
+    },
+    // 是否显示批量操作按钮
+    showBatchBtn() {
+      return this.selection.length > 0;
     },
   },
   created() {
@@ -279,7 +284,54 @@ export default {
      * @param {array} selection 选中角色列表
      */
     onSelectionChange(selection) {
-      console.log('onSelectionChange', selection);
+      this.selection = selection;
+    },
+    /**
+     * 批量操作
+     */
+    handleBatchCommand(command) {
+      if (command === 'deleteRoles') {
+        // 删除角色
+        this.$confirm(`确定删除【${this.selection.map(role => role.name)}】？`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        })
+          .then(() => roleApi.deleteRoles(this.selection.map(role => role.id)))
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '删除成功',
+            });
+            // 重新加载角色列表
+            this.searchRoles();
+          })
+          .catch(() => {});
+      } else if (command === 'enableRoles') {
+        // 启用角色
+        roleApi.setRolesEnable(this.selection.map(role => role.id), true).then(() => {
+          this.$message({
+            type: 'success',
+            message: '启用成功',
+          });
+          // 更新角色状态
+          this.selection.forEach(role => {
+            role.isEnable = true;
+          });
+        });
+      } else if (command === 'disableRoles') {
+        // 禁用角色
+        roleApi.setRolesEnable(this.selection.map(role => role.id), false).then(() => {
+          this.$message({
+            type: 'success',
+            message: '禁用成功',
+          });
+          // 更新角色状态
+          this.selection.forEach(role => {
+            role.isEnable = false;
+          });
+        });
+      }
     },
   },
 };

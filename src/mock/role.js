@@ -132,3 +132,9 @@ Mock.mock(pathToRegexp('/api/v1/core/base/role/:id/state'), 'put', () => true);
 
 // 删除角色
 Mock.mock(pathToRegexp('/api/v1/core/base/role/:id'), 'delete', () => true);
+
+// 批量启用/禁用角色
+Mock.mock('/api/v1/core/base/roles/state', 'put', () => true);
+
+// 批量删除角色
+Mock.mock('/api/v1/core/base/roles', 'delete', () => true);

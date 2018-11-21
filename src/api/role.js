@@ -48,11 +48,37 @@ export function setRoleEnable(roleId, isEnable) {
 }
 
 /**
+ * 批量启用/禁用角色
+ * @param {array} roleIds 要改变状态的角色id数组
+ * @param {boolean} isEnable 是否启用
+ */
+export function setRolesEnable(roleIds, isEnable) {
+  return request('/v1/core/base/roles/state', {
+    method: 'put',
+    data: {
+      roleIds,
+      isEnable,
+    },
+  });
+}
+
+/**
  * 删除角色
  * @param {string} roleId 角色id
  */
 export function deleteRole(roleId) {
   return request(`/v1/core/base/role/${roleId}`, {
     method: 'delete',
+  });
+}
+
+/**
+ * 批量删除角色
+ * @param {array} roleIds 待删除角色id数组
+ */
+export function deleteRoles(roleIds) {
+  return request('/v1/core/base/roles', {
+    method: 'delete',
+    data: roleIds,
   });
 }
