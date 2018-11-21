@@ -1,7 +1,5 @@
 // 模拟账号权限相关接口
 import Mock from 'mockjs';
-// import { getUrlParam } from '@/libs/utils';
-import pathToRegexp from 'path-to-regexp';
 
 const system = [
   {
@@ -52,13 +50,13 @@ const system = [
 Mock.mock(new RegExp('^/api/v1/core/base/apps'), 'get', () => system);
 
 // 根据系统ID 查询系统菜单
-Mock.mock(pathToRegexp('/api/v1/auth/app/:id/menus'), 'get', () => [6]);
+Mock.mock('/api/v1/auth/app/:id/menus', 'get', () => [6]);
 
 // 保存系统菜单
-Mock.mock(pathToRegexp('/api/v1/auth/app/:id/menus'), 'put', () => {});
+Mock.mock('/api/v1/auth/app/:id/menus', 'put', () => {});
 
 // 根据系统ID 查询系统服务
-Mock.mock(pathToRegexp('/api/v1/auth/app/:id/apis'), 'get', () => [1]);
+Mock.mock('/api/v1/auth/app/:id/apis', 'get', () => [1]);
 
 // 保存系统服务
-Mock.mock(pathToRegexp('/api/v1/auth/app/:id/apis'), 'put', () => {});
+Mock.mock('/api/v1/auth/app/:id/apis', 'put', () => {});
