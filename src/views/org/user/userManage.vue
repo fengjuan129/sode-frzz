@@ -185,10 +185,10 @@ import UserApi from '@/api/user'; // 用户管理接口
 import DeptApi from '@/api/dept'; // 组织机构管理接口
 import { data2treeArr } from '@/libs/utils';
 import SelectDept from '@/components/SelectDept';
-import LockRuleConfig from './lockRuleConfig.vue';
-import UserEdit from './userEdit.vue';
-import UserView from './userView.vue';
-import PasswordRuleConfig from './passwordRuleConfig.vue';
+import LockRuleConfig from './LockRuleConfig.vue';
+import UserEdit from './UserEdit.vue';
+import UserView from './UserView.vue';
+import PasswordRuleConfig from './PasswordRuleConfig.vue';
 
 export default {
   name: 'UserManage',

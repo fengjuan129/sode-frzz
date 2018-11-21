@@ -1,3 +1,3 @@
-import UserManage from './userManage.vue';
+import UserManage from './UserManage.vue';
 
 export default UserManage;

@@ -13,21 +13,28 @@
         </el-form-item>
 
         <el-form-item>
-          <el-button type='primary' size='mini'>查询</el-button>
+          <el-button type='primary' size='mini' @click='loadApi'>查询</el-button>
         </el-form-item>
 
         <el-form-item>
-          <el-button size='mini'>重置</el-button>
+          <el-button size='mini' @click="loadApi(true)">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
     <!-- 搜索框 END -->
+    <zk-table
+      v-loading='loading'
+      :columns='columns'
+      :data='treeData'
+      :expandType='false'
+      border
+      :show-row-hover='true'
+      :isFold='false'
+      :selection-type='true'
 
-    <el-table border>
-      <el-table-column label="服务名称"></el-table-column>
-      <el-table-column label="服务编码"></el-table-column>
-      <el-table-column label="服务路径"></el-table-column>
-    </el-table>
+      ref='apiTree'>
+    </zk-table>
+    <!-- tree grid end -->
     <span slot="footer" class='dialog-footer'>
         <el-button @click='close'>取 消</el-button>
         <el-button type='primary' @click='sendSelect'>确 定</el-button>
@@ -36,8 +43,15 @@
 </template>
 
 <script>
+import ZkTable from 'vue-table-with-tree-grid';
+import * as Utils from '@/libs/utils';
+import * as resApi from '@/api/resources';
+
 export default {
   name: 'SelectApi',
+  components: {
+    ZkTable,
+  },
   props: {
     title: {
       type: String,
@@ -54,17 +68,54 @@ export default {
   data() {
     return {
       isVisible: true,
+      loading: false,
+      columns: [
+        {
+          label: '服务名称',
+          prop: 'name',
+        },
+        {
+          label: '服务编码',
+          prop: 'code',
+          width: 200,
+        },
+        {
+          label: '服务路径',
+          prop: 'url',
+        },
+      ],
+      apiList: [],
       formApi: {
         name: '',
         code: '',
       },
     };
   },
-
-  created() {},
+  computed: {
+    treeData() {
+      return Utils.data2treeArr([...this.apiList], 'id', 'pid');
+    },
+  },
+  created() {
+    this.loadApi();
+  },
 
   methods: {
-    sendSelect() {},
+    // 获取服务列表
+    loadApi(isClear) {
+      if (isClear) {
+        this.formApi = {};
+      }
+      this.loading = true;
+      resApi.getApiListByOption(this.formApi).then(res => {
+        this.loading = false;
+        this.apiList = res;
+      });
+    },
+    sendSelect() {
+      this.$emit('select', this.$refs.apiTree.getCheckedProp('id'));
+      this.close();
+    },
     close() {
       this.$emit('close');
     },

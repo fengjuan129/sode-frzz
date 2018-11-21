@@ -1,3 +1,3 @@
-import DeptManage from './deptManage.vue';
+import DeptManage from './DeptManage.vue';
 
 export default DeptManage;

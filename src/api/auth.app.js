@@ -21,9 +21,6 @@ export function getSystemList(name) {
 export function getAuthMenusBySystemId(id) {
   return request(`/v1/auth/app/${id}/menus`, {
     method: 'get',
-    params: {
-      id,
-    },
   });
 }
 
@@ -45,9 +42,6 @@ export function saveMenuAuth(data) {
 export function getSystemAuth(id) {
   return request(`/v1/auth/app/${id}/apis`, {
     method: 'get',
-    params: {
-      id,
-    },
   });
 }
 
@@ -69,9 +63,6 @@ export function saveSystemAuth(data) {
 export function getSystemCodeTables(id) {
   return request(`/v1/auth/app/${id}/codetables`, {
     method: 'get',
-    params: {
-      id,
-    },
   });
 }
 

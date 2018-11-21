@@ -36,6 +36,10 @@ export default {
               label: '服务管理',
               routerLink: '/operation/res/api',
             },
+            {
+              label: '系统资源分配',
+              routerLink: '/auth/app',
+            },
             // {
             //   label: '自定义资源管理',
             //   routerLink: '/operation/res/custom',

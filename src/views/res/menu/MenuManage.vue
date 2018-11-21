@@ -34,9 +34,9 @@
 
       <el-table-column label="操作" >
         <template slot-scope='scope' class='t-btns-container'>
-          <a href="javascript: void(0)" class='m-5' @click.stop='editMenu("new",scope.row)'>新增菜单</a>
-          <a href="javascript: void(0)" class='m-5' @click.stop='editMenu("update",scope.row)' v-if='scope.$index > 0'>编辑</a>
-          <a href="javascript: void(0)" class='m-5' @click.stop='delMenu(scope.row,scope.$index)' v-if='scope.$index > 0'>删除</a>
+          <el-button type='text' @click.stop='editMenu("new",scope.row)'>新增菜单</el-button>
+          <el-button type='text' @click.stop='editMenu("update",scope.row)' v-if='scope.$index > 0'>编辑</el-button>
+          <el-button type='text' @click.stop='delMenu(scope.row,scope.$index)' v-if='scope.$index > 0'>删除</el-button>
         </template>
       </el-table-column>
     </el-table>

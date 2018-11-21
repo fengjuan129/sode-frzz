@@ -71,7 +71,7 @@ const router = new Router({
         {
           path: '/operation/res/menu',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "menuManage" */ '../views/auth/res/menuManage.vue')
+            import(/* webpackChunkName: "menuManage" */ '../views/res/menu/MenuManage')
           ),
           meta: {
             type: 'private',
@@ -81,7 +81,17 @@ const router = new Router({
         {
           path: '/operation/res/api',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "apiManage" */ '../views/auth/res/apiManage.vue')
+            import(/* webpackChunkName: "apiManage" */ '../views/res/api/ApiManage')
+          ),
+          meta: {
+            type: 'private',
+          },
+        },
+        // 系统资源分配
+        {
+          path: '/auth/app',
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "apiManage" */ '../views/auth/app/AppAuthRes')
           ),
           meta: {
             type: 'private',

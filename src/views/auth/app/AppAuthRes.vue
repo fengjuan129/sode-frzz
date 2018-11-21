@@ -13,7 +13,7 @@
           </el-form-item>
 
           <el-form-item>
-            <el-button size='mini' @click='keyWord = "",loadSystem'>重置</el-button>
+            <el-button size='mini' @click='keyWord = "",loadSystem()'>重置</el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -32,9 +32,9 @@
           <el-table-column label='备注' prop='description'></el-table-column>
           <el-table-column label='分配操作'>
             <template slot-scope="scope">
-              <a href="javascript: void(0)" class='m-5' @click='getSystemMenu(scope.row)'>[菜单]</a>
-              <a href="javascript: void(0)" class='m-5' @click='getSystemApi(scope.row)'>[服务]</a>
-              <a href="javascript: void(0)" class='m-5' @click='getSystemCodeTable(scope.row)'>[码表]</a>
+              <el-button type='text'  @click='getSystemMenu(scope.row)'>[菜单]</el-button>
+              <el-button type='text'  @click='getSystemApi(scope.row)'>[服务]</el-button>
+              <el-button type='text'  @click='getSystemCodeTable(scope.row)'>[码表]</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -64,11 +64,14 @@ import * as AppAuthResApi from '@/api/auth.app';
 
 import SelectMenu from '@/components/SelectMenu';
 import SelectApi from '@/components/SelectApi';
-import { major } from 'semver';
 // TODO 代码项：@/components/SelectCodeItem.vue（暂缺）
 
 export default {
   name: 'AppAuthRes',
+  components: {
+    SelectMenu,
+    SelectApi,
+  },
   data() {
     return {
       keyWord: '',
@@ -83,7 +86,7 @@ export default {
       },
       // 选择服务弹框
       selectApi: {
-        isVisible: true,
+        isVisible: false,
         multiple: true,
         selectedIds: [],
       },
@@ -91,11 +94,6 @@ export default {
         curRow: null, // 保存当前选中行
       },
     };
-  },
-
-  components: {
-    SelectMenu,
-    SelectApi,
   },
 
   created() {
@@ -106,6 +104,7 @@ export default {
     // 获取系统列表
     loadSystem() {
       this.loading = true;
+
       AppAuthResApi.getSystemList(this.keyWord).then(res => {
         this.loading = false;
         this.systemList = Utils.data2treeGridArr(res, 'id', 'pid', true);
@@ -116,17 +115,20 @@ export default {
     getSystemMenu(row) {
       this.cacheData.curRow = row;
       this.dialogLoading = true;
+
       AppAuthResApi.getAuthMenusBySystemId(row.id).then(res => {
         this.selectMenu.selectedIds = [...res];
         this.dialogLoading = false;
         this.selectMenu.isVisible = true;
       });
     },
+
     // 保存系统菜单
     saveSystemMenu(selectMenu) {
       // TODO 后端接收参数不确定
-      const id = this.cacheData.curRow.id;
+      const { id } = this.cacheData.curRow;
       const resId = this.findIds(selectMenu).join(',');
+
       AppAuthResApi.saveMenuAuth({ id, resId }).then(() => {
         this.$message({
           message: '保存成功',
@@ -134,10 +136,12 @@ export default {
         });
       });
     },
+
     // 获取系统服务
     getSystemApi(row) {
       this.cacheData.curRow = row;
       this.dialogLoading = true;
+
       AppAuthResApi.getSystemAuth(row.id).then(res => {
         this.selectApi.selectedIds = [...res];
         this.dialogLoading = false;
@@ -145,7 +149,20 @@ export default {
       });
     },
     // 保存系统服务
-    saveSystemApi(selectApi) {},
+    saveSystemApi(selectApi) {
+      this.dialogLoading = true;
+      // TODO 后端参数不确定
+      const { id } = this.cacheData.curRow;
+      const apis = selectApi.join(',');
+
+      AppAuthResApi.saveSystemAuth({ id, apis }).then(() => {
+        this.dialogLoading = false;
+        this.$message({
+          message: '修改服务成功',
+          type: 'success',
+        });
+      });
+    },
     // 获取系统码表
     getSystemCodeTable(row) {
       this.cacheData.curRow = row;
@@ -154,6 +171,7 @@ export default {
     // 保存系统码表
     saveSystemCodeTable(selectCodeTable) {
       // TODO 暂无选中码表公共组件
+      console.log(selectCodeTable);
     },
 
     findIds(arr) {

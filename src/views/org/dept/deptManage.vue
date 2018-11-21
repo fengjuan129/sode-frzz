@@ -83,8 +83,8 @@
 <script>
 import DeptApi from '@/api/dept';
 import { data2treeGridArr } from '@/libs/utils';
-import DeptTypeEdit from './deptTypeEdit.vue';
-import DeptEdit from './deptEdit.vue';
+import DeptTypeEdit from './DeptTypeEdit.vue';
+import DeptEdit from './DeptEdit.vue';
 
 export default {
   data() {

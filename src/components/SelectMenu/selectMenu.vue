@@ -1,6 +1,6 @@
 <!-- 菜单选择公共页面 -->
 <template>
-  <el-dialog :title='title' :visible.sync='isOpen' width="25%" :before-close="close">
+  <el-dialog :title='title' :visible='isVisible' width="25%" :before-close="close">
 
     <el-tree
       :props="defaultProps"
@@ -20,13 +20,28 @@
 </template>
 
 <script>
-import { data2treeArr } from '@/libs/utils';
+import * as Utils from '@/libs/utils';
 
 export default {
-  props: ['title', 'multiple', 'selectedIds'],
+  props: {
+    title: {
+      type: String,
+      default: '菜单选择',
+    },
+    multiple: {
+      type: Boolean,
+      default: false,
+    },
+    selectedIds: {
+      type: Array,
+      default() {
+        return [];
+      },
+    },
+  },
   data() {
     return {
-      isOpen: true,
+      isVisible: true,
       defaultProps: {
         children: 'children',
         label: 'label',
@@ -99,11 +114,12 @@ export default {
   methods: {
     getMenu() {
       // TODO 为调用接口
-      this.treeList = data2treeArr();
+      this.treeList = Utils.data2treeArr();
     },
     sendSelect() {
       const selected = this.$refs.menuTree[this.multiple ? 'getCheckedNodes' : 'getCurrentNode']();
       this.$emit('select', selected);
+      this.close('close');
     },
     close() {
       this.$emit('close');
