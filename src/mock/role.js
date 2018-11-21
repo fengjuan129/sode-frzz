@@ -1,7 +1,6 @@
 // 模拟角色相关接口
 import Mock, { Random } from 'mockjs';
 import { getUrlParam } from '@/libs/utils';
-import pathToRegexp from 'path-to-regexp';
 
 // 查询角色列表
 Mock.mock(new RegExp('^/api/v1/core/base/roles'), 'get', ({ url }) => {
@@ -153,16 +152,16 @@ Mock.mock('/api/v1/core/base/role', 'post', ({ body }) => {
 });
 
 // 修改角色
-Mock.mock(pathToRegexp('/api/v1/core/base/role/:id'), 'put', ({ body }) => {
+Mock.mock('/api/v1/core/base/role', 'put', ({ body }) => {
   const role = JSON.parse(body);
   return role;
 });
 
 // 启用/禁用角色
-Mock.mock(pathToRegexp('/api/v1/core/base/role/:id/state'), 'put', () => true);
+Mock.mock('/api/v1/core/base/role/state', 'put', () => true);
 
 // 删除角色
-Mock.mock(pathToRegexp('/api/v1/core/base/role/:id'), 'delete', () => true);
+Mock.mock('/api/v1/core/base/role', 'delete', () => true);
 
 // 批量启用/禁用角色
 Mock.mock('/api/v1/core/base/roles/state', 'put', () => true);

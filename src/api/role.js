@@ -25,10 +25,8 @@ export function loadRoles(appId, roleType, params) {
  * @param {object} role 角色对象
  */
 export function saveRole(role) {
-  const url = role.id ? `/v1/core/base/role/${role.id}` : '/v1/core/base/role';
-  const method = role.id ? 'put' : 'post';
-  return request(url, {
-    method,
+  return request('/v1/core/base/role', {
+    method: role.id ? 'put' : 'post',
     data: role,
   });
 }
@@ -39,9 +37,10 @@ export function saveRole(role) {
  * @param {boolean} isEnable 是否启用
  */
 export function setRoleEnable(roleId, isEnable) {
-  return request(`/v1/core/base/role/${roleId}/state`, {
+  return request(`/v1/core/base/role/state`, {
     method: 'put',
     data: {
+      roleId,
       isEnable,
     },
   });
@@ -67,8 +66,11 @@ export function setRolesEnable(roleIds, isEnable) {
  * @param {string} roleId 角色id
  */
 export function deleteRole(roleId) {
-  return request(`/v1/core/base/role/${roleId}`, {
+  return request(`/v1/core/base/role`, {
     method: 'delete',
+    data: {
+      roleId,
+    },
   });
 }
 

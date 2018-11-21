@@ -5,8 +5,11 @@ import request from '@/libs/request';
  * @param {string} roleId 角色id
  */
 export function loadRoleUsers(roleId) {
-  return request(`/v1/auth/role/${roleId}/users`, {
+  return request(`/v1/auth/role/users`, {
     method: 'get',
+    params: {
+      roleId,
+    },
   });
 }
 
@@ -15,8 +18,11 @@ export function loadRoleUsers(roleId) {
  * @param {string} roleId 角色id
  */
 export function loadRoleMenus(roleId) {
-  return request(`/v1/auth/role/${roleId}/menus`, {
+  return request(`/v1/auth/role/menus`, {
     method: 'get',
+    params: {
+      roleId,
+    },
   });
 }
 
@@ -25,8 +31,11 @@ export function loadRoleMenus(roleId) {
  * @param {string} roleId 角色id
  */
 export function loadRoleApis(roleId) {
-  return request(`/v1/auth/role/${roleId}/apis`, {
+  return request(`/v1/auth/role/apis`, {
     method: 'get',
+    params: {
+      roleId,
+    },
   });
 }
 
@@ -36,10 +45,11 @@ export function loadRoleApis(roleId) {
  * @param {array} userIds 账号id数组
  */
 export function roleAuthUser(roleId, userIds) {
-  return request(`/v1/auth/role/${roleId}/users`, {
+  return request(`/v1/auth/role/users`, {
     method: 'put',
     data: {
       userIds,
+      roleId,
     },
   });
 }
@@ -50,10 +60,11 @@ export function roleAuthUser(roleId, userIds) {
  * @param {array} menuIds 菜单id数组
  */
 export function roleAuthMenu(roleId, menuIds) {
-  return request(`/v1/auth/role/${roleId}/menus`, {
+  return request(`/v1/auth/role/menus`, {
     method: 'put',
     data: {
       menuIds,
+      roleId,
     },
   });
 }
@@ -64,10 +75,11 @@ export function roleAuthMenu(roleId, menuIds) {
  * @param {array} apiIds 服务id数组
  */
 export function roleAuthApi(roleId, apiIds) {
-  return request(`/v1/auth/role/${roleId}/apis`, {
+  return request(`/v1/auth/role/apis`, {
     method: 'put',
     data: {
       apiIds,
+      roleId,
     },
   });
 }
