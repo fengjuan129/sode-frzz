@@ -40,6 +40,10 @@ export default {
               label: '系统资源分配',
               routerLink: '/auth/app',
             },
+            {
+              label: '应用系统管理',
+              routerLink: '/core/app',
+            },
             // {
             //   label: '自定义资源管理',
             //   routerLink: '/operation/res/custom',
