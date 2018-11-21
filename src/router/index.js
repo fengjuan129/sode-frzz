@@ -44,7 +44,7 @@ const router = new Router({
           // 用户管理
           path: '/org/user',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "user" */ '../views/org/user/UserManage.vue')
+            import(/* webpackChunkName: "org.user" */ '../views/org/user/UserManage.vue')
           ),
           meta: {
             type: 'private',
@@ -54,7 +54,7 @@ const router = new Router({
         {
           path: '/org/dept',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "dept" */ '../views/org/dept/DeptManage.vue')
+            import(/* webpackChunkName: "org.dept" */ '../views/org/dept/DeptManage.vue')
           ),
           meta: {
             type: 'private',
@@ -64,7 +64,7 @@ const router = new Router({
         {
           path: '/core/role',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "role" */ '../views/core/role/RoleManage.vue')
+            import(/* webpackChunkName: "core.role" */ '../views/core/role/RoleManage.vue')
           ),
           meta: {
             type: 'private',
@@ -95,7 +95,7 @@ const router = new Router({
         {
           path: '/auth/app',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "AppAuthRes" */ '../views/auth/app/AppAuthRes.vue')
+            import(/* webpackChunkName: "auth.app" */ '../views/auth/app/AppAuthRes.vue')
           ),
           meta: {
             type: 'private',
@@ -105,7 +105,17 @@ const router = new Router({
         {
           path: '/core/app',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "AppManage" */ '../views/core/app/AppManage.vue')
+            import(/* webpackChunkName: "core.app" */ '../views/core/app/AppManage.vue')
+          ),
+          meta: {
+            type: 'private',
+          },
+        },
+        // 角色授权管理
+        {
+          path: '/auth/role',
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "auth.role" */ '../views/auth/role/RoleAuthManage.vue')
           ),
           meta: {
             type: 'private',

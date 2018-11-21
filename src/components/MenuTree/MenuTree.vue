@@ -51,6 +51,15 @@ export default {
           ],
         },
         {
+          label: '安全管理',
+          children: [
+            {
+              label: '角色授权管理',
+              routerLink: '/auth/role',
+            },
+          ],
+        },
+        {
           label: 'vuex模块化示例',
           routerLink: '/demo',
         },
