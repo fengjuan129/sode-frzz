@@ -43,7 +43,9 @@ const router = new Router({
         {
           // 用户管理
           path: '/org/user',
-          component: asyncLoader(() => import(/* webpackChunkName: "user" */ '../views/org/user')),
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "user" */ '../views/org/user/UserManage.vue')
+          ),
           meta: {
             type: 'private',
           },
@@ -51,7 +53,9 @@ const router = new Router({
         // 组织机构管理
         {
           path: '/org/dept',
-          component: asyncLoader(() => import(/* webpackChunkName: "dept" */ '../views/org/dept')),
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "dept" */ '../views/org/dept/DeptManage.vue')
+          ),
           meta: {
             type: 'private',
           },
@@ -71,7 +75,7 @@ const router = new Router({
         {
           path: '/operation/res/menu',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "menuManage" */ '../views/res/menu/MenuManage')
+            import(/* webpackChunkName: "menuManage" */ '../views/res/menu/MenuManage.vue')
           ),
           meta: {
             type: 'private',
@@ -81,7 +85,7 @@ const router = new Router({
         {
           path: '/operation/res/api',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "apiManage" */ '../views/res/api/ApiManage')
+            import(/* webpackChunkName: "apiManage" */ '../views/res/api/ApiManage.vue')
           ),
           meta: {
             type: 'private',
@@ -91,7 +95,17 @@ const router = new Router({
         {
           path: '/auth/app',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "apiManage" */ '../views/auth/app/AppAuthRes')
+            import(/* webpackChunkName: "AppAuthRes" */ '../views/auth/app/AppAuthRes.vue')
+          ),
+          meta: {
+            type: 'private',
+          },
+        },
+        // 应用系统管理
+        {
+          path: '/core/app',
+          component: asyncLoader(() =>
+            import(/* webpackChunkName: "AppManage" */ '../views/core/app/AppManage.vue')
           ),
           meta: {
             type: 'private',
