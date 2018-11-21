@@ -218,7 +218,7 @@ export default {
     },
     /**
      * 编辑角色
-     * @param {Object} role 角色
+     * @param {object} role 角色
      */
     editRole(role) {
       this.winEditRole = {
@@ -250,7 +250,7 @@ export default {
     },
     /**
      * 切换角色启用状态
-     * @param {Object} role 角色
+     * @param {object} role 角色
      * @param {Boolean} state 目标状态
      */
     toggleRoleState(role) {
@@ -267,7 +267,7 @@ export default {
     },
     /**
      * 删除角色
-     * @param {Object} role 角色
+     * @param {object} role 角色
      */
     deleteRole(role) {
       // 隐藏确认删除提示

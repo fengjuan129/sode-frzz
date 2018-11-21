@@ -55,7 +55,7 @@ if (process.env.NODE_ENV !== 'production') {
  */
 function buildOptions(options) {
   // eslint-disable-next-line camelcase
-  const { access_token, token_type } = getToken();
+  const { access_token, token_type } = getToken() || {};
   return {
     method: 'get',
     ...options,

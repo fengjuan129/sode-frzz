@@ -18,6 +18,7 @@
 <script>
 import MenuTree from '@/components/MenuTree';
 import { setToken } from '@/libs/token';
+import { logout } from '@/api/login';
 
 export default {
   name: 'BasicLayout',
@@ -26,8 +27,10 @@ export default {
   },
   methods: {
     exit() {
-      setToken('');
-      this.$router.push('/login');
+      logout().then(() => {
+        setToken('');
+        this.$router.push('/login');
+      });
     },
   },
 };

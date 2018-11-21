@@ -39,8 +39,6 @@ export default {
     return {
       // 表单
       formLogin: {
-        // username: 'admin',
-        // password: 'admin',
         username: '测试加密',
         password: '123456',
       },
