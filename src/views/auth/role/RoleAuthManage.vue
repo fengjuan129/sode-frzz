@@ -133,7 +133,8 @@ export default {
       // 加载已授权给角色的账号
       roleAuthApi.loadRoleUsers(role.id).then(users => {
         console.log('获取到账号列表', users);
-        // 打开账号选择页面
+        // 设置初始勾选账号信息，打开账号选择页面
+        this.winUser.selectedIds = users.map(user => user.id);
         this.winUser.visible = true;
       });
     },
@@ -146,7 +147,8 @@ export default {
       // 加载已授权给角色的菜单
       roleAuthApi.loadRoleMenus(role.id).then(menus => {
         console.log('获取到菜单列表', menus);
-        // 打开菜单选择页面
+        // 设置初始勾选菜单信息，打开菜单选择页面
+        this.winMenu.selectedIds = menus.map(menu => menu.id);
         this.winMenu.visible = true;
       });
     },
@@ -159,7 +161,8 @@ export default {
       // 加载已授权给角色的服务
       roleAuthApi.loadRoleApis(role.id).then(apis => {
         console.log('获取到服务列表', apis);
-        // 打开服务选择页面
+        // 设置初始勾选服务信息，打开服务选择页面
+        this.winApi.selectedIds = apis.map(api => api.id);
         this.winApi.visible = true;
       });
     },
