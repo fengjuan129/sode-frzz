@@ -1,3 +1,4 @@
+<!-- 角色授权管理页面 -->
 <template>
   <div>
     <el-tabs v-model="activeTabKey" @tab-click="loadRoles" type="border-card">

@@ -36,9 +36,17 @@ Mock.mock(new RegExp('^/api/v1/core/base/roles'), 'get', ({ url }) => {
     }
     return [
       {
-        id: Random.guid(),
-        name: 'XX角色',
-        roleCode: 'result',
+        id: 'id-1',
+        name: '固定id的角色01',
+        roleCode: 'id-1',
+        isEnable: true,
+        sort: '',
+        description: '这条是查询结果',
+      },
+      {
+        id: 'id-2',
+        name: '固定id的角色02',
+        roleCode: 'id-2',
         isEnable: true,
         sort: '',
         description: '这条是查询结果',
