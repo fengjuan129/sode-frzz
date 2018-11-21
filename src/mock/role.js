@@ -11,6 +11,29 @@ Mock.mock(new RegExp('^/api/v1/core/base/roles'), 'get', ({ url }) => {
   const isEnable = getUrlParam(url, 'isEnable');
 
   if (name || isEnable !== '') {
+    if (roleType === 'public') {
+      return [
+        {
+          id: Random.guid(),
+          name: '某某公共角色',
+          roleCode: 'public-role',
+          isEnable: true,
+          sort: '',
+          description: '这条是查询结果',
+        },
+      ];
+    } else if (roleType === 'private') {
+      return [
+        {
+          id: Random.guid(),
+          name: '某某私有角色',
+          roleCode: 'private-role',
+          isEnable: true,
+          sort: '',
+          description: '这条是查询结果',
+        },
+      ];
+    }
     return [
       {
         id: Random.guid(),

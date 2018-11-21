@@ -21,10 +21,10 @@
 
       <!-- 查询栏 -->
       <el-form :inline="true" :model="formSearch" size="mini">
-        <el-form-item label="角色名称：">
+        <el-form-item label="角色名称">
           <el-input v-model="formSearch.name"></el-input>
         </el-form-item>
-        <el-form-item v-if="isAdmin" label="状态：">
+        <el-form-item v-if="isAdmin" label="状态">
           <el-select v-model="formSearch.isEnable">
             <el-option
               v-for="item in isEnableCodeTable"
@@ -244,8 +244,8 @@ export default {
           return roleItem;
         });
       } else {
-        // 新增模式下将角色添加到列表中
-        this.roles = [...this.roles, role];
+        // 新增模式下将角色添加到列表首行
+        this.roles.unshift(role);
       }
     },
     /**

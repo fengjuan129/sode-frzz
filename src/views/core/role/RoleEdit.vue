@@ -1,7 +1,7 @@
 <!-- 角色编辑页面 -->
 <template>
   <!-- 弹出窗口 -->
-  <el-dialog title='角色编辑' :visible='visible' :before-close="close" width="600px">
+  <el-dialog title='角色编辑' visible :before-close="close" width="600px">
 
     <!-- 角色表单 -->
     <el-form :model="formRole" :rules="rules" ref="formRole" size="mini" label-width="90px">
@@ -54,11 +54,6 @@ import * as roleApi from '@/api/role';
 export default {
   name: 'RoleEdit',
   props: {
-    // 是否可见
-    visible: {
-      type: Boolean,
-      required: true,
-    },
     // 角色对象（修改时传入）
     role: {
       type: Object,
