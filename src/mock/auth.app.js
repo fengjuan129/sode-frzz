@@ -56,7 +56,7 @@ Mock.mock(new RegExp('^/v1/auth/app/menus'), 'get', () => [3]);
 Mock.mock('/v1/auth/app/menus', 'put', () => {});
 
 // 根据系统ID 查询系统服务
-Mock.mock('/v1/auth/app/apis', 'get', () => [1]);
+Mock.mock(new RegExp('^/v1/auth/app/apis'), 'get', () => [1]);
 
 // 保存系统服务
 Mock.mock('/v1/auth/app/apis', 'put', () => {});

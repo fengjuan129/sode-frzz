@@ -1,7 +1,7 @@
 <!-- 账号查看页面 -->
 <template>
   <div>
-    <el-dialog title='账号查看' width='30%' :visible.sync='isOpen' :before-close="close">
+    <el-dialog title='账号查看' width='500px' :visible.sync='isOpen' :before-close="close">
 
        <el-form :model='userMsg' size='small' label-width='80px'>
           <el-col :span='12'>
@@ -100,7 +100,7 @@ export default {
 
   watch: {
     id() {
-      if (!this.isOpen || !this.id) return;
+      if (!this.id) return;
       this.getUserById();
     },
   },

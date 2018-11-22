@@ -71,7 +71,7 @@ export default {
         this.treeList = res;
       });
     },
-    onCheckChange(node, checked) {
+    onCheckChange() {
       const parents = this.$refs.menuTree.getHalfCheckedKeys();
       parents.forEach(item => {
         this.$refs.menuTree.setChecked(item, true, false);

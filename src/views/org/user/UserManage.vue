@@ -5,7 +5,8 @@
       <el-tab-pane v-for='item in organizationType'
         :key='item.id'
         :label="item.typename"
-        :code='item.code'>
+        :code='item.code'
+        v-if='organizationType.length > 1'>
       </el-tab-pane>
 
       <el-row :gutter="30">
@@ -50,7 +51,7 @@
               <div class='btns-container'>
                 <el-button size='mini' @click='addUser'>新增</el-button>
 
-                  <el-dropdown trigger="click" style="margin: 0 10px;" @command='updateMore'>
+                  <el-dropdown trigger="click" style="margin-left: 10px;" @command='updateMore' v-if='curUser.length > 1'>
                     <span class="el-dropdown-link">
                       <el-button size='mini'>批量操作<i class="el-icon-arrow-down el-icon--right"></i></el-button>
                     </span>
@@ -64,7 +65,7 @@
                   </el-dropdown>
 
 
-                  <el-dropdown trigger="click" @command='setUp'>
+                  <el-dropdown trigger="click" @command='setUp' style="margin-left: 10px;" v-if='isAdmin'>
                     <span class="el-dropdown-link"><el-button size='mini'>设置<i class="el-icon-arrow-down el-icon--right"></i></el-button></span>
                     <el-dropdown-menu slot="dropdown">
                       <!-- <el-dropdown-item command='1'>账号锁定规则</el-dropdown-item> -->
@@ -183,7 +184,8 @@
 <script>
 import UserApi from '@/api/user'; // 用户管理接口
 import DeptApi from '@/api/dept'; // 组织机构管理接口
-import { data2treeArr } from '@/libs/utils';
+import * as authApi from '@/api/auth.user';
+import * as Utils from '@/libs/utils';
 import SelectDept from '@/components/SelectDept';
 import LockRuleConfig from './LockRuleConfig.vue';
 import UserEdit from './UserEdit.vue';
@@ -238,6 +240,7 @@ export default {
       seeCurUser: '', // 保存查看用户选中用户，与修改、新增不同数据对象。避免不能正确触发子组件 watch 方法
       testLazyTree: 1,
       moveUsersMsg: {}, // 保存
+      isAdmin: false, // 是否为运维管理员
     };
   },
 
@@ -250,10 +253,20 @@ export default {
   },
 
   mounted() {
+    this.judgeIsAdmin();
     this.getOrganizationType();
   },
 
   methods: {
+    /**
+     * 判断当前登录人员是否为运维管理员
+     */
+    judgeIsAdmin() {
+      return authApi.judgeIsAdmin().then(isAdmin => {
+        this.isAdmin = isAdmin;
+        return isAdmin;
+      });
+    },
     /**
      * 获取组织机构类型
      */
@@ -274,7 +287,7 @@ export default {
       if (tree.keyword) {
         tree.isLazy = false;
         DeptApi.getTreeByKeywork(tree.keyword, this.activeTab).then(res => {
-          tree.searchTreeData = data2treeArr(res);
+          tree.searchTreeData = Utils.data2treeArr(res);
           if (tree.searchTreeData.length === 0) return;
           this.$refs.userLazyTree.setCurrentKey(tree.searchTreeData[0].id);
           this.organizationId = tree.searchTreeData[0].code;

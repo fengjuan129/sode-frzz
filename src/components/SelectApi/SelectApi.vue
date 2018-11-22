@@ -113,7 +113,18 @@ export default {
       });
     },
     sendSelect() {
-      this.$emit('select', this.$refs.apiTree.getCheckedProp('id'));
+      const apiMap = {};
+      const selectedIds = this.$refs.apiTree.getCheckedProp('id');
+      const sendData = [];
+      this.$refs.apiTree.bodyData.forEach(item => {
+        apiMap[item.id] = item;
+      });
+
+      selectedIds.forEach(id => {
+        sendData.push(apiMap[id]);
+      });
+      // 返回完整对象
+      this.$emit('select', sendData);
       this.close();
     },
     close() {
