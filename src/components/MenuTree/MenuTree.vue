@@ -30,11 +30,11 @@ export default {
             },
             {
               label: '菜单管理',
-              routerLink: '/operation/res/menu',
+              routerLink: '/res/menu',
             },
             {
               label: '服务管理',
-              routerLink: '/operation/res/api',
+              routerLink: '/res/api',
             },
             {
               label: '系统资源分配',

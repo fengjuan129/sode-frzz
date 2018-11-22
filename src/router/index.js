@@ -73,9 +73,9 @@ const router = new Router({
 
         // 菜单管理
         {
-          path: '/operation/res/menu',
+          path: '/res/menu',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "menuManage" */ '../views/res/menu/MenuManage.vue')
+            import(/* webpackChunkName: "res.menu" */ '../views/res/menu/MenuManage.vue')
           ),
           meta: {
             type: 'private',
@@ -83,9 +83,9 @@ const router = new Router({
         },
         // 服务管理
         {
-          path: '/operation/res/api',
+          path: '/res/api',
           component: asyncLoader(() =>
-            import(/* webpackChunkName: "apiManage" */ '../views/res/api/ApiManage.vue')
+            import(/* webpackChunkName: "res.api" */ '../views/res/api/ApiManage.vue')
           ),
           meta: {
             type: 'private',
