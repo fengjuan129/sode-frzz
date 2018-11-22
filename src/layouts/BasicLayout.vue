@@ -17,12 +17,25 @@
     <!-- 页面主体 -->
     <el-container>
       <el-header>
-        <el-button @click="exit" type="danger" class="btn-exit">退出</el-button>
+        <el-dropdown @command="handleCommand" size="medium" class="user-dropdown">
+          <div>
+            <img src="../assets/logo.png" alt="头像">
+            <span>运维管理员</span>
+          </div>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="setting" disabled>
+              <i class="el-icon-setting"></i>&nbsp;&nbsp;个人设置
+            </el-dropdown-item>
+            <el-dropdown-item command="exit" divided>
+              <i class="el-icon-circle-close"></i>&nbsp;&nbsp;退出登录
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
       </el-header>
       <el-main>
+        <!-- 路由子页面显示区域 -->
         <router-view></router-view>
       </el-main>
-      <!-- <el-footer>Copyright © {{new Date().getFullYear()}} {{company}}</el-footer> -->
     </el-container>
   </el-container>
 </template>
@@ -40,16 +53,17 @@ export default {
   },
   data() {
     return {
-      // company: config.company,
       system: config.system,
     };
   },
   methods: {
-    exit() {
-      logout().then(() => {
-        setToken('');
-        this.$router.push('/login');
-      });
+    handleCommand(command) {
+      if (command === 'exit') {
+        logout().then(() => {
+          setToken('');
+          this.$router.push('/login');
+        });
+      }
     },
   },
 };
@@ -57,14 +71,36 @@ export default {
 
 
 <style lang="less" scoped>
-// .el-header {
-//   background-color: #b3c0d1;
-// }
+.el-header {
+  color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 
-.el-header,
-.el-footer {
-  color: #333;
-  text-align: center;
+  .user-dropdown {
+    div {
+      display: inline-block;
+      padding: 0 12px;
+      height: 60px;
+      line-height: 60px;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      &:hover {
+        background: rgba(0, 0, 0, 0.025);
+      }
+    }
+    img {
+      height: 24px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    span {
+      display: inline-block;
+      vertical-align: middle;
+      font-weight: normal;
+    }
+  }
 }
 
 .el-aside {
@@ -94,9 +130,5 @@ export default {
     font-size: 20px;
     margin: 0 0 0 12px;
   }
-}
-
-.btn-exit {
-  float: right;
 }
 </style>
