@@ -28,7 +28,7 @@ export default {
    * @param {string} name 关键词
    * @param {string} typeCode 机构类型
    */
-  getTreeByKeywork(name, typeCode) {
+  getTreeByKeyword(name, typeCode) {
     return request('/v1/core/org/tree', {
       method: 'get',
       params: {

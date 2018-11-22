@@ -19,8 +19,11 @@ export function getSystemList(name) {
  * @param {string} id 系统ID
  */
 export function getAuthMenusBySystemId(id) {
-  return request(`/v1/auth/app/${id}/menus`, {
+  return request(`/v1/auth/app/menus`, {
     method: 'get',
+    params: {
+      id,
+    },
   });
 }
 
@@ -29,7 +32,7 @@ export function getAuthMenusBySystemId(id) {
  * @param {object} data 保存对象，ID, 菜单 ids
  */
 export function saveMenuAuth(data) {
-  return request(`/v1/auth/app/${data.id}/menus`, {
+  return request(`/v1/auth/app/menus`, {
     method: 'put',
     data,
   });
@@ -40,8 +43,11 @@ export function saveMenuAuth(data) {
  * @param {string} id 系统id
  */
 export function getSystemAuth(id) {
-  return request(`/v1/auth/app/${id}/apis`, {
+  return request(`/v1/auth/app/apis`, {
     method: 'get',
+    params: {
+      id,
+    },
   });
 }
 
@@ -50,7 +56,7 @@ export function getSystemAuth(id) {
  * @param {object} data 保存数据，系统 id , 权限ID集合
  */
 export function saveSystemAuth(data) {
-  return request(`/v1/auth/app/${data.id}/apis`, {
+  return request(`/v1/auth/app/apis`, {
     method: 'put',
     data,
   });
@@ -61,8 +67,11 @@ export function saveSystemAuth(data) {
  * @param {string} id 系统ID
  */
 export function getSystemCodeTables(id) {
-  return request(`/v1/auth/app/${id}/codetables`, {
+  return request(`/v1/auth/app/codetables`, {
     method: 'get',
+    params: {
+      id,
+    },
   });
 }
 
@@ -71,7 +80,7 @@ export function getSystemCodeTables(id) {
  * @param {object} data 系统ID,码表ID集合
  */
 export function saveSystemCodeTables(data) {
-  return request(`/v1/auth/app/${data.id}/codetables`, {
+  return request(`/v1/auth/app/codetables`, {
     method: 'put',
     data,
   });
