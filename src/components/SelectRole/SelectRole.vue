@@ -87,13 +87,13 @@ export default {
           if (this.selectedIds.length > 0) {
             if (this.multiple) {
               // 多选
-              this.roles
-                .filter(role => this.selectedIds.some(selectedId => selectedId === role.id))
-                .forEach(role => {
-                  this.$nextTick(() => {
+              this.$nextTick(() => {
+                this.roles
+                  .filter(role => this.selectedIds.some(selectedId => selectedId === role.id))
+                  .forEach(role => {
                     this.$refs.tableRole.toggleRowSelection(role, true);
                   });
-                });
+              });
             } else {
               // 单选
               this.$nextTick(() => {

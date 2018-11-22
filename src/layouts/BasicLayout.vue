@@ -1,7 +1,7 @@
 <template>
-  <el-container style="height: 100%;">
+  <el-container style="min-height: 100%;">
     <el-aside>
-      <menu-tree></menu-tree>
+      <sider-menu></sider-menu>
     </el-aside>
     <el-container>
       <el-header>
@@ -10,20 +10,26 @@
       <el-main>
         <router-view></router-view>
       </el-main>
-      <!-- <el-footer>Footer</el-footer> -->
+      <!-- <el-footer>Copyright © {{new Date().getFullYear()}} {{company}}</el-footer> -->
     </el-container>
   </el-container>
 </template>
 
 <script>
-import MenuTree from '@/components/MenuTree';
+import SiderMenu from '@/components/SiderMenu';
 import { setToken } from '@/libs/token';
 import { logout } from '@/api/login';
+// import config from '@/config';
 
 export default {
   name: 'BasicLayout',
   components: {
-    MenuTree,
+    SiderMenu,
+  },
+  data() {
+    return {
+      // company: config.company,
+    };
   },
   methods: {
     exit() {
@@ -37,23 +43,23 @@ export default {
 </script>
 
 <style scoped>
+.el-header {
+  background-color: #b3c0d1;
+}
+
 .el-header,
 .el-footer {
-  background-color: #b3c0d1;
   color: #333;
   text-align: center;
 }
 
 .el-aside {
-  background-color: #d3dce6;
-  color: #333;
-  text-align: center;
+  border-right: solid 1px #e6e6e6;
 }
 
 .el-main {
   background-color: #fff;
   color: #333;
-  /* text-align: center; */
 }
 
 .btn-exit {

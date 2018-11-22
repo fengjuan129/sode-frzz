@@ -8,6 +8,10 @@ const userDB = [
     password: 'admin',
   },
   {
+    username: '测试加密',
+    password: '123456',
+  },
+  {
     username: 'user1',
     password: 'user1',
   },
