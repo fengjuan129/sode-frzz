@@ -121,54 +121,54 @@ const router = new Router({
             type: 'private',
           },
         },
+        // 配置发生异常时的路由
+        {
+          path: '/exception/403',
+          name: '403',
+          component: Exception,
+          props: {
+            // 为路由组件传参
+            type: 403,
+          },
+          meta: {
+            type: 'protected', // 配置为需登录才能访问
+          },
+        },
+        {
+          path: '/exception/404',
+          name: '404',
+          component: Exception,
+          props: {
+            type: 404,
+          },
+          meta: {
+            type: 'protected',
+          },
+        },
+        {
+          path: '/exception/500',
+          name: '500',
+          component: Exception,
+          props: {
+            type: 500,
+          },
+          meta: {
+            type: 'protected',
+          },
+        },
+        // 未匹配到任何路由时，默认返回404
+        // !此路由只能配置在路由表最后，顺序不可改变
+        {
+          path: '*',
+          component: Exception,
+          props: {
+            type: 404,
+          },
+          meta: {
+            type: 'protected',
+          },
+        },
       ],
-    },
-    // 配置发生异常时的路由
-    {
-      path: '/exception/403',
-      name: '403',
-      component: Exception,
-      props: {
-        // 为路由组件传参
-        type: 403,
-      },
-      meta: {
-        type: 'protected', // 配置为需登录才能访问
-      },
-    },
-    {
-      path: '/exception/404',
-      name: '404',
-      component: Exception,
-      props: {
-        type: 404,
-      },
-      meta: {
-        type: 'protected',
-      },
-    },
-    {
-      path: '/exception/500',
-      name: '500',
-      component: Exception,
-      props: {
-        type: 500,
-      },
-      meta: {
-        type: 'protected',
-      },
-    },
-    // 未匹配到任何路由时，默认返回404
-    // !此路由只能配置在路由表最后，顺序不可改变
-    {
-      path: '*',
-      component: Exception,
-      props: {
-        type: 404,
-      },
-      meta: {
-        type: 'protected',
-      },
     },
   ],
 });
