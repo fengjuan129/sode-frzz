@@ -1,3 +1,3 @@
-import SelectUser from './selectUser.vue';
+import SelectUser from './SelectUser.vue';
 
 export default SelectUser;

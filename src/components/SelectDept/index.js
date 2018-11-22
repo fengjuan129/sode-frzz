@@ -1,3 +1,3 @@
-import SelectDept from './selectDept.vue';
+import SelectDept from './SelectDept.vue';
 
 export default SelectDept;

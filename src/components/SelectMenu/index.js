@@ -1,3 +1,3 @@
-import SelectMenu from './selectMenu.vue';
+import SelectMenu from './SelectMenu.vue';
 
 export default SelectMenu;
