@@ -1,5 +1,8 @@
 import Mock from 'mockjs';
 
+/**
+ * 服务列表
+ */
 Mock.mock(new RegExp('^/api/v1/core/res/apis'), 'get', () => {
   const apis = [
     { id: 1, name: 'a1', code: 'weqwe', url: '/a/v/c' },
@@ -11,4 +14,35 @@ Mock.mock(new RegExp('^/api/v1/core/res/apis'), 'get', () => {
   ];
 
   return apis;
+});
+
+/**
+ * 菜单查询
+ */
+Mock.mock('/api/v1/core/res/menutree', 'get', () => {
+  const menuList = [
+    {
+      id: 1,
+      name: '1-1',
+    },
+    {
+      id: 2,
+      name: '2-1',
+    },
+    {
+      id: 3,
+      name: '3-1',
+    },
+    {
+      id: 4,
+      name: '1-2',
+      pid: 1,
+    },
+    {
+      id: 5,
+      name: '1-3',
+      pid: 1,
+    },
+  ];
+  return menuList;
 });
