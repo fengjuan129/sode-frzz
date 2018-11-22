@@ -33,3 +33,6 @@ Mock.mock('/v1/sso/authentication/token', 'post', ({ body }) => {
     __statusCode: 400,
   };
 });
+
+// 退出登录
+Mock.mock('/v1/sso/authentication/logout', 'post', () => true);

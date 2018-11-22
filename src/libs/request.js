@@ -25,6 +25,8 @@ if (process.env.NODE_ENV !== 'production') {
     if (data && data.__statusCode !== undefined) {
       // eslint-disable-next-line no-underscore-dangle
       response.status = data.__statusCode;
+      // eslint-disable-next-line prefer-promise-reject-errors
+      return Promise.reject({ response });
     }
     return response;
   });
@@ -133,11 +135,11 @@ export default function request(url, options) {
               // token刷新失败后，清除token
               clearToken();
               // 刷新token失败时抛出错误（注意这里抛出的是原始错误，而不是导致token刷新失败的错误）
-              throw error;
+              return Promise.reject(error);
             });
         }
         // 对于其他类型的错误，直接抛出，交给业务模块自行处理
-        throw error;
+        return Promise.reject(error);
       })
   );
 }
