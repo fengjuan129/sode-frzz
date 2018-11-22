@@ -1,7 +1,7 @@
 <!-- 角色编辑页面 -->
 <template>
   <!-- 弹出窗口 -->
-  <el-dialog title='角色编辑' visible :before-close="close" width="600px">
+  <el-dialog title='角色编辑' visible :before-close="close" :close-on-click-modal="false" width="600px">
 
     <!-- 角色表单 -->
     <el-form :model="formRole" :rules="rules" ref="formRole" size="mini" label-width="90px">

@@ -1,7 +1,7 @@
 <!-- 角色选择公共页面 -->
 <template>
   <!-- 角色选择窗口 -->
-  <el-dialog :title="title" visible :before-close="close" width="600px">
+  <el-dialog :title="title" visible :before-close="close" :close-on-click-modal="false" width="600px">
     <!-- 查询栏 -->
     <el-form :inline="true" size="mini">
       <el-form-item label="角色名称">
