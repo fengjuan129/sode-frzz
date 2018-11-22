@@ -18,7 +18,7 @@ const userDB = [
 ];
 
 // 模拟用户登录接口
-Mock.mock('/api/v1/sso/authentication/token', 'post', ({ body }) => {
+Mock.mock('/v1/sso/authentication/token', 'post', ({ body }) => {
   const { username, password } = parse(body);
   const loginUser = userDB.find(user => user.username === username && user.password === password);
   if (loginUser) {

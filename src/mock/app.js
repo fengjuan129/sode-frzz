@@ -2,7 +2,7 @@
 import Mock from 'mockjs';
 
 // 加载全部应用系统
-Mock.mock('/api/v1/core/base/apps', 'get', () => [
+Mock.mock('/v1/core/base/apps', 'get', () => [
   {
     id: 1,
     name: '院人事信息管理系统',
@@ -54,19 +54,19 @@ Mock.mock('/api/v1/core/base/apps', 'get', () => [
 ]);
 
 // 修改系统
-Mock.mock('/api/v1/core/base/app', 'put', () => {});
+Mock.mock('/v1/core/base/app', 'put', () => {});
 
 // 新增系统
-Mock.mock('/api/v1/core/base/app', 'post', () => {});
+Mock.mock('/v1/core/base/app', 'post', () => {});
 
 // 禁用
-Mock.mock('/api/v1/core/base/app/state', 'put', () => {});
+Mock.mock('/v1/core/base/app/state', 'put', () => {});
 
 // 删除
-Mock.mock('/api/v1/core/base/app', 'delete', () => {});
+Mock.mock('/v1/core/base/app', 'delete', () => {});
 
 // 查询应用系统管理员授权信息
-Mock.mock(new RegExp('^/api/v1/core/base/app/admins'), 'get', () => {
+Mock.mock(new RegExp('^/v1/core/base/app/admins'), 'get', () => {
   const list = [
     { id: 1, name: '系统管理员', userName: '张三', userId: 12 },
     { id: 2, name: '安全管理员', userName: '张1', userId: 13 },

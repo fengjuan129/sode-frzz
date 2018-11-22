@@ -2,7 +2,7 @@
 import Mock from 'mockjs';
 
 // 获取 组织机构类型
-Mock.mock('/api/v1/core/org/types', 'get', () => {
+Mock.mock('/v1/core/org/types', 'get', () => {
   const deptType = [
     { id: 1, typename: '机构1', code: 'jg01' },
     { id: 2, typename: '机构2', code: 'jg02' },
@@ -13,7 +13,7 @@ Mock.mock('/api/v1/core/org/types', 'get', () => {
 });
 
 // 全加载树
-Mock.mock(new RegExp('^/api/v1/core/org/tree'), 'get', () => {
+Mock.mock(new RegExp('^/v1/core/org/tree'), 'get', () => {
   const tree = [
     { id: 1, code: 1, parentCode: -1, name: '1-1' },
     { id: 2, code: 2, parentCode: 1, name: '1-2' },

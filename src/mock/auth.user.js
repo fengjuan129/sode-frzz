@@ -2,4 +2,4 @@
 import Mock from 'mockjs';
 
 // 判断当前账号是否为运维管理员
-Mock.mock('/api/v1/auth/user/admin', 'get', () => true);
+Mock.mock('/v1/auth/user/admin', 'get', () => true);

@@ -3,7 +3,7 @@ import Mock, { Random } from 'mockjs';
 import { getUrlParam } from '@/libs/utils';
 
 // 查询角色列表
-Mock.mock(new RegExp('^/api/v1/core/base/roles'), 'get', ({ url }) => {
+Mock.mock(new RegExp('^/v1/core/base/roles'), 'get', ({ url }) => {
   const appId = getUrlParam(url, 'appId');
   const roleType = getUrlParam(url, 'roleType');
   const name = getUrlParam(url, 'name');
@@ -143,7 +143,7 @@ Mock.mock(new RegExp('^/api/v1/core/base/roles'), 'get', ({ url }) => {
 });
 
 // 新增角色
-Mock.mock('/api/v1/core/base/role', 'post', ({ body }) => {
+Mock.mock('/v1/core/base/role', 'post', ({ body }) => {
   const role = JSON.parse(body);
   return {
     id: Random.guid(),
@@ -152,19 +152,19 @@ Mock.mock('/api/v1/core/base/role', 'post', ({ body }) => {
 });
 
 // 修改角色
-Mock.mock('/api/v1/core/base/role', 'put', ({ body }) => {
+Mock.mock('/v1/core/base/role', 'put', ({ body }) => {
   const role = JSON.parse(body);
   return role;
 });
 
 // 启用/禁用角色
-Mock.mock('/api/v1/core/base/role/state', 'put', () => true);
+Mock.mock('/v1/core/base/role/state', 'put', () => true);
 
 // 删除角色
-Mock.mock('/api/v1/core/base/role', 'delete', () => true);
+Mock.mock('/v1/core/base/role', 'delete', () => true);
 
 // 批量启用/禁用角色
-Mock.mock('/api/v1/core/base/roles/state', 'put', () => true);
+Mock.mock('/v1/core/base/roles/state', 'put', () => true);
 
 // 批量删除角色
-Mock.mock('/api/v1/core/base/roles', 'delete', () => true);
+Mock.mock('/v1/core/base/roles', 'delete', () => true);

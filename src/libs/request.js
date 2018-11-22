@@ -5,9 +5,13 @@ import axios from 'axios';
 import { relogin } from '../api/login';
 import { getToken, setToken, clearToken } from './token';
 
-// 如果启用了远程mock功能，设置url基础路径为远程mock地址
-if (process.env.VUE_APP_MOCK_ENABLED && process.env.VUE_APP_MOCK_MODE === 'remote') {
-  axios.defaults.baseURL = `${process.env.VUE_APP_MOCK_URL}/api`;
+// 判断是否启用了mock功能
+if (process.env.VUE_APP_MOCK_ENABLED) {
+  // 如果启用的是远程mock，设置url基础路径为远程mock地址
+  if (process.env.VUE_APP_MOCK_MODE === 'remote') {
+    axios.defaults.baseURL = `${process.env.VUE_APP_MOCK_URL}/api`;
+  }
+  // * 本地mock模式不再设置'/api'前缀，目的是为了写url时能够统一
 } else {
   axios.defaults.baseURL = '/api';
 }

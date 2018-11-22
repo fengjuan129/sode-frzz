@@ -3,7 +3,7 @@ import Mock from 'mockjs';
 /**
  * 服务列表
  */
-Mock.mock(new RegExp('^/api/v1/core/res/apis'), 'get', () => {
+Mock.mock(new RegExp('^/v1/core/res/apis'), 'get', () => {
   const apis = [
     { id: 1, name: 'a1', code: 'weqwe', url: '/a/v/c' },
     { id: 2, name: 'q2', code: 'czx', url: '/a/v/c' },
@@ -19,7 +19,7 @@ Mock.mock(new RegExp('^/api/v1/core/res/apis'), 'get', () => {
 /**
  * 菜单查询
  */
-Mock.mock('/api/v1/core/res/menutree', 'get', () => {
+Mock.mock('/v1/core/res/menutree', 'get', () => {
   const menuList = [
     {
       id: 1,
