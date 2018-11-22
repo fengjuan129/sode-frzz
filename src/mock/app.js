@@ -18,7 +18,7 @@ Mock.mock('/v1/core/base/apps', 'get', () => [
   {
     id: 2,
     name: '涉密电子会议系统',
-    appId: 'seshr',
+    appId: 'seshr2',
     code: 'sdaa',
     isEnable: false,
     deptCode: 122,
@@ -41,8 +41,8 @@ Mock.mock('/v1/core/base/apps', 'get', () => [
   },
   {
     id: 4,
-    name: '电子公文系统',
-    appId: 'doc',
+    name: '内容管理系统',
+    appId: 'doc1',
     code: 'sdwqaa',
     isEnable: true,
     deptCode: 1232,
