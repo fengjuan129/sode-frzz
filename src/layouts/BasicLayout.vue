@@ -1,8 +1,20 @@
 <template>
   <el-container style="min-height: 100%;">
-    <el-aside>
-      <sider-menu></sider-menu>
+    <!-- 侧栏 -->
+    <el-aside width="265px">
+      <!-- 侧栏导航菜单 -->
+      <sider-menu>
+        <template slot="header">
+          <div class="logo-wrapper">
+            <router-link to="/">
+              <img src="../assets/logo.png" :alt="system">
+              <h1>{{ system }}</h1>
+            </router-link>
+          </div>
+        </template>
+      </sider-menu>
     </el-aside>
+    <!-- 页面主体 -->
     <el-container>
       <el-header>
         <el-button @click="exit" type="danger" class="btn-exit">退出</el-button>
@@ -19,7 +31,7 @@
 import SiderMenu from '@/components/SiderMenu';
 import { setToken } from '@/libs/token';
 import { logout } from '@/api/login';
-// import config from '@/config';
+import config from '@/config';
 
 export default {
   name: 'BasicLayout',
@@ -29,6 +41,7 @@ export default {
   data() {
     return {
       // company: config.company,
+      system: config.system,
     };
   },
   methods: {
@@ -42,10 +55,11 @@ export default {
 };
 </script>
 
-<style scoped>
-.el-header {
-  background-color: #b3c0d1;
-}
+
+<style lang="less" scoped>
+// .el-header {
+//   background-color: #b3c0d1;
+// }
 
 .el-header,
 .el-footer {
@@ -58,8 +72,28 @@ export default {
 }
 
 .el-main {
-  background-color: #fff;
+  background-color: #f0f2f5;
   color: #333;
+}
+
+.logo-wrapper {
+  height: 60px;
+  line-height: 60px;
+  padding-left: 24px;
+  overflow: hidden;
+
+  img {
+    height: 30px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  h1 {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 20px;
+    margin: 0 0 0 12px;
+  }
 }
 
 .btn-exit {
