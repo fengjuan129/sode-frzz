@@ -9,3 +9,7 @@ export default {
   name: 'app',
 };
 </script>
+
+<style>
+@import '~normalize.css';
+</style>

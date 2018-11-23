@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import app from './modules/app';
+import global from './modules/global';
 import dept from './modules/dept';
 import user from './modules/user';
 import demo from './modules/demo';
@@ -13,7 +13,7 @@ export default new Vuex.Store({
   mutations: {},
   actions: {},
   modules: {
-    app,
+    global,
     demo,
     dept,
     user,

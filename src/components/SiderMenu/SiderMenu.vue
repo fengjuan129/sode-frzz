@@ -31,7 +31,6 @@
         <el-menu-item index="/auth/app">系统资源分配</el-menu-item>
         <el-menu-item index="/auth/role">角色授权管理</el-menu-item>
       </el-submenu>
-      <el-menu-item index="/demo">vuex模块化示例</el-menu-item>
     </el-menu>
   </div>
 </template>
