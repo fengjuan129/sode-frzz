@@ -122,7 +122,7 @@ export default function request(url, options) {
       // .then(saveCache)
       .catch(error => {
         // TODO: 准确判断错误是否由token过期导致
-        if (error.response.status === 401) {
+        if (error.response && error.response.status === 401) {
           // 尝试刷新token
           relogin()
             .then(tokenData => {

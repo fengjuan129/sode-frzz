@@ -7,10 +7,14 @@ import router from '../../router';
  */
 const errorHandlePlugin = {
   install() {
-    Vue.prototype.$errorHandler = function errorHandler(e) {
+    Vue.prototype.$errorHandler = function errorHandler(e = {}) {
       const { response } = e; // 从错误对象中获取响应对象
-      const { status, data, statusText } = response; // 获取HTTP状态码及返回数据
-      const { msg } = data; // 从返回数据中获取错误码及错误提示信息
+      const { status, data, statusText } = response || {}; // 获取HTTP状态码及返回数据
+      let { msg } = data || {}; // 从返回数据中获取错误码及错误提示信息
+      // 如果response不存在，表示错误不是由后端返回，此时错误信息直接从错误对象获取
+      if (!response) {
+        msg = e.message;
+      }
       if (status === 401) {
         // 未授权时跳转至登录界面并显示提示信息（request.js中已经尝试刷新token，错误到达这里说明未能成功刷新token）
         // * 提示信息优先级为：服务器返回的业务错误提示 > HTTP默认状态码提示
