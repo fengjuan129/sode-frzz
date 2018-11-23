@@ -4,6 +4,7 @@
 import core from './modules/core';
 import org from './modules/org';
 import res from './modules/res';
+import auth from './modules/auth';
 import error from './modules/error';
 
 export default [
@@ -31,6 +32,7 @@ export default [
       ...core,
       ...org,
       ...res,
+      ...auth,
       ...error,
       // 未匹配到任何路由时，默认返回404
       // !此路由只能配置在路由表最后，顺序不可改变
