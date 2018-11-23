@@ -7,7 +7,7 @@
       <h1>{{ config[type].title }}</h1>
       <div class="desc">{{ config[type].desc }}</div>
       <div class="actions">
-        <el-button type="primary" @click="goBack">重新加载</el-button>
+        <el-button type="primary" @click="redirect">{{ btnText }}</el-button>
       </div>
     </div>
   </div>
@@ -32,10 +32,21 @@ export default {
       // eslint-disable-next-line global-require
       return require(`./img/${this.type}.svg`); // eslint-disable-line import/no-dynamic-require
     },
+    btnText() {
+      return this.type === 404 ? '返回首页' : '重新加载';
+    },
   },
   methods: {
-    goBack() {
-      this.$router.back();
+    /**
+     * 路由重定向
+     */
+    redirect() {
+      // 如果当前是404错误，返回首页；如果是其他错误，返回原页面
+      if (this.type === 404) {
+        this.$router.replace('/');
+      } else {
+        this.$router.back();
+      }
     },
   },
 };
