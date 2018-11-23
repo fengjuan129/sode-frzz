@@ -8,6 +8,10 @@ import router from '../../router';
 const errorHandlePlugin = {
   install() {
     Vue.prototype.$errorHandler = function errorHandler(e = {}) {
+      // 如果当前是开发环境，在控制台输出错误
+      if (process.env.NODE_ENV === 'development') {
+        console.error(e);
+      }
       const { response } = e; // 从错误对象中获取响应对象
       const { status, data, statusText } = response || {}; // 获取HTTP状态码及返回数据
       let { msg } = data || {}; // 从返回数据中获取错误码及错误提示信息
