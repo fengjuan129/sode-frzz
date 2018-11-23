@@ -7,9 +7,7 @@
       <h1>{{ config[type].title }}</h1>
       <div class="desc">{{ config[type].desc }}</div>
       <div class="actions">
-        <router-link to="/">
-          <el-button type="primary">返回首页</el-button>
-        </router-link>
+        <el-button type="primary" @click="goBack">重新加载</el-button>
       </div>
     </div>
   </div>
@@ -33,6 +31,11 @@ export default {
     image() {
       // eslint-disable-next-line global-require
       return require(`./img/${this.type}.svg`); // eslint-disable-line import/no-dynamic-require
+    },
+  },
+  methods: {
+    goBack() {
+      this.$router.back();
     },
   },
 };
