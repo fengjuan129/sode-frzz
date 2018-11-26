@@ -118,12 +118,15 @@ export default {
       // 验证表单
       this.$refs.formRole.validate(valid => {
         if (valid) {
-          roleApi.saveRole(this.formRole).then(role => {
-            // 更新表单角色对象
-            this.formRole = { ...role };
-            // 触发保存成功事件
-            this.$emit('save', role);
-          });
+          roleApi
+            .saveRole(this.formRole)
+            .then(role => {
+              // 更新表单角色对象
+              this.formRole = { ...role };
+              // 触发保存成功事件
+              this.$emit('save', role);
+            })
+            .catch(this.$errorHandler);
         }
       });
     },

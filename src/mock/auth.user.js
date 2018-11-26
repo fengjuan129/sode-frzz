@@ -2,4 +2,7 @@
 import Mock from 'mockjs';
 
 // 判断当前账号是否为运维管理员
-Mock.mock('/v1/auth/user/admin', 'get', () => true);
+Mock.mock('/v1/core/auth/user/admin', 'get', () => false);
+
+// 判断当前账号是否为顶级系统三员
+Mock.mock('/v1/core/auth/user/topadmin', 'get', () => false);

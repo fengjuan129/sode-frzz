@@ -100,6 +100,7 @@ export default {
       activeTabKey: '', // 当前选中标签页对应的应用id
       loading: true, // 是否正在加载
       isAdmin: true, // 当前账号是否为运维管理员
+      isTopAdmin: true, // 当前账号是否为顶级系统三员
       apps: [], // 应用系统
       formSearch: { name: '', isEnable: '' }, // 查询条件
       isEnableCodeTable: [{ text: '启用', value: true }, { text: '禁用', value: false }], // TODO: 是否启用码表
@@ -115,11 +116,15 @@ export default {
   computed: {
     // 界面中显示的标签页
     tabs() {
+      // 如果当前账号是顶级系统三员，此时不显示标签页
+      if (this.isTopAdmin) {
+        return [];
+      }
       // 如果当前账号是运维管理员，标签页显示为应用系统
       if (this.isAdmin) {
         return this.apps.map(app => ({ name: app.name, key: app.appId }));
       }
-      // 否则标签页固定显示为公共角色和私有角色（此时为系统管理员使用）
+      // 否则标签页固定显示为公共角色和私有角色（此时为下级小三员使用）
       return [{ name: '公共角色', key: 'public' }, { name: '私有角色', key: 'private' }];
     },
     // 是否显示批量操作按钮
@@ -128,26 +133,46 @@ export default {
     },
   },
   created() {
-    // 判断当前账号是否为运维管理员
-    this.judgeIsAdmin().then(isAdmin => {
-      // 如果是运维管理员
-      if (isAdmin) {
-        // 加载应用系统
-        this.loadApps().then(apps => {
-          // 标记选中的tab标签页
-          this.activeTabKey = apps[0].appId;
+    // 判断当前账号是否为顶级系统三员
+    this.judgeIsTopAdmin()
+      .then(isTopAdmin => {
+        // 如果是顶级系统三员
+        if (isTopAdmin) {
           // 加载角色列表
-          this.loadRoles(this.activeTabKey);
-        });
-      } else {
-        // 标记选中的tab标签页
-        this.activeTabKey = 'public';
-        // 直接加载公共角色列表
-        this.loadRoles(null, 'public');
-      }
-    });
+          this.loadRoles();
+        } else {
+          // 如果不是顶级系统三员，判断当前账号是否为运维管理员
+          this.judgeIsAdmin().then(isAdmin => {
+            // 如果是运维管理员
+            if (isAdmin) {
+              // 加载应用系统
+              this.loadApps().then(apps => {
+                // 标记选中的tab标签页
+                this.activeTabKey = apps[0].appId;
+                // 加载角色列表
+                this.loadRoles(this.activeTabKey);
+              });
+            } else {
+              // 标记选中的tab标签页
+              this.activeTabKey = 'public';
+              // 直接加载公共角色列表
+              this.loadRoles(null, 'public');
+            }
+          });
+        }
+      })
+      .catch(this.$errorHandler);
   },
   methods: {
+    /**
+     * 判断当前账号是否为顶级系统三员
+     */
+    judgeIsTopAdmin() {
+      return authApi.judgeIsTopAdmin().then(isTopAdmin => {
+        this.isTopAdmin = isTopAdmin;
+        return isTopAdmin;
+      });
+    },
     /**
      * 判断当前账号是否为运维管理员
      */
@@ -173,14 +198,19 @@ export default {
      */
     loadRoles(appId, roleType) {
       this.loading = true;
-      return roleApi.loadRoles(appId, roleType, this.formSearch).then(roles => {
-        this.roles = roles.map(role => ({
-          ...role,
-          showDelPopOver: false, // 为每行数据添加是否显示确认删除框的标识
-        }));
-        this.loading = false;
-        return roles;
-      });
+      return roleApi
+        .loadRoles(appId, roleType, this.formSearch)
+        .then(roles => {
+          this.roles = roles.map(role => ({
+            ...role,
+            showDelPopOver: false, // 为每行数据添加是否显示确认删除框的标识
+          }));
+          return roles;
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.loading = false;
+        });
     },
     /**
      * 查询角色列表
@@ -254,16 +284,19 @@ export default {
      * @param {Boolean} state 目标状态
      */
     toggleRoleState(role) {
-      roleApi.setRoleEnable(role.id, !role.isEnable).then(() => {
-        // 显示提示
-        this.$message.success(`${role.isEnable ? '禁用' : '启用'}成功`);
-        // 更新角色状态
-        this.roles.forEach(roleItem => {
-          if (roleItem.id === role.id) {
-            roleItem.isEnable = !roleItem.isEnable;
-          }
-        });
-      });
+      roleApi
+        .setRoleEnable(role.id, !role.isEnable)
+        .then(() => {
+          // 显示提示
+          this.$message.success(`${role.isEnable ? '禁用' : '启用'}成功`);
+          // 更新角色状态
+          this.roles.forEach(roleItem => {
+            if (roleItem.id === role.id) {
+              roleItem.isEnable = !roleItem.isEnable;
+            }
+          });
+        })
+        .catch(this.$errorHandler);
     },
     /**
      * 删除角色
@@ -272,12 +305,15 @@ export default {
     deleteRole(role) {
       // 隐藏确认删除提示
       role.showDelPopOver = false;
-      roleApi.deleteRole(role.id).then(() => {
-        // 显示提示
-        this.$message.success('删除成功');
-        // 将删除的角色从列表移除
-        this.roles = this.roles.filter(roleItem => roleItem.id !== role.id);
-      });
+      roleApi
+        .deleteRole(role.id)
+        .then(() => {
+          // 显示提示
+          this.$message.success('删除成功');
+          // 将删除的角色从列表移除
+          this.roles = this.roles.filter(roleItem => roleItem.id !== role.id);
+        })
+        .catch(this.$errorHandler);
     },
     /**
      * 勾选项改变事件
@@ -297,7 +333,9 @@ export default {
           cancelButtonText: '取消',
           type: 'warning',
         })
-          .then(() => roleApi.deleteRoles(this.selection.map(role => role.id)))
+          .then(() =>
+            roleApi.deleteRoles(this.selection.map(role => role.id)).catch(this.$errorHandler)
+          )
           .then(() => {
             this.$message({
               type: 'success',
@@ -309,28 +347,34 @@ export default {
           .catch(() => {});
       } else if (command === 'enableRoles') {
         // 启用角色
-        roleApi.setRolesEnable(this.selection.map(role => role.id), true).then(() => {
-          this.$message({
-            type: 'success',
-            message: '启用成功',
-          });
-          // 更新角色状态
-          this.selection.forEach(role => {
-            role.isEnable = true;
-          });
-        });
+        roleApi
+          .setRolesEnable(this.selection.map(role => role.id), true)
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '启用成功',
+            });
+            // 更新角色状态
+            this.selection.forEach(role => {
+              role.isEnable = true;
+            });
+          })
+          .catch(this.$errorHandler);
       } else if (command === 'disableRoles') {
         // 禁用角色
-        roleApi.setRolesEnable(this.selection.map(role => role.id), false).then(() => {
-          this.$message({
-            type: 'success',
-            message: '禁用成功',
-          });
-          // 更新角色状态
-          this.selection.forEach(role => {
-            role.isEnable = false;
-          });
-        });
+        roleApi
+          .setRolesEnable(this.selection.map(role => role.id), false)
+          .then(() => {
+            this.$message({
+              type: 'success',
+              message: '禁用成功',
+            });
+            // 更新角色状态
+            this.selection.forEach(role => {
+              role.isEnable = false;
+            });
+          })
+          .catch(this.$errorHandler);
       }
     },
   },

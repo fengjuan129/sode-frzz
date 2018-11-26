@@ -103,6 +103,9 @@ export default {
               });
             }
           }
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
           this.loading = false;
         });
     },
