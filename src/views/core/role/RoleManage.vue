@@ -12,7 +12,8 @@
         <el-dropdown v-show="showBatchBtn" @command="handleBatchCommand" trigger="click" style="margin: 0 10px;">
           <el-button size="mini">批量操作<i class="el-icon-arrow-down el-icon--right"></i></el-button>
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="deleteRoles">删除</el-dropdown-item>
+            <!-- 开发模式才可执行删除操作 -->
+            <el-dropdown-item command="deleteRoles" v-if="isDevMode">删除</el-dropdown-item>
             <el-dropdown-item command="enableRoles">启用</el-dropdown-item>
             <el-dropdown-item command="disableRoles">禁用</el-dropdown-item>
           </el-dropdown-menu>
@@ -24,7 +25,7 @@
         <el-form-item label="角色名称">
           <el-input v-model="formSearch.name"></el-input>
         </el-form-item>
-        <el-form-item v-if="isAdmin" label="状态">
+        <el-form-item label="状态">
           <el-select v-model="formSearch.isEnable">
             <el-option
               v-for="item in isEnableCodeTable"
@@ -46,11 +47,7 @@
         <el-table-column type="index" label="序号"></el-table-column>
         <el-table-column prop="name" label="角色名称"></el-table-column>
         <el-table-column prop="roleCode" label="角色编码"></el-table-column>
-        <el-table-column prop="isEnable" label="状态">
-          <template slot-scope="scope">
-            {{ scope.row.isEnable | code2text('isEnable') }}
-          </template>
-        </el-table-column>
+        <el-table-column prop="isEnable" label="状态" :formatter="isEnableFormatter"></el-table-column>
         <el-table-column prop="sort" label="排序"></el-table-column>
         <el-table-column prop="description" label="备注"></el-table-column>
         <el-table-column label="操作">
@@ -58,7 +55,9 @@
           <template v-if="activeTabKey !== 'public'" slot-scope="scope">
             <el-button type='text' @click="editRole(scope.row)">编辑</el-button>
             <el-button type='text' @click="toggleRoleState(scope.row)">{{scope.row.isEnable === true ? '禁用' : '启用'}}</el-button>
+            <!-- 开发模式才可执行删除操作 -->
             <el-popover
+              v-if="isDevMode"
               style="margin-left: 10px;"
               placement="top"
               v-model="scope.row.showDelPopOver">
@@ -90,6 +89,7 @@
 import * as appApi from '@/api/app';
 import * as roleApi from '@/api/role';
 import * as authApi from '@/api/auth.user';
+import { get as getCodeTable, createFormatter } from '@/libs/codeTable';
 import RoleEdit from './RoleEdit.vue';
 
 export default {
@@ -97,13 +97,15 @@ export default {
   components: { RoleEdit },
   data() {
     return {
-      activeTabKey: '', // 当前选中标签页对应的应用id
+      mode: process.env.NODE_ENV,
+      isDevMode: process.env.NODE_ENV === 'development',
+      activeTabKey: 'public', // 当前选中标签页对应的应用id（默认设置为public是为了界面显示效果，先隐藏操作栏）
       loading: true, // 是否正在加载
       isAdmin: true, // 当前账号是否为运维管理员
       isTopAdmin: true, // 当前账号是否为顶级系统三员
       apps: [], // 应用系统
       formSearch: { name: '', isEnable: '' }, // 查询条件
-      isEnableCodeTable: [{ text: '启用', value: true }, { text: '禁用', value: false }], // TODO: 是否启用码表
+      isEnableCodeTable: [], // 是否启用码表
       roles: [], // 角色数据
       selection: [], // 勾选的角色数据
       // 编辑窗口相关配置及数据
@@ -133,11 +135,17 @@ export default {
     },
   },
   created() {
+    // 加载码表
+    getCodeTable('isEnable').then(codeTable => {
+      this.isEnableCodeTable = codeTable.isEnable;
+    });
+
     // 判断当前账号是否为顶级系统三员
     this.judgeIsTopAdmin()
       .then(isTopAdmin => {
         // 如果是顶级系统三员
         if (isTopAdmin) {
+          this.activeTabKey = '';
           // 加载角色列表
           this.loadRoles();
         } else {
@@ -231,6 +239,10 @@ export default {
       this.formSearch = { name: '', isEnable: '' };
       this.searchRoles();
     },
+    /**
+     * 是否启用字段值显示转换器
+     */
+    isEnableFormatter: createFormatter('isEnable'),
     /**
      * 点击标签页事件
      */

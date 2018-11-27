@@ -50,6 +50,7 @@
 
 <script>
 import * as roleApi from '@/api/role';
+import { get as getCodeTable } from '@/libs/codeTable';
 
 export default {
   name: 'RoleEdit',
@@ -67,7 +68,7 @@ export default {
         deptCode: '',
         roleCode: '',
         name: '',
-        isEnable: true,
+        isEnable: 'true',
       },
       // 表单验证规则
       rules: {
@@ -92,10 +93,15 @@ export default {
           },
         ],
       },
-      isEnableCodeTable: [{ text: '启用', value: true }, { text: '禁用', value: false }], // TODO: 是否启用码表
+      isEnableCodeTable: [], // 是否启用码表数据
     };
   },
   created() {
+    // 加载码表
+    getCodeTable('isEnable').then(codeTable => {
+      this.isEnableCodeTable = codeTable.isEnable;
+    });
+
     // 如果传入了角色对象，表明为修改模式，此时将表单数据替换为传入对象的拷贝
     // ! 注意一定要拷贝传入的对象，否则子组件对对象的修改会影响父组件，除非设计效果就是这样
     if (this.role) {
