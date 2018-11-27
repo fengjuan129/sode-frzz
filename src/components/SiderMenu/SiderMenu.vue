@@ -4,7 +4,7 @@
     <!-- 顶部插槽 -->
     <slot name="header"></slot>
     <!-- 菜单主体 -->
-    <el-menu router :default-active="$route.path">
+    <el-menu router :default-active="$route.path" v-bind="$attrs">
       <el-submenu index="1">
         <template slot="title">
           <i class="el-icon-menu"></i>
@@ -38,10 +38,8 @@
 <script>
 export default {
   name: 'SiderMenu',
-  props: [],
-  data() {
-    return {};
-  },
+  // 禁用特性继承，手动将父组件传入的props绑定到el-menu上
+  inheritAttrs: false,
 };
 </script>
 

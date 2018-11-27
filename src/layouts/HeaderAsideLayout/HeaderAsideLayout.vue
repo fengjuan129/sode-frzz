@@ -1,13 +1,13 @@
 <template>
   <el-container style="min-height: 100%;">
     <!-- 侧栏 -->
-    <el-aside width="265px">
+    <el-aside :width="asideWidth">
       <!-- 侧栏导航菜单 -->
-      <sider-menu>
+      <sider-menu v-bind="menuConfig">
         <template slot="header">
-          <div class="logo-wrapper">
+          <div class="logo-wrapper" :title="system">
             <router-link to="/">
-              <img src="../assets/logo.png" :alt="system">
+              <img src="../../assets/logo.png" :alt="system">
               <h1>{{ system }}</h1>
             </router-link>
           </div>
@@ -17,10 +17,13 @@
     <!-- 页面主体 -->
     <el-container>
       <el-header>
+        <div class="toggle-handler" @click="toggleCollapse">
+          <font-awesome-icon icon="bars" class="toggle-icon" size="lg" :rotation="toggleIconRotation"/>
+        </div>
         <el-dropdown @command="handleCommand" size="medium" class="user-dropdown">
-          <div>
-            <img src="../assets/logo.png" alt="头像">
-            <span>运维管理员</span>
+          <div class="user-info-container">
+            <img src="../../assets/logo.png" class="avatar" alt="头像">
+            <span class="user-name">运维管理员</span>
           </div>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item command="setting" disabled>
@@ -41,23 +44,43 @@
 </template>
 
 <script>
+import { mapState, mapGetters, mapMutations } from 'vuex';
 import SiderMenu from '@/components/SiderMenu';
 import { setToken } from '@/libs/token';
 import { logout } from '@/api/login';
 import config from '@/config';
 
 export default {
-  name: 'BasicLayout',
+  name: 'HeaderAsideLayout',
   components: {
     SiderMenu,
   },
   data() {
     return {
-      system: config.system,
+      system: config.system, // 系统名称
     };
   },
+  computed: {
+    // 是否折叠侧栏
+    ...mapState('global', {
+      collapse: state => state.layout.collapse,
+    }),
+    // 获取侧栏宽度、菜单配置
+    ...mapGetters('global', ['asideWidth', 'menuConfig']),
+    // 切换侧栏折叠按钮旋转角度
+    toggleIconRotation() {
+      return this.collapse ? 270 : 180;
+    },
+  },
   methods: {
+    // 将切换侧栏收缩状态方法绑定到当前组件
+    ...mapMutations('global', ['toggleCollapse']),
+    /**
+     * 处理下拉菜单操作
+     * @param {string} command 操作类型
+     */
     handleCommand(command) {
+      // 退出登录
       if (command === 'exit') {
         logout().then(() => {
           setToken('');
@@ -73,12 +96,29 @@ export default {
 <style lang="less" scoped>
 .el-header {
   color: rgba(0, 0, 0, 0.65);
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  padding-left: 0px;
+
+  .toggle-handler {
+    display: inline-block;
+    height: 60px;
+    line-height: 60px;
+    padding: 0 20px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    &:hover {
+      background: rgba(0, 0, 0, 0.025);
+    }
+    .toggle-icon {
+      transition: all 0.2s ease-in-out;
+    }
+    .toggle-icon.rotate {
+      transform: rotate('90deg');
+    }
+  }
 
   .user-dropdown {
-    div {
+    float: right;
+    .user-info-container {
       display: inline-block;
       padding: 0 12px;
       height: 60px;
@@ -89,13 +129,13 @@ export default {
         background: rgba(0, 0, 0, 0.025);
       }
     }
-    img {
+    .avatar {
       height: 24px;
       display: inline-block;
       vertical-align: middle;
       margin-right: 8px;
     }
-    span {
+    .user-name {
       display: inline-block;
       vertical-align: middle;
       font-weight: normal;
@@ -105,6 +145,8 @@ export default {
 
 .el-aside {
   border-right: solid 1px #e6e6e6;
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
 }
 
 .el-main {
@@ -115,7 +157,7 @@ export default {
 .logo-wrapper {
   height: 60px;
   line-height: 60px;
-  padding-left: 24px;
+  padding-left: 17px;
   overflow: hidden;
 
   img {

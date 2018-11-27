@@ -12,7 +12,7 @@ export default [
   {
     path: '/login',
     name: 'login',
-    component: () => import(/* webpackChunkName: "login" */ '../views/login'),
+    component: () => import('../views/login'),
     meta: {
       // 路由类型分为：公开(public)、受保护(protected)、授权(private)
       // 公开路由无需登录即可访问；受保护路由需要登录才能访问；授权路由除了登录还需要有相应授权才能访问
@@ -23,7 +23,7 @@ export default [
   {
     path: '/',
     name: 'index',
-    component: () => import(/* webpackChunkName: "basic-layout" */ '../layouts/BasicLayout.vue'),
+    component: () => import('../views/index/index.vue'),
     meta: {
       type: 'protected',
     },
@@ -38,7 +38,7 @@ export default [
       // !此路由只能配置在路由表最后，顺序不可改变
       {
         path: '*',
-        component: () => import(/* webpackChunkName: "exception" */ '@/components/Exception'),
+        component: () => import('@/components/Exception'),
         props: {
           type: 404,
         },

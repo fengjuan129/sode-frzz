@@ -2,7 +2,7 @@ export default [
   {
     path: '/exception/403',
     name: '403',
-    component: () => import(/* webpackChunkName: "exception" */ '@/components/Exception'),
+    component: () => import('@/components/Exception'),
     props: {
       // 为路由组件传参
       type: 403,
@@ -14,7 +14,7 @@ export default [
   {
     path: '/exception/404',
     name: '404',
-    component: () => import(/* webpackChunkName: "exception" */ '@/components/Exception'),
+    component: () => import('@/components/Exception'),
     props: {
       type: 404,
     },
@@ -25,7 +25,7 @@ export default [
   {
     path: '/exception/500',
     name: '500',
-    component: () => import(/* webpackChunkName: "exception" */ '@/components/Exception'),
+    component: () => import('@/components/Exception'),
     props: {
       type: 500,
     },
