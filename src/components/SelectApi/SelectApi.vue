@@ -1,6 +1,12 @@
 <!-- 选择服务公共页面 -->
 <template>
-  <el-dialog :title="title" visible width="60%" :before-close="close" :close-on-click-modal="false">
+  <el-dialog
+    :title="title"
+    visible
+    width="900px"
+    :before-close="close"
+    :close-on-click-modal="false"
+  >
     <div class="search-bar">
       <el-form :inline="true">
         <el-form-item label="服务名称">
@@ -119,11 +125,9 @@ export default {
                 this.setParentsChecked(item.parent);
               }
             });
-          } else {
-            if (this.selectedIds.length) {
-              const targetRow = returnTree.find(item => !!this.defaultSelectMap[item.id]);
-              this.$refs.tbaleApi.setCurrentRow(targetRow);
-            }
+          } else if (this.selectedIds.length) {
+            const targetRow = returnTree.find(item => !!this.defaultSelectMap[item.id]);
+            this.$refs.tbaleApi.setCurrentRow(targetRow);
           }
         });
       }
@@ -144,11 +148,16 @@ export default {
         this.formApi = {};
       }
       this.loading = true;
-      resApi.getApisTree(this.formApi).then(res => {
-        this.loading = false;
-        // 没查询到数据时，后端返回 null
-        this.apiList = res || [];
-      });
+      resApi
+        .getApisTree(this.formApi)
+        .then(res => {
+          // 没查询到数据时，后端返回 null
+          this.apiList = res || [];
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.loading = false;
+        });
     },
 
     /**

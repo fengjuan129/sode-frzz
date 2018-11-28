@@ -91,23 +91,28 @@ export default {
      */
     getMenu() {
       this.loading = true;
-      resApi.getMenuTree({ isEnable: true }).then(res => {
-        this.loading = false;
-        this.treeList = res;
+      resApi
+        .getMenuTree({ isEnable: true })
+        .then(res => {
+          this.treeList = res;
 
-        // 设置默认选中
-        if (this.selectedIds && this.selectedIds.length) {
-          this.$nextTick(() => {
-            this.selectedIds.forEach(item => {
-              if (this.multiple) {
-                this.$refs.menuTree.setChecked(item, true, false);
-              } else {
-                this.$refs.menuTree.setCurrentKey(item);
-              }
+          // 设置默认选中
+          if (this.selectedIds && this.selectedIds.length) {
+            this.$nextTick(() => {
+              this.selectedIds.forEach(item => {
+                if (this.multiple) {
+                  this.$refs.menuTree.setChecked(item, true, false);
+                } else {
+                  this.$refs.menuTree.setCurrentKey(item);
+                }
+              });
             });
-          });
-        }
-      });
+          }
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.loading = false;
+        });
     },
 
     /**
@@ -141,7 +146,7 @@ export default {
      * @return {Object}  保存、删除集合
      */
     filterDelAndSaveOption(select) {
-      select instanceof Array ? select : [select];
+      select = select instanceof Array ? select : [select];
       const { defaultSelectMap } = this;
       const returnDate = {
         added: [],

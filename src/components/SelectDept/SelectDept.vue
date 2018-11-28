@@ -125,7 +125,7 @@ export default {
           this.activeTabCode = this.rootCode || this.deptTypeList[0].code;
           this.loadDept();
         })
-        .catch(this.$errorHandle)
+        .catch(this.$errorHandler)
         .finally(() => {
           this.loading = false;
         });
@@ -149,7 +149,7 @@ export default {
             });
           }
         })
-        .catch(this.$errorHandle)
+        .catch(this.$errorHandler)
         .finally(() => {
           this.loading = false;
         });
@@ -175,7 +175,7 @@ export default {
       const filterData = this.filterDelAndSaveOption(select);
 
       // return;
-      this.$emit('select', curDept, filterData.added, filterData.removed);
+      this.$emit('select', select, filterData.added, filterData.removed);
       this.close();
     },
     close() {

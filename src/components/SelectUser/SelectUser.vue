@@ -136,6 +136,7 @@ export default {
 
           this.userList = res;
 
+          // 默认选中
           if (this.selectedIds.length) {
             this.$nextTick(() => {
               this.selectedIds.forEach(item => {
