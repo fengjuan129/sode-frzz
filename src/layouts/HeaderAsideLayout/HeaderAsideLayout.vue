@@ -3,7 +3,7 @@
     <!-- 侧栏 -->
     <el-aside :width="asideWidth">
       <!-- 侧栏导航菜单 -->
-      <sider-menu v-bind="menuConfig">
+      <nav-menu v-bind="menuConfig">
         <template slot="header">
           <div class="logo-wrapper" :title="system">
             <router-link to="/">
@@ -12,7 +12,7 @@
             </router-link>
           </div>
         </template>
-      </sider-menu>
+      </nav-menu>
     </el-aside>
     <!-- 页面主体 -->
     <el-container>
@@ -45,7 +45,7 @@
 
 <script>
 import { mapState, mapGetters, mapMutations } from 'vuex';
-import SiderMenu from '@/components/SiderMenu';
+import NavMenu from '@/components/NavMenu';
 import { setToken } from '@/libs/token';
 import { logout } from '@/api/login';
 import config from '@/config';
@@ -53,7 +53,7 @@ import config from '@/config';
 export default {
   name: 'HeaderAsideLayout',
   components: {
-    SiderMenu,
+    NavMenu,
   },
   data() {
     return {

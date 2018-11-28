@@ -89,7 +89,7 @@
 import * as appApi from '@/api/app';
 import * as roleApi from '@/api/role';
 import * as authApi from '@/api/auth.user';
-import { get as getCodeTable, createFormatter } from '@/libs/codeTable';
+import { getCodeTable, createFormatter } from '@/libs/codeTable';
 import RoleEdit from './RoleEdit.vue';
 
 export default {
@@ -105,7 +105,7 @@ export default {
       isTopAdmin: true, // 当前账号是否为顶级系统三员
       apps: [], // 应用系统
       formSearch: { name: '', isEnable: '' }, // 查询条件
-      isEnableCodeTable: [], // 是否启用码表
+      isEnableCodeTable: getCodeTable('isEnable'), // 是否启用码表
       roles: [], // 角色数据
       selection: [], // 勾选的角色数据
       // 编辑窗口相关配置及数据
@@ -135,11 +135,6 @@ export default {
     },
   },
   created() {
-    // 加载码表
-    getCodeTable('isEnable').then(codeTable => {
-      this.isEnableCodeTable = codeTable.isEnable;
-    });
-
     // 判断当前账号是否为顶级系统三员
     this.judgeIsTopAdmin()
       .then(isTopAdmin => {
@@ -240,7 +235,7 @@ export default {
       this.searchRoles();
     },
     /**
-     * 是否启用字段值显示转换器
+     * 是否启用码表转换器
      */
     isEnableFormatter: createFormatter('isEnable'),
     /**
