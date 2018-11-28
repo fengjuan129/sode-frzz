@@ -1,14 +1,19 @@
 <!-- 应用系统管理员授权页面 -->
 <template>
   <div>
-    <el-dialog width='400px' :visible="visible" title='应用系统管理员权限' :before-close="close">
+    <el-dialog
+      width='400px'
+      :visible="visible"
+      title='应用系统管理员权限'
+      :before-close="close"
+      :close-on-click-modal='false'>
 
-      <el-table style='width: 100%;' :data='userList' v-loading='loading' @current-change="onCurrentChange">
+      <el-table style='width: 100%;' :data='roleList' v-loading='loading'>
 
         <el-table-column label="管理角色" prop='name'></el-table-column>
         <el-table-column label="账号">
           <template slot-scope="scope">
-            <el-button type='text' @click="winSelectUser.visible = true;">[{{scope.row.userName || '选择'}}]</el-button>
+            <el-button type='text' @click="onAdminChange(scope.row)">[{{scope.row.userName || '选择'}}]</el-button>
           </template>
         </el-table-column>
 
@@ -41,7 +46,7 @@ export default {
       default: false,
     },
     appId: {
-      type: Number,
+      type: String,
       required: true,
     },
   },
@@ -51,7 +56,7 @@ export default {
   data() {
     return {
       loading: true,
-      userList: [],
+      roleList: [],
       winSelectUser: {
         visible: false,
       },
@@ -62,7 +67,7 @@ export default {
   created() {
     CoreApi.searchAdminAuth(this.appId).then(res => {
       this.loading = false;
-      this.userList = res;
+      this.roleList = res;
     });
   },
 
@@ -70,24 +75,44 @@ export default {
     close() {
       this.$emit('close');
     },
+    /**
+     * 选中用户回调方法
+     */
     setAdmin(user) {
-      CoreApi.saveAdminAuth(this.selection.id, user.id).then(res => {
-        console.log(res);
-        // TODO 数据结构不清楚
+      /**
+       * 判断选中用户是否已经拥有管理员角色
+       * 同一个账号不能同时担任两个及以上管理角色
+       */
+      const role = this.roleList.find(item => item.userId === user.id);
+      if (role) {
+        this.$message({
+          message: `选中用户已经拥有【${role.name}】角色，请重新选择！`,
+          type: 'warning',
+        });
+        return;
+      }
+
+      this.loading = true;
+      // TODO 后端暂无接口,提交参数不明， 保存成功后后端返回完整数据
+      CoreApi.saveAdminAuth(this.selection.id, user.id).then(() => {
+        this.loading = false;
+
         this.selection.userName = user.name;
         this.selection.userId = user.id;
-        // TODO 保存成功后后端返回完整数据
-        this.$emit('save', this.selection);
-        this.close();
+
+        this.$emit('save', { ...this.selection });
         this.$message({
           message: '保存成功',
           type: 'success',
         });
       });
-      console.log(user);
     },
-    onCurrentChange(selection) {
+    /**
+     * 保存当前选中行
+     */
+    onAdminChange(selection) {
       this.selection = selection;
+      this.winSelectUser.visible = true;
     },
   },
 };

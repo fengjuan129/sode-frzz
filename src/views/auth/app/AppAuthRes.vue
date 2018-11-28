@@ -1,61 +1,64 @@
 <!-- 系统资源分配页面 -->
 <template>
-  <div>
-    <div class="t-pane" v-loading='dialogLoading'>
-      <div class="pane-tit">
-        <el-form :inline='true'>
-          <el-form-item label="应用系统名称">
-            <el-input v-model.trim="keyWord" size='mini' @keydown.13.prevent="loadSystem"></el-input>
-          </el-form-item>
+  <el-card class="box-card">
+    <el-form :inline="true" @submit.native.prevent slot="header" class="clearfix">
+      <el-form-item label="应用系统名称">
+        <el-input v-model.trim="keyWord" size="mini" @keydown.13.prevent="loadSystem"></el-input>
+      </el-form-item>
 
-          <el-form-item>
-            <el-button type='primary' size='mini' @click='loadSystem'>查询</el-button>
-          </el-form-item>
+      <el-form-item>
+        <el-button type="primary" size="mini" @click="loadSystem">查询</el-button>
+      </el-form-item>
 
-          <el-form-item>
-            <el-button size='mini' @click='keyWord = "",loadSystem()'>重置</el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-      <!-- searchBar END -->
-      <div class="pane-container">
-        <el-table :data='systemList' style='width: 100%;' border hightlight-current-row v-loading='loading'>
-          <el-table-column type='index' width='50' label="序号" align="center"></el-table-column>
-          <el-table-column label='系统名称' prop='name'>
-            <template slot-scope="scope">
-              <span class='ms-tree-space' v-for='(item,index) in scope.row.level' :key='index'></span>
-              {{scope.row.name}}
-            </template>
-          </el-table-column>
-          <el-table-column label='系统编码' prop='code' width='100' align="center"></el-table-column>
-          <el-table-column label='所属机构' prop='deptCode' width='100' align="center"></el-table-column>
-          <el-table-column label='备注' prop='description'></el-table-column>
-          <el-table-column label='分配操作'>
-            <template slot-scope="scope">
-              <el-button type='text'  @click='getSystemMenu(scope.row)'>[菜单]</el-button>
-              <el-button type='text'  @click='getSystemApi(scope.row)'>[服务]</el-button>
-              <el-button type='text'  @click='getSystemCodeTable(scope.row)'>[码表]</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
-      <!-- table END -->
-    </div>
+      <el-form-item>
+        <el-button size="mini" @click="keyWord = '',loadSystem()">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+    <el-table
+      :data="systemList"
+      style="width: 100%;"
+      border
+      highlight-current-row
+      v-loading="loading"
+    >
+      <el-table-column type="index" width="50" label="序号" align="center"></el-table-column>
+      <el-table-column label="系统名称" prop="name">
+        <template slot-scope="scope">
+          <span class="ms-tree-space" v-for="(item,index) in scope.row.level" :key="index"></span>
+          {{scope.row.name}}
+        </template>
+      </el-table-column>
+      <el-table-column label="系统编码" prop="code" width="100" align="center"></el-table-column>
+      <el-table-column label="所属机构" prop="deptCode" width="100" align="center"></el-table-column>
+      <el-table-column label="备注" prop="description"></el-table-column>
+      <el-table-column label="分配操作">
+        <template slot-scope="scope">
+          <el-button type="text" @click="getSystemMenu(scope.row)">[菜单]</el-button>
+          <el-button type="text" @click="getSystemApi(scope.row)">[服务]</el-button>
+          <el-button type="text" @click="getSystemCodeTable(scope.row)">[码表]</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
 
     <!-- 公共组件 -->
-    <SelectMenu
+    <select-menu
       v-bind="selectMenu"
-      v-if='selectMenu.isVisible'
-      @close='selectMenu.isVisible = false'
-      @select='saveSystemMenu'/>
+      :selectedIds="cacheData.selectedIds"
+      v-if="selectMenu.isVisible"
+      @close="selectMenu.isVisible = false"
+      @select="saveAppAuth"
+    ></select-menu>
     <!-- 菜单 END -->
-    <SelectApi
+    <select-api
       v-bind="selectApi"
-      v-if='selectApi.isVisible'
-      @close='selectApi.isVisible = false'
-      @select='saveSystemApi'/>
+      :selectedIds="cacheData.selectedIds"
+      v-if="selectApi.isVisible"
+      @close="selectApi.isVisible = false"
+      @select="saveAppAuth"
+    ></select-api>
     <!-- 服务 END -->
-  </div>
+  </el-card>
 </template>
 
 <script>
@@ -82,16 +85,17 @@ export default {
       selectMenu: {
         isVisible: false,
         multiple: true,
-        selectedIds: [],
+        autoCheckParent: true,
       },
       // 选择服务弹框
       selectApi: {
         isVisible: false,
         multiple: true,
-        selectedIds: [],
       },
       cacheData: {
         curRow: null, // 保存当前选中行
+        selectedIds: [], // 保存授权菜单、服务、码表 对应的资源ID
+        selectedMsg: [], // 保存授权菜单、服务、码表 完整对象，便于保存时查找关联ID
       },
     };
   },
@@ -105,7 +109,7 @@ export default {
     loadSystem() {
       this.loading = true;
 
-      AppAuthResApi.getSystemList(this.keyWord).then(res => {
+      AppAuthResApi.getSystemList({ name: this.keyWord, isEnable: true }).then(res => {
         this.loading = false;
         this.systemList = Utils.data2treeGridArr(res, 'id', 'pid', true);
       });
@@ -117,19 +121,37 @@ export default {
       this.dialogLoading = true;
 
       AppAuthResApi.getAuthMenusBySystemId(row.id).then(res => {
-        this.selectMenu.selectedIds = [...res];
+        // 未查询到授权菜单时 后端返回 null，
+        this.cacheData.selectedIds = res ? res.map(item => item.id) : [];
+        this.cacheData.selectedMsg = res || [];
         this.dialogLoading = false;
         this.selectMenu.isVisible = true;
       });
     },
 
-    // 保存系统菜单
-    saveSystemMenu(selectMenu) {
-      // TODO 后端接收参数不确定
-      const { id } = this.cacheData.curRow;
-      const resId = this.findIds(selectMenu).join(',');
+    // 保存系统授权
+    saveAppAuth(select) {
+      /**
+       * 11/23 resourceId / appId / resTypeCode 后端参数，要求组装成对象
+       * 11/26 后端接收参数修改
+       *       接收删除已勾选对象，新增对象
+       */
+      const saveData = [];
+      const appId = this.cacheData.curRow.id;
+      const findTarData = this.filterDelAndSaveData(select); //
+      const deleteIds = this.findContactIdByResId(findTarData.deleteIds); // 根据资源ID 查找 系统-资源关联ID
 
-      AppAuthResApi.saveMenuAuth({ id, resId }).then(() => {
+      findTarData.saveData.forEach(item => {
+        saveData.push({
+          appId,
+          resourceId: item.id,
+          resTypeCode: item.resTypeCode,
+        });
+      });
+
+      console.log(saveData, deleteIds);
+
+      AppAuthResApi.saveAppAuth(saveData, deleteIds).then(() => {
         this.$message({
           message: '保存成功',
           type: 'success',
@@ -143,26 +165,14 @@ export default {
       this.dialogLoading = true;
 
       AppAuthResApi.getSystemAuth(row.id).then(res => {
-        this.selectApi.selectedIds = [...res];
+        // 未查询到授权服务时 返回 NULL
+        this.cacheData.selectedIds = res ? res.map(item => item.id) : [];
+        this.cacheData.selectedMsg = res || [];
         this.dialogLoading = false;
         this.selectApi.isVisible = true;
       });
     },
-    // 保存系统服务
-    saveSystemApi(selectApi) {
-      this.dialogLoading = true;
-      // TODO 后端参数不确定
-      const { id } = this.cacheData.curRow;
-      const apis = selectApi.join(',');
 
-      AppAuthResApi.saveSystemAuth({ id, apis }).then(() => {
-        this.dialogLoading = false;
-        this.$message({
-          message: '修改服务成功',
-          type: 'success',
-        });
-      });
-    },
     // 获取系统码表
     getSystemCodeTable(row) {
       this.cacheData.curRow = row;
@@ -174,10 +184,58 @@ export default {
       console.log(selectCodeTable);
     },
 
-    findIds(arr) {
+    /**
+     * 查找需要删除的选项
+     * @param {Array} select 子组件返回勾选信息
+     * @return {Object}  保存、删除集合
+     */
+    filterDelAndSaveData(select) {
+      const self = this;
+      const returnDate = {
+        saveData: [],
+        deleteIds: [],
+      };
+      const cacheSelectidMap = {};
+
+      self.cacheData.selectedIds.forEach(item => {
+        cacheSelectidMap[item] = true;
+      });
+
+      select.forEach(item => {
+        if (cacheSelectidMap[item.id]) {
+          cacheSelectidMap[item.id] = false; // 如果存在，表示不需要做修改操作
+        } else {
+          returnDate.saveData.push(item); // 新增项
+        }
+      });
+
+      const keys = Object.keys(cacheSelectidMap);
+      // 获取需要删除的选项
+      for (let i = 0, len = keys.length; i < len; i += 1) {
+        const item = keys[i];
+        if (cacheSelectidMap[item] === true) {
+          returnDate.deleteIds.push(item);
+        }
+      }
+
+      return returnDate;
+    },
+
+    /**
+     * 查找关联ID
+     */
+    findContactIdByResId(ids) {
+      const map = {};
       const returnArr = [];
-      arr.forEach(element => {
-        returnArr.push(element.id);
+
+      this.cacheData.selectedMsg.forEach(item => {
+        map[item.id] = item;
+      });
+
+      ids.forEach(item => {
+        if (map[item]) {
+          returnArr.push(map[item].reality); // 添加关联ID
+        }
       });
 
       return returnArr;
@@ -186,27 +244,8 @@ export default {
 };
 </script>
 <style lang='less' scoped>
-.m-5 {
-  margin: 0 5px;
-}
-.t-pane {
-  @borderColor: #e9e9e9;
-  border: 1px solid @borderColor;
-  .pane-tit,
-  .pane-container {
-    padding: 11px 15px;
-  }
-
-  .pane-tit {
-    border-bottom: 1px solid @borderColor;
-  }
-
-  .pane-tit .el-form-item {
-    margin-bottom: 0;
-  }
-  .search-option-container {
-    padding: 11px 15px 0 15px;
-  }
+.el-form-item {
+  margin-bottom: 0;
 }
 .ms-tree-space {
   position: relative;

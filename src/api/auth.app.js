@@ -5,12 +5,10 @@ import request from '@/libs/request';
  * 获取应用系统列表
  * @param {string} name 关键词
  */
-export function getSystemList(name) {
+export function getSystemList(params) {
   return request('/v1/core/base/apps', {
     method: 'get',
-    params: {
-      name,
-    },
+    params,
   });
 }
 
@@ -19,7 +17,7 @@ export function getSystemList(name) {
  * @param {string} id 系统ID
  */
 export function getAuthMenusBySystemId(id) {
-  return request(`/v1/auth/app/menus`, {
+  return request('/v1/core/auth/app/menus', {
     method: 'get',
     params: {
       id,
@@ -28,13 +26,18 @@ export function getAuthMenusBySystemId(id) {
 }
 
 /**
- * 保存系统菜单授权
- * @param {object} data 保存对象，ID, 菜单 ids
+ * 保存系统菜单授权、保存系统服务授权
+ * @param {object} data 保存对象，菜单、权限 选中集合
+ * @param {Array} deleteIds 删除的选项
+ * ! 后端接收方式有问题，不能正常拿到 Array ，修改为 路径放 ID
  */
-export function saveMenuAuth(data) {
-  return request(`/v1/auth/app/menus`, {
+export function saveAppAuth(data, deleteIds) {
+  return request('/v1/core/auth/app/menus', {
     method: 'put',
-    data,
+    data: {
+      ids: deleteIds,
+      appReses: data,
+    },
   });
 }
 
@@ -43,7 +46,7 @@ export function saveMenuAuth(data) {
  * @param {string} id 系统id
  */
 export function getSystemAuth(id) {
-  return request(`/v1/auth/app/apis`, {
+  return request('/v1/core/auth/app/apis', {
     method: 'get',
     params: {
       id,
@@ -52,22 +55,11 @@ export function getSystemAuth(id) {
 }
 
 /**
- * 保存系统服务授权
- * @param {object} data 保存数据，系统 id , 权限ID集合
- */
-export function saveSystemAuth(data) {
-  return request(`/v1/auth/app/apis`, {
-    method: 'put',
-    data,
-  });
-}
-
-/**
  * 查询授权给某系统的代码项（码表）
  * @param {string} id 系统ID
  */
 export function getSystemCodeTables(id) {
-  return request(`/v1/auth/app/codetables`, {
+  return request('/v1/core/auth/app/codetables', {
     method: 'get',
     params: {
       id,
@@ -80,8 +72,8 @@ export function getSystemCodeTables(id) {
  * @param {object} data 系统ID,码表ID集合
  */
 export function saveSystemCodeTables(data) {
-  return request(`/v1/auth/app/codetables`, {
+  return request('/v1/core/auth/app/codetables', {
     method: 'put',
-    data,
+    params: data,
   });
 }
