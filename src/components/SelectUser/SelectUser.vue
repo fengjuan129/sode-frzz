@@ -203,7 +203,7 @@ export default {
       });
 
       // 获取需要删除的选项
-      returnDate.removed = this.apiList.filter(item => defaultSelectMap[item.id] === true);
+      returnDate.removed = this.userList.filter(item => defaultSelectMap[item.id] === true);
       // 单选返回对象
       if (!this.multiple) {
         returnDate.added = { ...returnDate.added[0] };
