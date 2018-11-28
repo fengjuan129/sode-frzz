@@ -6,65 +6,54 @@ let codeTable = {};
 
 /**
  * 获取码表数据
- * @param {array} codes 码表代码数组或单个代码字符串
- * @returns {promise}
+ * @param {string | array} codes 码表项代码字符串或数组
+ * @description codes为字符串时返回[{text, value}]；codes为数组时返回{code1:[{text, value}], code2:[{text, value}]}
+ * @returns {array | object} 码表数据数组或对象
  */
-export function get(codes) {
+export function getCodeTable(codes) {
   // 缓存中不存在的码表代码
   const inexistence = [];
-  codes = Array.isArray(codes) ? codes : [codes];
+  // 将码表项编码构造为数组
+  const codesArr = Array.isArray(codes) ? codes : [codes];
   // 找出缓存中不存在的码表项
-  codes.forEach(code => {
+  codesArr.forEach(code => {
     if (!codeTable[code]) {
       inexistence.push(code);
     }
   });
   if (inexistence.length > 0) {
     // 加载码表数据
-    return sysApi.getCodeTable(inexistence).then(res => {
-      // 合并新加载的数据至缓存
-      codeTable = {
-        ...codeTable,
-        ...res,
-      };
-      // 返回码表数据
-      return codes.reduce((ret, code) => {
-        ret[code] = [...codeTable[code]]; // 返回新的码表数据，避免业务模块内部对其修改影响缓存
-        return ret;
-      }, {});
-    });
+    const res = sysApi.getCodeTable(inexistence);
+    // 合并新加载的数据至缓存
+    codeTable = {
+      ...codeTable,
+      ...res,
+    };
   }
-  // 要加载的码表已有缓存时，直接返回缓存数据
-  return Promise.resolve(
-    codes.reduce((ret, code) => {
+  // 返回码表数据
+  if (Array.isArray(codes)) {
+    return codes.reduce((ret, code) => {
       ret[code] = [...codeTable[code]];
       return ret;
-    }, {})
-  );
+    }, {});
+  }
+  return [...codeTable[codes]];
 }
 
 /**
- * 码表转换
- * @param {string} code 码表代码
- * @param {string} value 码表项的值
- */
-export function format(code, value) {
-  const codeItem = (codeTable[code] || []).find(item => item.value === value);
-  return codeItem ? codeItem.text : value;
-}
-
-/**
- * 创建码表转换器
- * @param {string} code 码表代码
+ * 创建码表转码器
+ * @param {string} code 码表项代码
+ * @returns {function} 表格列formatter函数
  */
 export function createFormatter(code) {
   // 加载尚未获取的码表数据
   if (!codeTable[code]) {
-    get(code);
+    getCodeTable(code);
   }
   // 返回数据转换方法
   return function formatter(row, column, value) {
-    return format(code, value);
+    const codeItem = (codeTable[code] || []).find(item => item.value === value);
+    return codeItem ? codeItem.text : value;
   };
 }
 
@@ -72,5 +61,10 @@ export function createFormatter(code) {
  * 刷新码表数据
  */
 export function refresh() {
+  // 获取当前已缓存的码表项代码
+  const codes = Object.keys(codeTable);
+  // 清空码表缓存
   codeTable = {};
+  // 重新加载码表
+  getCodeTable(codes);
 }

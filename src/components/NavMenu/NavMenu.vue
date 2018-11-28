@@ -46,5 +46,6 @@ export default {
 <style scoped>
 .el-menu {
   border-right: 0px;
+  border-bottom: 0px;
 }
 </style>

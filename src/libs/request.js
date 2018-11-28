@@ -1,7 +1,7 @@
 // 数据请求工具
-
 import axios from 'axios';
 // import hash from 'hash.js';
+import Qs from 'qs';
 import { relogin } from '../api/login';
 import { getToken, setToken, clearToken } from './token';
 
@@ -142,4 +142,33 @@ export default function request(url, options) {
         return Promise.reject(error);
       })
   );
+}
+
+/**
+ * 同步请求方法
+ * @param {string} url 请求路径
+ * @param {object} options 配置项（参考axios）
+ */
+export function syncRequest(url, options = { method: 'get' }) {
+  options.method = options.method.toLowerCase();
+  // 获取token数据
+  const { access_token, token_type } = getToken() || {}; // eslint-disable-line camelcase
+  // 获取参数
+  const { params, data, method } = options;
+  // 处理参数
+  if (method === 'get' && params) {
+    url = `${url}?${Qs.stringify(params)}`;
+  }
+  // 创建请求对象
+  const xhr = new XMLHttpRequest();
+  // 打开与服务器的链接
+  xhr.open(method, url, false);
+  // 设置请求头
+  xhr.setRequestHeader('Accept', 'application/json');
+  xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+  xhr.setRequestHeader('Authorization', `${token_type} ${access_token}`); // eslint-disable-line camelcase
+  // 发送数据给服务器
+  xhr.send(method === 'get' ? null : data);
+  // 响应就绪（同步请求）
+  return JSON.parse(xhr.responseText);
 }
