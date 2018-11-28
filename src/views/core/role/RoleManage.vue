@@ -2,15 +2,22 @@
 <template>
   <div>
     <el-tabs v-model="activeTabKey" @tab-click="onTabClick" type="border-card">
-
       <!-- tab标签栏 -->
       <el-tab-pane v-for="tab in tabs" :label="tab.name" :name="tab.key" :key="tab.key"></el-tab-pane>
 
       <!-- 按钮栏（公共角色不能编辑，此时不显示按钮栏） -->
       <div v-if="activeTabKey !== 'public'" class="btn-container">
         <el-button size="mini" @click="createRole">新增</el-button>
-        <el-dropdown v-show="showBatchBtn" @command="handleBatchCommand" trigger="click" style="margin: 0 10px;">
-          <el-button size="mini">批量操作<i class="el-icon-arrow-down el-icon--right"></i></el-button>
+        <el-dropdown
+          v-show="showBatchBtn"
+          @command="handleBatchCommand"
+          trigger="click"
+          style="margin: 0 10px;"
+        >
+          <el-button size="mini">
+            批量操作
+            <i class="el-icon-arrow-down el-icon--right"></i>
+          </el-button>
           <el-dropdown-menu slot="dropdown">
             <!-- 开发模式才可执行删除操作 -->
             <el-dropdown-item command="deleteRoles" v-if="isDevMode">删除</el-dropdown-item>
@@ -31,18 +38,23 @@
               v-for="item in isEnableCodeTable"
               :key="item.value"
               :label="item.text"
-              :value="item.value">
-            </el-option>
+              :value="item.value"
+            ></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type='primary' @click="searchRoles">查询</el-button>
+          <el-button type="primary" @click="searchRoles">查询</el-button>
           <el-button @click="resetCondition">重置</el-button>
         </el-form-item>
       </el-form>
 
       <!-- 角色列表 -->
-      <el-table :data="roles" v-loading="loading" highlight-current-row @selection-change="onSelectionChange">
+      <el-table
+        :data="roles"
+        v-loading="loading"
+        highlight-current-row
+        @selection-change="onSelectionChange"
+      >
         <el-table-column type="selection"></el-table-column>
         <el-table-column type="index" label="序号"></el-table-column>
         <el-table-column prop="name" label="角色名称"></el-table-column>
@@ -53,14 +65,18 @@
         <el-table-column label="操作">
           <!-- 公共角色不允许编辑，此时不显示各类操作 -->
           <template v-if="activeTabKey !== 'public'" slot-scope="scope">
-            <el-button type='text' @click="editRole(scope.row)">编辑</el-button>
-            <el-button type='text' @click="toggleRoleState(scope.row)">{{scope.row.isEnable === true ? '禁用' : '启用'}}</el-button>
+            <el-button type="text" @click="editRole(scope.row)">编辑</el-button>
+            <el-button
+              type="text"
+              @click="toggleRoleState(scope.row)"
+            >{{scope.row.isEnable === true ? '禁用' : '启用'}}</el-button>
             <!-- 开发模式才可执行删除操作 -->
             <el-popover
               v-if="isDevMode"
               style="margin-left: 10px;"
               placement="top"
-              v-model="scope.row.showDelPopOver">
+              v-model="scope.row.showDelPopOver"
+            >
               <p>确定删除此角色？</p>
               <div style="text-align: right;">
                 <el-button size="mini" type="text" @click="scope.row.showDelPopOver = false">取消</el-button>
@@ -71,7 +87,6 @@
           </template>
         </el-table-column>
       </el-table>
-
     </el-tabs>
 
     <!-- 角色编辑弹出窗口 -->
@@ -79,9 +94,8 @@
       v-bind="winEditRole"
       v-if="winEditRole.visible"
       @close="winEditRole.visible=false"
-      @save="onRoleSaved">
-    </role-edit>
-
+      @save="onRoleSaved"
+    ></role-edit>
   </div>
 </template>
 

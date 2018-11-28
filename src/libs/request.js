@@ -2,6 +2,7 @@
 import axios from 'axios';
 // import hash from 'hash.js';
 import Qs from 'qs';
+import config from '../config';
 import { relogin } from '../api/login';
 import { getToken, setToken, clearToken } from './token';
 
@@ -68,6 +69,7 @@ function buildOptions(options) {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json; charset=utf-8',
+      APP_ID: config.appId,
       // eslint-disable-next-line camelcase
       Authorization: `${token_type} ${access_token}`,
       ...options.headers,
@@ -166,6 +168,7 @@ export function syncRequest(url, options = { method: 'get' }) {
   // 设置请求头
   xhr.setRequestHeader('Accept', 'application/json');
   xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+  xhr.setRequestHeader('APP_ID', config.appId);
   xhr.setRequestHeader('Authorization', `${token_type} ${access_token}`); // eslint-disable-line camelcase
   // 发送数据给服务器
   xhr.send(method === 'get' ? null : data);

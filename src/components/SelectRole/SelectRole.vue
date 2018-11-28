@@ -1,14 +1,20 @@
 <!-- 角色选择公共页面 -->
 <template>
   <!-- 角色选择窗口 -->
-  <el-dialog :title="title" visible :before-close="close" :close-on-click-modal="false" width="600px">
+  <el-dialog
+    :title="title"
+    visible
+    :before-close="close"
+    :close-on-click-modal="false"
+    width="600px"
+  >
     <!-- 查询栏 -->
     <el-form :inline="true" size="mini">
       <el-form-item label="角色名称">
         <el-input v-model="name"></el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type='primary' @click="loadRoles">查询</el-button>
+        <el-button type="primary" @click="loadRoles">查询</el-button>
         <el-button @click="resetCondition">重置</el-button>
       </el-form-item>
     </el-form>
@@ -20,7 +26,8 @@
       v-loading="loading"
       highlight-current-row
       @selection-change="onSelectionChange"
-      @current-change="onCurrentChange">
+      @current-change="onCurrentChange"
+    >
       <!-- 多选时才显示checkbox列 -->
       <el-table-column type="selection" v-if="multiple"></el-table-column>
       <el-table-column type="index" label="序号"></el-table-column>
@@ -29,9 +36,9 @@
     </el-table>
 
     <!-- 底部按钮栏 -->
-    <span slot='footer' class='dialog-footer'>
-      <el-button @click='close'>取 消</el-button>
-      <el-button type='primary' @click='select'>确 定</el-button>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="close">取 消</el-button>
+      <el-button type="primary" @click="select">确 定</el-button>
     </span>
   </el-dialog>
 </template>
@@ -64,6 +71,7 @@ export default {
       currentRole: {}, // 当前选中角色
       name: '', // 查询条件，角色名称
       loading: true, // 是否正在加载
+      initSelection: [], // 初始勾选角色
     };
   },
   created() {
@@ -91,15 +99,16 @@ export default {
                 this.roles
                   .filter(role => this.selectedIds.some(selectedId => selectedId === role.id))
                   .forEach(role => {
+                    this.initSelection.push(role); // 记录初始勾选角色
                     this.$refs.tableRole.toggleRowSelection(role, true);
                   });
               });
             } else {
               // 单选
               this.$nextTick(() => {
-                this.$refs.tableRole.setCurrentRow(
-                  this.roles.find(role => role.id === this.selectedIds[0])
-                );
+                const toSelectRole = this.roles.find(role => role.id === this.selectedIds[0]);
+                this.initSelection = toSelectRole; // 记录初始勾选角色
+                this.$refs.tableRole.setCurrentRow(toSelectRole);
               });
             }
           }
@@ -133,9 +142,29 @@ export default {
      * 确定选择角色
      */
     select() {
-      // 多选时返回勾选角色列表，单选时返回当前选择的角色对象
-      const selection = this.multiple ? [...this.selectedRoles] : { ...this.currentRole };
-      this.$emit('select', selection);
+      // 多选时返回角色列表，单选时返回角色对象
+      const selection = this.multiple ? this.selectedRoles : this.currentRole;
+      let added = null;
+      let removed = null;
+
+      // 多选
+      if (this.multiple) {
+        // 现在有，原来没有 => 新勾选
+        added = selection.filter(
+          selectRole => !this.initSelection.some(initRole => initRole.id === selectRole.id)
+        );
+        // 原来有，现在没有 => 去掉勾选
+        removed = this.initSelection.filter(
+          initRole => !selection.some(selectRole => selectRole.id === initRole.id)
+        );
+      }
+      // 单选
+      else if (selection.id !== this.initSelection.id) {
+        added = { ...selection }; // 新增项和删除项返回新的对象是为了避免引用相同对象造成数据污染
+        removed = { ...this.initSelection };
+      }
+
+      this.$emit('select', selection, added, removed);
     },
     /**
      * 关闭窗口

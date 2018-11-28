@@ -9,9 +9,14 @@
       <!-- 表单部分 -->
       <div class="form-group">
         <el-card>
-          <el-form ref="loginForm" label-position="top" :rules="rules" :model="formLogin"
-            size="default">
-            <el-form-item  prop="username">
+          <el-form
+            ref="loginForm"
+            label-position="top"
+            :rules="rules"
+            :model="formLogin"
+            size="default"
+          >
+            <el-form-item prop="username">
               <el-input type="text" v-model="formLogin.username" placeholder="用户名">
                 <i slot="prepend" class="el-icon-edit"></i>
               </el-input>
@@ -21,8 +26,7 @@
                 <i slot="prepend" class="el-icon-goods"></i>
               </el-input>
             </el-form-item>
-            <el-button @click="submit" size="default" type="primary"
-              class="button-login">登录</el-button>
+            <el-button @click="submit" size="default" type="primary" class="button-login">登录</el-button>
           </el-form>
         </el-card>
       </div>
@@ -39,7 +43,7 @@ export default {
     return {
       // 表单
       formLogin: {
-        username: '测试加密',
+        username: '测试加密', // xuw 测试
         password: '123456',
       },
       // 校验
@@ -50,7 +54,7 @@ export default {
     };
   },
   methods: {
-    // TODO: 调用登录服务实现登录
+    // 调用登录服务实现登录
     submit() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {

@@ -50,6 +50,22 @@ Mock.mock(new RegExp('^/v1/core/base/roles'), 'get', ({ url }) => {
         sort: '',
         description: '这条是查询结果',
       },
+      {
+        id: 'id-3',
+        name: '固定id的角色03',
+        roleCode: 'id-3',
+        isEnable: true,
+        sort: '',
+        description: '这条是查询结果',
+      },
+      {
+        id: 'id-4',
+        name: '固定id的角色04',
+        roleCode: 'id-4',
+        isEnable: true,
+        sort: '',
+        description: '这条是查询结果',
+      },
     ];
   }
 
