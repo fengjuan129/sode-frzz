@@ -28,6 +28,7 @@
       border
       @row-click="onClickCacheRow"
       v-loading="loading"
+      ref="tbaleApi"
     >
       <el-table-column label="服务名称">
         <template slot-scope="scope">
@@ -110,13 +111,20 @@ export default {
       // ! 默认选中
       if (this.apiList.length) {
         this.$nextTick(() => {
-          returnTree.forEach(item => {
-            if (this.defaultSelectMap[item.id]) {
-              item.isChecked = true;
-              this.setChildChecked(item.children, true);
-              this.setParentsChecked(item.parent);
+          if (this.multiple) {
+            returnTree.forEach(item => {
+              if (this.defaultSelectMap[item.id]) {
+                item.isChecked = true;
+                this.setChildChecked(item.children, true);
+                this.setParentsChecked(item.parent);
+              }
+            });
+          } else {
+            if (this.selectedIds.length) {
+              const targetRow = returnTree.find(item => !!this.defaultSelectMap[item.id]);
+              this.$refs.tbaleApi.setCurrentRow(targetRow);
             }
-          });
+          }
         });
       }
       return returnTree;
@@ -147,13 +155,13 @@ export default {
      * 向父组件发送选中数据
      */
     sendSelect() {
-      let sendData = [];
+      let selection = [];
+
       if (this.multiple) {
-        // ! 后期优化，多选时可配置返回值
         // 只返回选中的子类
         this.apiList.forEach(item => {
           if (item.isChecked && item.children === undefined) {
-            sendData.push(item);
+            selection.push(item);
           }
         });
       } else {
@@ -165,11 +173,13 @@ export default {
           });
           return;
         }
-        sendData = this.cacheCurRow;
+        selection = this.cacheCurRow;
       }
 
-      // 返回完整对象
-      this.$emit('select', sendData);
+      const filterData = this.filterDelAndSaveOption(selection);
+
+      // 返回完整对象,单选返回对象，多选返回数组
+      this.$emit('select', selection, filterData.added, filterData.removed);
       this.close();
     },
     close() {
@@ -229,6 +239,38 @@ export default {
     onClickCacheRow(row) {
       if (this.multiple) return;
       this.cacheCurRow = row;
+    },
+
+    /**
+     * 查找需要删除的选项
+     * @param {Array} select 子组件返回勾选信息
+     * @return {Object}  保存、删除集合
+     */
+    filterDelAndSaveOption(select) {
+      select = select instanceof Array ? select : [select];
+      const returnDate = {
+        added: [],
+        removed: [],
+      };
+      const { defaultSelectMap } = this;
+
+      select.forEach(item => {
+        if (defaultSelectMap[item.id]) {
+          defaultSelectMap[item.id] = false; // 如果存在，表示不需要做修改操作
+        } else {
+          returnDate.added.push(item); // 新增项
+        }
+      });
+
+      // 获取需要删除的选项
+      returnDate.removed = this.apiList.filter(item => defaultSelectMap[item.id] === true);
+      // 单选返回对象
+      if (!this.multiple) {
+        returnDate.added = { ...returnDate.added[0] };
+        returnDate.removed = { ...returnDate.removed[0] };
+      }
+
+      return returnDate;
     },
   },
 };
