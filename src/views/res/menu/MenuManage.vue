@@ -6,8 +6,8 @@
       :row-style="showTr"
       @row-click='activeRow'
       highlight-current-row
-      border
-      >
+      border>
+
       <el-table-column v-for='(col,index) in columns'
         :key='index'
         :label='col.text'
@@ -51,12 +51,13 @@
 </template>
 
 <script>
-import { getMenuTree, setMenu, deleteMenu } from '@/api/resources'; // 接口
+import { getMenuTree, setMenu, deleteMenu } from '@/api/res'; // 接口
 import Dic from '@/api/mockDictionary'; // 假数据字典
 import { data2treeGridArr } from '@/libs/utils';
 import MenuEdit from './MenuEdit.vue';
 
 export default {
+  name: 'MenuManage',
   data() {
     return {
       columns: [
@@ -70,7 +71,7 @@ export default {
         { text: '排序', key: 'sort', width: 50, align: 'center' },
       ],
       // 功能菜单为虚根节点
-      menuList: [{ id: -1, name: '功能菜单' }],
+      menuList: [{ id: -1, name: '功能菜单', expanded: true }],
       // 弹框管理
       dialogs: {
         menuEdit: false,
@@ -104,7 +105,7 @@ export default {
       .then(res => {
         this.menuList = [...this.menuList, ...res];
       })
-      .catch(this.$errorHandle);
+      .catch(this.$errorHandler);
   },
   methods: {
     // 控制表格显示、隐藏
@@ -153,7 +154,7 @@ export default {
             type: 'success',
           });
         })
-        .catch(this.$errorHandle);
+        .catch(this.$errorHandler);
     },
     // 删除菜单
     delMenu(curRow) {
@@ -185,7 +186,7 @@ export default {
                 type: 'success',
               });
             })
-            .catch(this.$errorHandle);
+            .catch(this.$errorHandler);
         })
         .catch(() => {});
     },
@@ -196,11 +197,12 @@ export default {
      */
     editMenu(type, curRow) {
       const { curMenu } = this.catchData;
+
       if (type === 'new') {
         curMenu.id = curRow.id;
         curMenu.menu = {};
       } else if (type === 'update') {
-        curMenu.id = undefined;
+        curMenu.id = '';
         curMenu.menu = curRow;
       }
 

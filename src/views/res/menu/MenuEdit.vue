@@ -1,6 +1,11 @@
 <!-- 菜单编辑页 -->
 <template>
-  <el-dialog title='菜单编辑' :visible='true' width="30%" :before-close="close">
+  <el-dialog
+    title='菜单编辑'
+    :visible='true'
+    width="500px"
+    :close-on-click-modal='false'
+    :before-close="close">
       <el-form
         :model="menuEditForm"
         ref="menuEditForm"
@@ -9,7 +14,6 @@
         label-width='80px'
         status-icon>
         <el-row :gutter="30">
-
           <el-col :span='12'>
             <el-form-item label="菜单名称" prop='name'>
               <el-input autocomplete='off' v-model="menuEditForm.name"></el-input>
@@ -102,8 +106,8 @@
       </el-form>
 
      <span slot='footer' class='dialog-footer'>
-        <el-button @click='close'>{{parentMenu ? '关 闭' : '取 消' }}</el-button>
-        <el-button type='primary' @click='save()'>{{parentMenu ? '保 存' : '确 定'}}</el-button>
+        <el-button @click='close'>{{menu.id ? '关 闭' : '取 消' }}</el-button>
+        <el-button type='primary' @click='save()'>{{menu.id ? '保 存' : '确 定'}}</el-button>
       </span>
   </el-dialog>
 </template>
@@ -115,7 +119,7 @@ export default {
   name: 'MenuEdit',
   props: {
     parentMenu: {
-      type: Number,
+      type: [String, Number],
       required: true,
     },
     menu: {
@@ -125,7 +129,6 @@ export default {
   },
   data() {
     return {
-      isOpen: true,
       menuEditForm: {
         isEnable: true, // 默认为启用
         isVisible: true, // 默认可见
@@ -150,15 +153,17 @@ export default {
 
   methods: {
     initForm() {
-      // parentMenu 没有为修改，有值为新增
-      if (this.parentMenu !== undefined) {
+      // this.menu.id 有为修改，没值为新增
+      if (this.menu.id === undefined) {
         this.menuEditForm.parentId = this.parentMenu;
       } else {
         const keys = Object.keys(this.menu);
         const cloneMenu = {};
 
         keys.forEach(item => {
-          cloneMenu[item] = this.menu[item];
+          if (item !== 'parent' && item !== 'children') {
+            cloneMenu[item] = this.menu[item];
+          }
         });
 
         this.$set(this, 'menuEditForm', cloneMenu);
