@@ -169,6 +169,7 @@ export function syncRequest(url, options = { method: 'get' }) {
   xhr.setRequestHeader('Authorization', `${token_type} ${access_token}`); // eslint-disable-line camelcase
   // 发送数据给服务器
   xhr.send(method === 'get' ? null : data);
+  // TODO: 错误处理
   // 响应就绪（同步请求）
   return JSON.parse(xhr.responseText);
 }
