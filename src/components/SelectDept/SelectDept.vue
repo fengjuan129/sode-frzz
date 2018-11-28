@@ -3,11 +3,17 @@
 <el-dialog title='组织机构选择'
   visible
   :before-close="close"
+  :close-on-click-modal='false'
   width='400px'>
 
   <div class="select-user-container">
-    <el-tabs type="card" @tab-click='onTabClick' v-model='activeTabCode'>
-      <el-tab-pane v-for='item in deptTypeList' :key='item.code' :name='item.code' :label="item.typename"></el-tab-pane>
+    <el-tabs @tab-click='onTabClick' v-model='activeTabCode'>
+      <el-tab-pane
+        v-for='item in deptTypeList'
+        :key='item.code'
+        :name='item.code'
+        :label="item.typename"
+        v-if='deptTypeList.length > 1'></el-tab-pane>
 
       <div class='select-user-search-bar'>
         <el-input v-model="keyword" placeholder="输入关键词" style='width: 70%' size='mini' @keydown.13.native="loadDept"></el-input>
@@ -18,7 +24,7 @@
         <el-tree
           v-loading='loading'
           v-if='deptTypeList.length > 0'
-          node-key='code'
+          node-key='id'
           :data='treeData'
           :props="defaultProps"
           :show-checkbox='multiple'
@@ -44,6 +50,7 @@ import DeptApi from '@/api/dept';
 import * as Utils from '@/libs/utils';
 
 export default {
+  name: 'SelectDept',
   /**
    * multiple: 是否允许多选。多选时显示checkbox
    * rootCode: 根节点的部门编码
@@ -111,7 +118,7 @@ export default {
     // 获取机构
     loadDept() {
       this.loading = true;
-      DeptApi.getTreeByKeyword(this.keyword, this.activeTabCode).then(res => {
+      DeptApi.getTreeByKeyword(this.keyword, this.activeTabCode, true).then(res => {
         this.loading = false;
         this.deptList = res;
       });

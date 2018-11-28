@@ -1,6 +1,11 @@
 <!-- 组织机构编辑页面 -->
 <template>
-  <el-dialog title='组织机构编辑' :visible.sync='isOpen' width="30%" :before-close="close">
+  <el-dialog
+    title='组织机构编辑'
+    visible
+    width="30%"
+    :before-close="close"
+    :close-on-click-modal='false'>
 
     <el-form :model="deptEditForm" :rules="deptEditRules" ref='deptEditForm' size='small' label-width='80px' status-icon>
       <el-row :gutter="30">
@@ -67,7 +72,20 @@
 import DeptApi from '@/api/dept';
 
 export default {
-  props: ['id', 'parentCode', 'parentName', 'isOpen'],
+  name: 'DeptEdit',
+  props: {
+    id: {
+      type: String,
+    },
+    parentCode: {
+      type: String,
+      required: true,
+    },
+    parentName: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     const checkSort = (rule, value, callback) => {
       if (value && !Number.isInteger(value)) {

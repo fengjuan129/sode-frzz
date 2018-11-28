@@ -17,7 +17,7 @@
       </el-tab-pane>
       <!-- tabItem END -->
       <div class='t-toolbar'>
-        <el-button size='mini' @click='dialogStatus.deptEdit = true; upDateDeptMsg.id = false'>新增</el-button>
+        <el-button size='mini' @click='dialogStatus.deptEdit = true; upDateDeptMsg.id = ""'>新增</el-button>
       </div>
 
       <!-- 表格树 -->
@@ -27,6 +27,7 @@
         style="width: 100%"
         highlight-current-row
         @row-click='sendRowData'
+        v-loading='loading'
         :row-style="showTr">
         <el-table-column v-for="(column, index) in columns" :key="column.dataIndex" :label="column.text" :align="column.align" :width='column.width'>
           <template slot-scope="scope">
@@ -47,9 +48,21 @@
 
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
-            <el-button size='mini' @click.stop='deptEdit(scope.row,scope.$index)'>修改</el-button>
-            <el-button size='mini' @click.stop="deleteDept(scope.row,scope.$index)">删除</el-button>
-            <el-button size='mini'
+            <el-button type='text' @click.stop='deptEdit(scope.row,scope.$index)'>修改</el-button>
+
+            <el-popover
+              style="margin: 0 10px;"
+              placement="top"
+              v-model="scope.row.showDelPopOver">
+              <p>确定删除此机构？</p>
+              <div style="text-align: right;">
+                <el-button size="mini" type="text" @click.stop="scope.row.showDelPopOver = false">取消</el-button>
+                <el-button type="primary" size="mini" @click.stop="deleteDept(scope.row)">确定</el-button>
+              </div>
+              <el-button type="text" slot="reference" v-if='isDevlopment'>删除</el-button>
+            </el-popover>
+
+            <el-button type='text'
               @click.stop='disableDept(!scope.row["isEnable"],scope.row,scope.$index)'>{{scope.row["isEnable"] ? '禁用' : '启用'}}
             </el-button>
           </template>
@@ -60,36 +73,41 @@
     </el-tabs>
 
     <!-- v-if 触发组件生命周期 -->
-    <DeptTypeEdit :isOpen='dialogStatus.deptTypeEdit'
+    <dept-type-edit
       :id='dialogStatus.deptTypeId'
       @close='dialogStatus.deptTypeEdit = false'
       @delete='deleteDeptType'
       @save='editDeptType'
-      v-if='dialogStatus.deptTypeEdit'/>
+      v-if='dialogStatus.deptTypeEdit'></dept-type-edit>
     <!-- 组织机构类型 END -->
 
-    <DeptEdit :isOpen='dialogStatus.deptEdit'
+    <dept-edit
       :id='upDateDeptMsg.id'
       :parentCode='upDateDeptMsg.code'
       :parentName='upDateDeptMsg.name'
       @close='dialogStatus.deptEdit = false'
       @save='editDept'
-      v-if='dialogStatus.deptEdit'/>
+      v-if='dialogStatus.deptEdit'></dept-edit>
     <!-- 组织机构编辑 END -->
 
+    <!-- <SelectUser/> -->
   </div>
 </template>
 
 <script>
 import DeptApi from '@/api/dept';
 import { data2treeGridArr } from '@/libs/utils';
+import SelectUser from '@/components/SelectUser';
 import DeptTypeEdit from './DeptTypeEdit.vue';
 import DeptEdit from './DeptEdit.vue';
 
 export default {
+  name: 'DeptManage',
   data() {
     return {
-      defaultExpandAll: false,
+      isDevlopment: process.env.NODE_ENV === 'development', // 是否为开发环境
+      loading: false,
+      defaultExpandAll: false, // 是否展开tree
       tabs: {
         tabData: [], // 机构类型
         tabActiveCode: '',
@@ -139,6 +157,7 @@ export default {
   components: {
     DeptTypeEdit,
     DeptEdit,
+    SelectUser,
   },
 
   computed: {
@@ -178,7 +197,14 @@ export default {
      * @param {string} parentCode 父Code
      */
     loadDeptByParentId(typeCode, parentCode) {
+      this.loading = true;
       DeptApi.getLazyTree(typeCode, parentCode).then(res => {
+        this.loading = false;
+        res = res.map(item => ({
+          ...item,
+          showDelPopOver: false,
+        }));
+
         this.deptList = [...this.deptList, ...res];
       });
     },
@@ -272,7 +298,7 @@ export default {
       return false;
     },
     /**
-     * 选中行发生变化时，向父组件发送选中行的数据
+     * 选中行发生变化时，向子组件发送选中行的数据
      */
     sendRowData(curRow) {
       curRow.expanded = !curRow.expanded;
@@ -297,42 +323,34 @@ export default {
     updateDeptType() {
       this.dialogStatus.deptTypeEdit = true;
     },
+    /**
+     * 删除组织机构
+     */
     deleteDept(row) {
-      this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'error',
-      })
-        .then(() => {
-          DeptApi.deleteDept(row.id).then(() => {
-            const { children, parent } = row;
-            /**
-             * !删除 Tree 上的引用，dataTranslate.js  根据 item.children 处理数据，删除子类及父级目标子类
-             */
-            // children && delete row.children;
-            if (children && children.length) {
-              row.children.splice(0, children.length);
+      DeptApi.deleteDept(row.id).then(() => {
+        const { children, parent } = row;
+
+        if (children && children.length) {
+          row.children.splice(0, children.length);
+        }
+
+        if (parent && parent.children && parent.children.length) {
+          for (let i = 0, len = parent.children.length; i < len; i += 1) {
+            const item = parent.children[i];
+            if (item.id === row.id) {
+              parent.children.splice(i, 1);
+              break;
             }
+          }
+        }
 
-            if (parent && parent.children && parent.children.length) {
-              for (let i = 0, len = parent.children.length; i < len; i += 1) {
-                const item = parent.children[i];
-                if (item.id === row.id) {
-                  parent.children.splice(i, 1);
-                  break;
-                }
-              }
-            }
+        this.deleteDeptById(row.id);
 
-            this.deleteDeptById(row.id);
-
-            this.$message({
-              type: 'success',
-              message: '删除成功!',
-            });
-          });
-        })
-        .catch(() => {});
+        this.$message({
+          type: 'success',
+          message: '删除成功!',
+        });
+      });
     },
 
     /**
@@ -344,11 +362,13 @@ export default {
         deptInfo.parentCode = -1;
         deptInfo.code = this.upDateDeptMsg.code;
       }
+
       DeptApi.editDept(deptInfo).then(res => {
         // 有 ID 为修改，无ID 新增
         if (this.upDateDeptMsg.id) {
           Object.assign(this.findDeptById(deptInfo.id, this.treeData), res);
         } else {
+          this.$set(res, 'showDelPopOver', false);
           this.$set(this, 'deptList', [res, ...this.deptList]);
         }
       });

@@ -1,18 +1,17 @@
 <!-- 组织机构类型编辑页面 -->
 <template>
-  <el-dialog title='组织机构类型编辑' :visible.sync='isOpen' width="30%" :before-close="close">
+  <el-dialog
+    title='组织机构类型编辑'
+    visible
+    width="500px"
+    :close-on-click-modal='false'
+    :before-close="close">
 
     <el-form :model='deptTypeForm' size='small' label-width='80px' :rules='deptTypeRules' ref='deptTypeForm' status-icon>
       <el-row :gutter="30">
-        <el-col :span='12'>
+        <el-col :span='24'>
           <el-form-item label='类型名称' prop='typename'>
             <el-input v-model='deptTypeForm.typename'></el-input>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span='12'>
-          <el-form-item label='类型编码' prop='code'>
-            <el-input v-model='deptTypeForm.code'></el-input>
           </el-form-item>
         </el-col>
 
@@ -38,16 +37,17 @@
 import DeptApi from '@/api/dept';
 
 export default {
-  props: ['isOpen', 'id'],
+  name: 'DeptTypeEdit',
+  props: {
+    id: {
+      type: String,
+    },
+  },
   data() {
     return {
       deptTypeForm: {},
       deptTypeRules: {
         typename: [
-          { required: true, message: '此项为必填选项', trigger: 'blur' },
-          { max: 32, message: '长度不能超过32位', trigger: 'blur' },
-        ],
-        code: [
           { required: true, message: '此项为必填选项', trigger: 'blur' },
           { max: 32, message: '长度不能超过32位', trigger: 'blur' },
         ],
@@ -60,6 +60,9 @@ export default {
   },
 
   methods: {
+    /**
+     * 加载机构类型
+     */
     loadDepTypeInfo() {
       if (!this.id) return;
       DeptApi.getDeptTypeInfo(this.id).then(res => {
@@ -67,6 +70,9 @@ export default {
       });
     },
 
+    /**
+     * 编辑机构类型
+     */
     save(deptTypeForm) {
       this.$refs[deptTypeForm].validate(valid => {
         if (!valid) return;
@@ -89,6 +95,9 @@ export default {
     close() {
       this.$emit('close');
     },
+    /**
+     * 删除组织机构
+     */
     deleteDeptTye() {
       this.$confirm('确定删除该组织机构', '提示', {
         confirmButtonText: '确定',
