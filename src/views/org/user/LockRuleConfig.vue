@@ -5,6 +5,7 @@
       title="设置 - 账号锁定规则"
       :visible.sync="isOpen"
       :before-close="close"
+      :close-on-click-modal='false'
       width="25%">
 
       <div class='form-container'>

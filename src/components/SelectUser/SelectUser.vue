@@ -1,20 +1,20 @@
 <!-- 账号选择公共页面 -->
 <template>
-  <div>
-    <el-dialog title='账号选择'
-      :visible='isVisible'
-      :before-close="close"
-      width='400px'>
+  <el-dialog title='账号选择'
+    :visible='isVisible'
+    :before-close="close"
+    :close-on-click-modal='false'
+    width='400px'>
 
-      <div class="select-user-container">
-        <el-tabs type="card" @tab-click='changeTab' v-model='activeTab'>
+    <div class="select-user-container" v-loading='loading'>
+      <el-tabs @tab-click='changeTab' v-model='activeTab'>
         <el-tab-pane v-for='item in tabData'
           :key='item.id'
           :label="item.typename"
           :code='item.code'
           :name="item.code"></el-tab-pane>
-      </el-tabs>
-      <div class='select-user-search-bar'>
+
+          <div class='select-user-search-bar'>
         <el-input v-model="keyword" placeholder="输入关键词" style='width: 70%' size='mini' @keydown.13.native="getTree"></el-input>
         <el-button type='primary' style='float: right;' size='mini ' @click='getTree'>查询</el-button>
       </div>
@@ -27,18 +27,17 @@
           :show-checkbox='multiple'
           default-expand-all
           highlight-current
-
           ref='searchTree'>
         </el-tree>
       </div>
-      </div>
+      </el-tabs>
+    </div>
 
-      <span slot='footer' class='dialog-footer'>
-        <el-button @click='close'>取 消</el-button>
-        <el-button type='primary' @click='submitUser("userEditForm")'>确 定</el-button>
-      </span>
-    </el-dialog>
-  </div>
+    <span slot='footer' class='dialog-footer'>
+      <el-button @click='close'>取 消</el-button>
+      <el-button type='primary' @click='submitUser("userEditForm")'>确 定</el-button>
+    </span>
+  </el-dialog>
 </template>
 
 <script>
@@ -67,6 +66,7 @@ export default {
   data() {
     return {
       isVisible: true,
+      loading: false,
       keyword: '',
       tree: {
         organizationTree: [],
@@ -80,7 +80,7 @@ export default {
       checkedUser: '', // 保存选中人员
     };
   },
-  mounted() {
+  created() {
     this.loadOrganization();
   },
   methods: {
@@ -88,16 +88,32 @@ export default {
      * 加装组织机构
      */
     loadOrganization() {
+      this.loading = true;
       DeptApi.getDeptType().then(res => {
+        this.loading = false;
         this.tabData = res;
-        this.activeTab = res[0].code;
+        this.activeTab = this.rootCode || res[0].code;
+        this.getTree();
       });
     },
 
     getTree() {
-      // TODO 后端接口未定
+      this.loading = true;
       UserApi.getUserByDeptType(this.activeTab, this.keyword).then(res => {
-        this.tree.organizationTree = data2treeArr(res);
+        this.loading = false;
+        /**
+         * 11/27 后端返回参数 账户关联字段为 deptCode ，机构类型 关联字段为 parentCode，统一使用 parentCode
+         */
+        res.forEach(item => {
+          if (item.username !== undefined && item.deptCode) {
+            item.parentCode = item.deptCode;
+            item.name = item.realName; // 添加显示项
+            item.code = item.username;
+          }
+        });
+        console.log(res);
+        console.log(data2treeArr(res, 'code', 'parentCode', true));
+        this.tree.organizationTree = data2treeArr(res, 'code', 'parentCode', true);
       });
     },
 
@@ -105,35 +121,24 @@ export default {
       this.keyword = '';
       this.activeTab = tab.$attrs.code;
       this.tree.organizationTree = [];
+      this.getTree();
     },
     submitUser() {
       const curUser = this.$refs.searchTree[this.multiple ? 'getCheckedNodes' : 'getCurrentNode']();
-      if (curUser.length === 0) {
+
+      if (!curUser || curUser.length === 0 || curUser.children) {
         this.$message({
-          message: '请选择后再提交',
+          message: '请选择用户后再提交',
           type: 'warning',
         });
         return;
       }
+
       this.$emit('select', curUser);
       this.close();
     },
     close() {
       this.$emit('close');
-      /**
-       * !使用 setCheckedNodes、setCurrentNode 树节点必须设置 node-key
-       */
-      if (this.multiple) {
-        this.$refs.searchTree.setCheckedNodes([]);
-      } else {
-        this.$refs.searchTree.setCurrentNode([]);
-      }
-    },
-  },
-
-  watch: {
-    activeTab() {
-      this.getTree();
     },
   },
 };

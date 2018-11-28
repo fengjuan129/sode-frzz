@@ -49,7 +49,7 @@
             <div class='t-header'>
 
               <div class='btns-container'>
-                <el-button size='mini' @click='addUser'>新增</el-button>
+                <el-button size='mini' @click='addUser' :disabled="!organizationId">新增</el-button>
 
                   <el-dropdown trigger="click" style="margin-left: 10px;" @command='updateMore' v-if='curUser.length > 1'>
                     <span class="el-dropdown-link">
@@ -105,7 +105,7 @@
                   <el-table-column type="selection" width="55"><!-- 复选框--></el-table-column>
                   <el-table-column type='index' width="55" label="序号"></el-table-column>
                   <el-table-column label="姓名" property='realName'></el-table-column>
-                  <el-table-column label='账号' property='userName'></el-table-column>
+                  <el-table-column label='账号' property='username'></el-table-column>
                   <el-table-column label="密级" property='securityLevel' :formatter="filterSecretLev"></el-table-column>
                   <el-table-column label="状态">
                     <template slot-scope="scope">
@@ -159,18 +159,18 @@
         </el-row>
     </el-tabs>
     <!-- tab end -->
-    <LockRuleConfig :isOpen='dialogMsg.lockRule' @close='dialogMsg.lockRule = false'/>
+    <!-- <LockRuleConfig v-if='dialogMsg.lockRule' @close='dialogMsg.lockRule = false'/> -->
     <!-- 锁定用户弹框 END 保存成功后刷新列表 -->
-    <UserEdit :isOpen='dialogMsg.userEdit'
+    <UserEdit
       :id='curUser.id'
       @save='getUserListByOption'
       @close='dialogMsg.userEdit = false'
       :rootName='activeTabName'
       v-if='dialogMsg.userEdit'/>
     <!-- 修改用户信息 弹框 END -->
-    <UserView :isOpen='dialogMsg.userView' :id='seeCurUser.id' @close='dialogMsg.userView = false'/>
+    <UserView v-if='dialogMsg.userView' :id='seeCurUser.id' @close='dialogMsg.userView = false'/>
     <!-- 查看用户信息 END -->
-    <!-- <PasswordRuleConfig :isOpen='dialogMsg.passwordRuleConfig' @close='dialogMsg.passwordRuleConfig = false'/> -->
+    <PasswordRuleConfig v-if='dialogMsg.passwordRuleConfig' @close='dialogMsg.passwordRuleConfig = false'/>
     <!-- 密码强度规则编辑页面 END -->
 
     <SelectDept :multiple='false'
@@ -286,7 +286,7 @@ export default {
       const { tree } = this;
       if (tree.keyword) {
         tree.isLazy = false;
-        DeptApi.getTreeByKeywork(tree.keyword, this.activeTab).then(res => {
+        DeptApi.getTreeByKeyword(tree.keyword, this.activeTab).then(res => {
           tree.searchTreeData = Utils.data2treeArr(res);
           if (tree.searchTreeData.length === 0) return;
           this.$refs.userLazyTree.setCurrentKey(tree.searchTreeData[0].id);
@@ -308,8 +308,9 @@ export default {
      * 加载第一级tree节点
      */
     lazyTreeInit(resolve) {
-      DeptApi.getLazyTree(this.activeTab, -1).then(res => {
+      DeptApi.getLazyTree(this.activeTab, -1, true).then(res => {
         resolve(res);
+        if (res.length === 0) return;
         this.$refs.userLazyTree.setCurrentKey(res[0].id);
         this.organizationId = res[0].code;
       });
@@ -318,7 +319,7 @@ export default {
      * 加载子节点
      */
     getLeaf(node, resolve) {
-      DeptApi.getLazyTree(this.activeTab, node.data.code).then(res => {
+      DeptApi.getLazyTree(this.activeTab, node.data.code, true).then(res => {
         resolve(res);
       });
     },

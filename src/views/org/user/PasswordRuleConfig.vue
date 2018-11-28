@@ -1,36 +1,35 @@
 <!-- 密码强度规则编辑页面 -->
 <template>
-  <div>
-    <el-dialog
-      title='设置 - 密码强度规则'
-      :visible.sync='isOpen'
-      :before-close="close"
-      width='25%'>
-        <el-form :model="pwdRuleForm" label-width="80px">
-          <el-form-item>
-            <el-checkbox label='必须包含字母' v-model="pwdRuleForm.letter"></el-checkbox>
-          </el-form-item>
-          <el-form-item>
-            <el-checkbox label='必须包含大小写' v-model="pwdRuleForm.uperlowercase"></el-checkbox>
-          </el-form-item>
-          <el-form-item>
-            <el-checkbox label='必须包含数字' v-model="pwdRuleForm.number"></el-checkbox>
-          </el-form-item>
-          <el-form-item>
-            <el-checkbox v-model="pwdRuleForm.length">
-              <span class='t-label el-input--mini'>长度限制为
-              <input type="text" class='el-input__inner' v-model="pwdRuleForm.size" @keydown.13.prevent="()=>{}"/> 位
-            </span>
-          </el-checkbox>
-          </el-form-item>
-        </el-form>
+  <el-dialog
+    title='设置 - 密码强度规则'
+    visible
+    :before-close="close"
+    :close-on-click-modal='false'
+    width='400px'>
+      <el-form :model="pwdRuleForm" label-width="80px">
+        <el-form-item>
+          <el-checkbox label='必须包含字母' v-model="pwdRuleForm.letter"></el-checkbox>
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox label='必须包含大小写' v-model="pwdRuleForm.uperlowercase"></el-checkbox>
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox label='必须包含数字' v-model="pwdRuleForm.number"></el-checkbox>
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox v-model="pwdRuleForm.length">
+            <span class='t-label el-input--mini'>长度限制为
+            <input type="text" class='el-input__inner' v-model="pwdRuleForm.size" @keydown.13.prevent="()=>{}"/> 位
+          </span>
+        </el-checkbox>
+        </el-form-item>
+      </el-form>
 
-      <span slot='footer' class='dialog-footer'>
-        <el-button type='primary' @click='save'>保 存</el-button>
-        <el-button @click='close'>关 闭</el-button>
-      </span>
-    </el-dialog>
-  </div>
+    <span slot='footer' class='dialog-footer'>
+      <el-button type='primary' @click='save'>保 存</el-button>
+      <el-button @click='close'>关 闭</el-button>
+    </span>
+  </el-dialog>
 </template>
 
 <script>

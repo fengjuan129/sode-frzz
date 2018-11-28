@@ -3,10 +3,13 @@
   <div>
     <el-dialog
       title='设置 - 账号编辑'
-      :visible.sync='isOpen'
+      visible
       :before-close="close"
+      :close-on-click-modal='false'
       width='30%'>
+
       <el-form :model='userEditForm' size='small' label-width='80px' :rules='userEditRules' ref='userEditForm'>
+        <input type="hidden" v-model="userEditForm.orgCode">
         <el-col :span='12'>
           <el-form-item label='姓名' prop='realName'>
             <el-input v-model='userEditForm.realName'></el-input>
@@ -20,11 +23,10 @@
         </el-col>
 
         <el-col :span='12'>
-          <el-form-item prop='orgCode' class='t-select-dep'>
+          <el-form-item prop='deptName' class='t-select-dep'>
             <template>
-              <a href="javascript: void(0)" slot='label' @click='dialogState = true'>部门</a>
+              <el-button type='text' slot='label' @click='dialogState = true'>部门</el-button>
               <el-input v-model='userEditForm.deptName' disabled placeholder="请选择部门"></el-input>
-              <input type="hidden" v-model="userEditForm.orgCode">
             </template>
             <!--<el-input v-model='userEditForm.deptCode' :disabled="id ? true : false"></el-input>
             <div class='t-mask' @click='selectDep' v-if='id ? false : true'></div>-->
@@ -80,7 +82,7 @@
       </el-dialog>
 
 
-      <SelectDept :isOpen='dialogState'
+      <SelectDept
         @close='dialogState = false'
         @select="setDept"
         v-if='dialogState'/>
@@ -95,7 +97,6 @@ export default {
   props: ['id', 'rootName'],
   data() {
     return {
-      isOpen: true,
       dialogState: false,
       userEditForm: {
         isEnabled: true,
@@ -118,9 +119,8 @@ export default {
         username: [
           { required: true, message: '此项为必填选项', trigger: 'blur' },
           {
-            min: 6,
             max: 32,
-            message: '账号长度为 6 - 32个字符',
+            message: '账号长度不能超过32个字符',
             trigger: 'blur',
           },
         ],
@@ -128,7 +128,7 @@ export default {
           { required: true, message: '此项为必填选项', trigger: 'blur' },
           { max: 32, message: '姓名长度不能超过32个字符', trigger: 'blur' },
         ],
-        orgCode: [{ required: true, message: '此项为必填选项', trigger: 'blur' }],
+        deptName: [{ required: true, message: '此项为必填选项', trigger: 'change' }],
         certId: [{ required: true, message: '此项为必填选项', trigger: 'blur' }],
       },
     };
@@ -156,9 +156,7 @@ export default {
     save(userEditForm) {
       this.$refs[userEditForm].validate(valid => {
         if (!valid) return;
-        /**
-         * TODO: 保存后 将数据发送给父组件，方法名 save
-         */
+
         UserApi.userEdit(Object.assign(this.userEditForm, { id: this.id })).then(res => {
           this.$emit('save', res);
           this.$message({
@@ -180,16 +178,6 @@ export default {
     close() {
       this.$emit('close');
     },
-  },
-  watch: {
-    // id(val, old) {
-    //   if (val === undefined) {
-    //     this.$refs['userEditForm'].resetFields();
-    //     this.userEditForm = {};
-    //   }
-    //   if (!this.isOpen || !val) return;
-    //   this.getUserById();
-    // },
   },
 };
 </script>

@@ -1,4 +1,3 @@
-import qs from 'qs';
 import request from '../libs/request';
 
 export default {
@@ -7,8 +6,11 @@ export default {
    * @param {json} options 查询条件
    */
   loadUserList(options) {
-    return request(`/v1/core/account/users?${qs.stringify(options)}`, {
+    return request('/v1/core/account/users', {
       method: 'get',
+      params: {
+        ...options,
+      },
     });
   },
 
@@ -16,8 +18,11 @@ export default {
    * 加载用户详情
    */
   getUserMsg(id) {
-    return request(`/v1/core/account/user/${id}`, {
+    return request('/v1/core/account/user', {
       method: 'get',
+      params: {
+        id,
+      },
     });
   },
   /**
@@ -36,8 +41,8 @@ export default {
   updateUserState(userIds, state) {
     return request('/v1/core/account/users/state', {
       method: 'put',
-      params: {
-        ids: userIds.join(','),
+      data: {
+        ids: userIds,
         state,
       },
     });
@@ -49,8 +54,8 @@ export default {
   lockUser(userIds, isLocked) {
     return request('/v1/core/account/users/unlock', {
       method: 'put',
-      params: {
-        ids: userIds.join(','),
+      data: {
+        ids: userIds,
         isLocked,
       },
     });
@@ -59,8 +64,11 @@ export default {
    * 重置密码
    */
   resetPwd(userIds) {
-    return request(`/v1/core/account/user/${userIds.join(',')}/reset`, {
+    return request('/v1/core/account/user/reset', {
       method: 'put',
+      data: {
+        id: userIds,
+      },
     });
   },
 
@@ -73,10 +81,10 @@ export default {
   /**
    * 保存密码强度规则
    */
-  savePwdRule(params) {
+  savePwdRule(data) {
     return request('/v1/core/account/pwdrule', {
       method: 'put',
-      params,
+      data,
     });
   },
 
@@ -86,8 +94,8 @@ export default {
   moveUsers(ids, deptCode) {
     return request('/v1/core/account/users/transfer', {
       method: 'put',
-      params: {
-        ids: ids.join(','),
+      data: {
+        ids,
         deptCode,
       },
     });
@@ -97,8 +105,11 @@ export default {
    * 删除账号
    */
   deleteUser(ids) {
-    return request(`/v1/core/account/user/${ids.join(',')}`, {
+    return request('/v1/core/account/user', {
       method: 'delete',
+      data: {
+        ids,
+      },
     });
   },
 
@@ -108,15 +119,14 @@ export default {
   disableUser(ids, isEnabled) {
     return request('/v1/core/account/users/state', {
       method: 'put',
-      params: {
-        ids: ids.join(','),
+      data: {
+        ids,
         isEnabled,
       },
     });
   },
   /**
    * 获取人员所在机构树
-   * TODO 后端接口未定
    */
   getUserByDeptType(typeCode, name) {
     return request('/v1/core/account/usertree', {

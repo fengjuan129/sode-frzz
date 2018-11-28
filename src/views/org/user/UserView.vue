@@ -1,9 +1,14 @@
 <!-- 账号查看页面 -->
 <template>
   <div>
-    <el-dialog title='账号查看' width='500px' :visible.sync='isOpen' :before-close="close">
+    <el-dialog
+      title='账号查看'
+      width='500px'
+      visible
+      :before-close="close"
+      :close-on-click-modal='false'>
 
-       <el-form :model='userMsg' size='small' label-width='80px'>
+       <el-form :model='userMsg' size='small' label-width='80px' v-loading='loading'>
           <el-col :span='12'>
             <el-form-item label='姓名:'>
               {{userMsg.realName}}
@@ -36,7 +41,7 @@
 
           <el-col :span='12'>
             <el-form-item label='密级:'>
-              {{secretLev[userMsg.securityLevel]}}
+              {{userMsg.securityLevel && secretLev[userMsg.securityLevel].tit}}
             </el-form-item>
           </el-col>
 
@@ -72,9 +77,16 @@
 import UserApi from '@/api/user';
 
 export default {
-  props: ['id', 'isOpen'],
+  name: 'UserView',
+  props: {
+    id: {
+      type: String,
+      requirde: true,
+    },
+  },
   data() {
     return {
+      loading: true,
       userMsg: {},
       secretLev: [
         { id: 1, tit: '公开' },
@@ -85,23 +97,15 @@ export default {
       ],
     };
   },
-
+  created() {
+    UserApi.getUserMsg(this.id).then(res => {
+      this.userMsg = res;
+      this.loading = false;
+    });
+  },
   methods: {
-    getUserById() {
-      UserApi.getUserMsg(this.id).then(res => {
-        this.userMsg = res;
-      });
-    },
-
     close() {
       this.$emit('close');
-    },
-  },
-
-  watch: {
-    id() {
-      if (!this.id) return;
-      this.getUserById();
     },
   },
 };
