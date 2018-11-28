@@ -4,9 +4,12 @@ import request from '@/libs/request';
 /**
  * 加载所有应用系统
  */
-export function loadApps() {
+export function loadApps(name) {
   return request('/v1/core/base/apps', {
     method: 'get',
+    params: {
+      name,
+    },
   });
 }
 
@@ -27,7 +30,7 @@ export function editApp(app) {
  * @param {string} id 系统id
  */
 export function deleteApp(id) {
-  return request(`/v1/core/base/app`, {
+  return request('/v1/core/base/app', {
     method: 'delete',
     data: {
       id,
@@ -40,12 +43,12 @@ export function deleteApp(id) {
  * @param {string} id 系统ID
  * @param {string} state 状态
  */
-export function toggleAppState(id, state) {
+export function toggleAppState(id, isEnable) {
   return request('/v1/core/base/app/state', {
     method: 'put',
     data: {
       id,
-      state,
+      isEnable,
     },
   });
 }

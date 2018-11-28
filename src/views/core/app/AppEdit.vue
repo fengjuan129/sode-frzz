@@ -1,7 +1,12 @@
 <!-- 应用系统编辑页面 -->
 <template>
   <div>
-    <el-dialog width="650px" :title='title' visible :before-close="close">
+    <el-dialog
+      width="650px"
+      :title='title'
+      visible
+      :before-close="close"
+      :close-on-click-modal='false'>
       <!-- 子系统提示 -->
       <div class="hint-container" v-if='!isRootApp && formApp.id === undefined'>
         <el-alert
@@ -119,35 +124,49 @@ export default {
       formAppRules: {
         name: [{ required: true, message: '请输入系统名称' }],
         code: [{ required: true, message: '请输入系统编码' }],
-        deptName: [{ required: true, message: '请选择所属机构', trggir: 'changed' }],
+        deptName: [{ required: true, message: '请选择所属机构' }],
       },
       isEnableCodeTable: [{ text: '启用', value: true }, { text: '禁用', value: false }], // TODO: 是否启用码表
     };
   },
 
   created() {
-    this.formApp = { ...this.app };
-    if (this.app.id === undefined) {
-      this.formApp.isEnable = true;
-    }
+    this.initForm();
   },
 
   methods: {
+    initForm() {
+      // id undefined 新增
+      if (this.app.id === undefined) {
+        this.formApp.isEnable = true;
+        this.formApp.pid = this.app.pid;
+      } else {
+        // 后端只接受表单数据，传多余数据报错 18/11/23
+        const keys = Object.keys(this.formApp);
+
+        keys.forEach(item => {
+          this.formApp[item] = this.app[item];
+        });
+      }
+    },
     close() {
       this.$emit('close');
     },
     save() {
       this.$refs.formApp.validate(valid => {
         if (!valid) return;
-        AppApi.editApp(this.formApp).then(res => {
-          console.log(res);
-          // TODO 测试添加 ID
-          if (this.formApp.id === undefined) {
-            this.formApp.id = Math.random();
-          }
-          this.$emit('save', this.formApp);
-          this.close();
-        });
+        // ! promise 层级太深转换出错，删除childern
+        if (this.formApp.children) {
+          this.formApp.children = [];
+        }
+        AppApi.editApp(this.formApp)
+          .then(res => {
+            console.log(res);
+
+            this.$emit('save', res);
+            this.close();
+          })
+          .catch(this.$errorHandler);
       });
     },
     setDept(dept) {

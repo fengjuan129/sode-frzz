@@ -68,9 +68,9 @@ Mock.mock('/v1/core/base/app', 'delete', () => {});
 // 查询应用系统管理员授权信息
 Mock.mock(new RegExp('^/v1/core/base/app/admins'), 'get', () => {
   const list = [
-    { id: 1, name: '系统管理员', userName: '张三', userId: 12 },
-    { id: 2, name: '安全管理员', userName: '张1', userId: 13 },
-    { id: 3, name: '审计管理员' },
+    { id: 1, name: '系统管理员', userName: '张三', userId: 3 },
+    { id: 2, name: '安全管理员', userName: '李四', userId: 4 },
+    { id: 3, name: '审计管理员', userName: '', userId: '' },
   ];
 
   return list;

@@ -1,8 +1,8 @@
 <!-- 应用系统管理 -->
 <template>
-  <div>
+  <el-card type='box-card'>
     <div class="search-bar">
-      <el-form :inline='true' :model="formSearch">
+      <el-form :inline='true' :model="formSearch" @submit.native.prevent>
         <el-button size="mini" @click='createApp(-1)'>新增</el-button>
 
         <div class="f-r">
@@ -70,7 +70,7 @@
       v-if='winAdminAuth.visible'
       @close='winAdminAuth.visible = false'>
     </app-admin-auth>
-  </div>
+  </el-card>
 </template>
 
 <script>
@@ -115,10 +115,12 @@ export default {
     // 加载系统集合
     loadApp() {
       this.loading = true;
-      CoreApp.loadApps(this.formSearch.name).then(res => {
-        this.loading = false;
-        this.appList = res;
-      });
+      CoreApp.loadApps(this.formSearch.name)
+        .then(res => {
+          this.loading = false;
+          this.appList = res;
+        })
+        .catch(this.$errorHandler);
     },
     // 新增系统
     createApp(pid) {
@@ -203,7 +205,8 @@ export default {
     disableApp(app) {
       const status = !app.isEnable;
       this.loading = true;
-      CoreApp.toggleAppState(app.id, status).then(() => {
+      // 后端接收 Y N
+      CoreApp.toggleAppState(app.id, status ? 'Y' : 'N').then(() => {
         this.loading = false;
         app.isEnable = status;
 
