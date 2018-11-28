@@ -59,7 +59,7 @@
 
 <script>
 import Dic from '@/api/mockDictionary'; // TODO 假数据字典
-import { editApi } from '@/api/resources';
+import { editApi } from '@/api/res';
 
 export default {
   name: 'ApiEdit',

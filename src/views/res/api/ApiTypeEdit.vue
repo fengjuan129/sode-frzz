@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { editApiType, deleteApiType } from '@/api/resources';
+import { editApiType, deleteApiType } from '@/api/res';
 
 export default {
   name: 'ApiTypeEdit',
@@ -88,9 +88,7 @@ export default {
     save() {
       editApiType(this.formApiType)
         .then(res => {
-          console.log(res);
-          // TODO 后端会返回编辑后的对象
-          this.$emit('save', this.formApiType);
+          this.$emit('save', res);
           this.close();
           this.$message({
             message: this.isNew ? '添加成功' : '修改成功',

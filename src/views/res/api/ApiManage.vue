@@ -1,6 +1,6 @@
 <!-- 服务管理页面 -->
 <template>
-  <div>
+  <el-card type='box-card'>
     <el-row :gutter="30">
       <el-col :span='4'>
         <div class="t-pane">
@@ -83,8 +83,19 @@
                 <!-- </el-table-column> -->
                 <el-table-column label='操作'>
                   <template slot-scope='scope'>
-                    <a href="javascript: void(0)" class="m-5" @click='editApi(false,scope.row)'>编辑</a>
-                    <a href="javascript: void(0)" class="m-5" @click='delApi(scope.row,scope.$index)'>删除</a>
+                    <el-button type='text' @click='editApi(false,scope.row)'>编辑</el-button>
+
+                    <el-popover
+                      style="margin: 0 10px;"
+                      placement="top"
+                      v-model="scope.row.showDelPopOver">
+                      <p>确定删除此机构？</p>
+                      <div style="text-align: right;">
+                        <el-button size="mini" type="text" @click.stop="scope.row.showDelPopOver = false">取消</el-button>
+                        <el-button type="primary" size="mini" @click.stop="delApi(scope.row,scope.$index)">确定</el-button>
+                      </div>
+                      <el-button type="text" slot="reference" v-if='isDevlopment'>删除</el-button>
+                    </el-popover>
                   </template>
                 </el-table-column>
             </el-table>
@@ -109,28 +120,28 @@
     </el-row>
 
     <!-- 服务类型 -->
-    <ApiTypeEdit
+    <api-type-edit
       v-if='dialogs.apiTypeEdit'
       :parentType='cacheData.parentType'
       :apiType='cacheData.activeTreeNode'
       :isNew='cacheData.isNewApiType'
       @close='dialogs.apiTypeEdit = false'
       @save='appendApiType2Tree'
-      @delete='deleteApiType'/>
+      @delete='deleteApiType'></api-type-edit>
     <!-- 服务 -->
-    <ApiEdit
+    <api-edit
       v-if='dialogs.apiEdit'
       :api='cacheData.activeApi'
       :isNew='cacheData.isNewApi'
       @save='appendApi2List'
-      @close='dialogs.apiEdit = false'/>
+      @close='dialogs.apiEdit = false'></api-edit>
     <!-- 弹框 end -->
-  </div>
+  </el-card>
 </template>
 
 <script>
 import Dic from '@/api/mockDictionary';
-import { getApiTypeTree, getApiListByOption, deleteApi } from '@/api/resources';
+import { getApiTypeTree, getApiListByOption, deleteApi } from '@/api/res';
 import { data2treeArr } from '@/libs/utils';
 import ApiTypeEdit from './ApiTypeEdit.vue';
 import ApiEdit from './ApiEdit.vue';
@@ -139,6 +150,7 @@ export default {
   name: 'ApiManage',
   data() {
     return {
+      isDevlopment: process.env.NODE_ENV === 'development', // 是否为开发环境
       // 服务类型集合
       apiTypeList: [{ name: '服务分类', id: -1 }],
       defaultProps: {
@@ -190,6 +202,10 @@ export default {
     // 获取服务类型 Tree 数据
     getApiTypeData() {
       getApiTypeTree().then(res => {
+        res = res.map(item => ({
+          ...item,
+          showDelPopOver: false,
+        }));
         this.apiTypeList = [...this.apiTypeList, ...res];
         if (res.length > 0) {
           const firstObj = res[0];
@@ -229,8 +245,6 @@ export default {
      */
     editApiType(isNew, data) {
       const { cacheData } = this;
-
-      console.log(cacheData.activeTreeNode);
 
       if (data !== undefined) {
         cacheData.activeTreeNode = data;
@@ -283,8 +297,11 @@ export default {
           break;
         }
       }
-
       this.apiTypeList.splice(target.index, 1);
+      this.$nextTick(() => {
+        this.cacheData.expandedKeys = [parent.id];
+        // this.$refs.apiTypeTree.setCurrentKey(parent.id);
+      });
     },
     // 根据 ID 查找数据
     findObjByid(id, list = this.apiTypeList) {
@@ -334,24 +351,19 @@ export default {
     },
     // 删除 服务
     delApi(row, index) {
-      this.$confirm('删除后将无法恢复，确定删除此服务?', '提示', { type: 'warning' }).then(
-        () => {
-          deleteApi(row.id).then(() => {
-            this.apiList.splice(index, 1);
+      deleteApi(row.id).then(() => {
+        this.apiList.splice(index, 1);
+        this.page.total -= 1;
+        if (this.apiList.length === 0 && this.page.current > 1) {
+          this.page.current -= 1;
+          this.getApiList();
+        }
 
-            if (this.apiList.length === 0 && this.page.current > 1) {
-              this.page.current -= 1;
-              this.getApiList();
-            }
-
-            this.$message({
-              message: '删除成功',
-              type: 'success',
-            });
-          });
-        },
-        () => {}
-      );
+        this.$message({
+          message: '删除成功',
+          type: 'success',
+        });
+      });
     },
     // 编辑服务
     editApi(isNew, data) {
