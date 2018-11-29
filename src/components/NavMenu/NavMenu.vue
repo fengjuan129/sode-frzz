@@ -11,7 +11,6 @@
           <span>系统管理</span>
         </template>
         <el-menu-item index="/org/dept">组织机构管理</el-menu-item>
-        <el-menu-item index="/org/dept2">组织机构管理重写</el-menu-item>
         <el-menu-item index="/org/user">账号管理</el-menu-item>
       </el-submenu>
       <el-submenu index="2">
