@@ -103,16 +103,19 @@ export default {
   created() {
     this.loadSystem();
   },
-
   methods: {
     // 获取系统列表
     loadSystem() {
       this.loading = true;
 
-      AppAuthResApi.getSystemList({ name: this.keyWord, isEnable: true }).then(res => {
-        this.loading = false;
-        this.systemList = Utils.data2treeGridArr(res, 'id', 'pid', true);
-      });
+      AppAuthResApi.getSystemList({ name: this.keyWord, isEnable: true })
+        .then(res => {
+          this.systemList = Utils.data2treeGridArr(res, 'id', 'pid', true);
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.loading = false;
+        });
     },
 
     // 获取系统菜单
@@ -120,43 +123,49 @@ export default {
       this.cacheData.curRow = row;
       this.dialogLoading = true;
 
-      AppAuthResApi.getAuthMenusBySystemId(row.id).then(res => {
-        // 未查询到授权菜单时 后端返回 null，
-        this.cacheData.selectedIds = res ? res.map(item => item.id) : [];
-        this.cacheData.selectedMsg = res || [];
-        this.dialogLoading = false;
-        this.selectMenu.isVisible = true;
-      });
+      AppAuthResApi.getAuthMenusBySystemId(row.id)
+        .then(res => {
+          // 未查询到授权菜单时 后端返回 null，
+          this.cacheData.selectedIds = res ? res.map(item => item.id) : [];
+          this.cacheData.selectedMsg = res || [];
+          this.selectMenu.isVisible = true;
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.dialogLoading = false;
+        });
     },
 
     // 保存系统授权
-    saveAppAuth(select) {
+    saveAppAuth(select, added, removed) {
       /**
        * 11/23 resourceId / appId / resTypeCode 后端参数，要求组装成对象
        * 11/26 后端接收参数修改
        *       接收删除已勾选对象，新增对象
        */
-      const saveData = [];
       const appId = this.cacheData.curRow.id;
-      const findTarData = this.filterDelAndSaveData(select); //
-      const deleteIds = this.findContactIdByResId(findTarData.deleteIds); // 根据资源ID 查找 系统-资源关联ID
+      let deleteIds = removed.map(item => item.id);
 
-      findTarData.saveData.forEach(item => {
-        saveData.push({
-          appId,
-          resourceId: item.id,
-          resTypeCode: item.resTypeCode,
+      const saveData = added.map(item => ({
+        appId,
+        resourceId: item.id,
+        resTypeCode: item.resTypeCode,
+      }));
+
+      // 根据资源ID 查找 系统-资源关联ID
+      deleteIds = this.findContactIdByResId(deleteIds);
+
+      AppAuthResApi.saveAppAuth(saveData, deleteIds)
+        .then(() => {
+          this.$message({
+            message: '保存成功',
+            type: 'success',
+          });
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.dialogLoading = false;
         });
-      });
-
-      console.log(saveData, deleteIds);
-
-      AppAuthResApi.saveAppAuth(saveData, deleteIds).then(() => {
-        this.$message({
-          message: '保存成功',
-          type: 'success',
-        });
-      });
     },
 
     // 获取系统服务
@@ -164,13 +173,18 @@ export default {
       this.cacheData.curRow = row;
       this.dialogLoading = true;
 
-      AppAuthResApi.getSystemAuth(row.id).then(res => {
-        // 未查询到授权服务时 返回 NULL
-        this.cacheData.selectedIds = res ? res.map(item => item.id) : [];
-        this.cacheData.selectedMsg = res || [];
-        this.dialogLoading = false;
-        this.selectApi.isVisible = true;
-      });
+      AppAuthResApi.getSystemAuth(row.id)
+        .then(res => {
+          // 未查询到授权服务时 返回 NULL
+          this.cacheData.selectedIds = res ? res.map(item => item.id) : [];
+          this.cacheData.selectedMsg = res || [];
+          this.dialogLoading = false;
+          this.selectApi.isVisible = true;
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.dialogLoading = false;
+        });
     },
 
     // 获取系统码表
@@ -182,43 +196,6 @@ export default {
     saveSystemCodeTable(selectCodeTable) {
       // TODO 暂无选中码表公共组件
       console.log(selectCodeTable);
-    },
-
-    /**
-     * 查找需要删除的选项
-     * @param {Array} select 子组件返回勾选信息
-     * @return {Object}  保存、删除集合
-     */
-    filterDelAndSaveData(select) {
-      const self = this;
-      const returnDate = {
-        saveData: [],
-        deleteIds: [],
-      };
-      const cacheSelectidMap = {};
-
-      self.cacheData.selectedIds.forEach(item => {
-        cacheSelectidMap[item] = true;
-      });
-
-      select.forEach(item => {
-        if (cacheSelectidMap[item.id]) {
-          cacheSelectidMap[item.id] = false; // 如果存在，表示不需要做修改操作
-        } else {
-          returnDate.saveData.push(item); // 新增项
-        }
-      });
-
-      const keys = Object.keys(cacheSelectidMap);
-      // 获取需要删除的选项
-      for (let i = 0, len = keys.length; i < len; i += 1) {
-        const item = keys[i];
-        if (cacheSelectidMap[item] === true) {
-          returnDate.deleteIds.push(item);
-        }
-      }
-
-      return returnDate;
     },
 
     /**

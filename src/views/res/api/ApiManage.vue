@@ -1,106 +1,107 @@
 <!-- 服务管理页面 -->
 <template>
-  <el-card type='box-card'>
+  <el-card type="box-card">
     <el-row :gutter="30">
-      <el-col :span='4'>
+      <el-col :span="4">
         <div class="t-pane">
           <div class="pane-tit">
-            <el-button size='mini' @click='editApiType(true)'>新增分类</el-button>
+            <el-button size="mini" @click="editApiType(true)">新增分类</el-button>
           </div>
 
-          <div class='pane-container'>
-              <el-tree
-                :data="treeData"
-                :props="defaultProps"
-                @node-click="clickTreeNode"
-                highlight-current
-                :default-expanded-keys="cacheData.expandedKeys"
-                node-key="id"
-                ref='apiTypeTree'>
-                <span class="custom-tree-node" slot-scope="{ node, data }">
-                  <span>{{ node.label }}</span>
-                  <i v-if='data.id !== -1' class='el-icon-edit t-edit-icon' @click.stop='editApiType(false,data)'></i>
-                </span>
-              </el-tree>
-              <!-- 服务类型 Tree END -->
+          <div class="pane-container">
+            <el-tree
+              :data="treeData"
+              :props="defaultProps"
+              @node-click="clickTreeNode"
+              highlight-current
+              :default-expanded-keys="cacheData.expandedKeys"
+              node-key="id"
+              ref="apiTypeTree"
+            >
+              <span class="custom-tree-node" slot-scope="{ node, data }">
+                <span>{{ node.label }}</span>
+                <i
+                  v-if="data.id !== -1"
+                  class="el-icon-edit t-edit-icon"
+                  @click.stop="editApiType(false,data)"
+                ></i>
+              </span>
+            </el-tree>
+            <!-- 服务类型 Tree END -->
           </div>
         </div>
       </el-col>
       <!-- Tree END -->
-
-      <el-col :span='20'>
+      <el-col :span="20">
         <div class="t-pane">
           <div class="pane-tit">
-            <el-button size='mini' @click='editApi(true)'>新增服务</el-button>
+            <el-button size="mini" @click="editApi(true)">新增服务</el-button>
           </div>
 
           <div class="pane-container">
             <div class="search-option-container">
-                <el-form :inline="true" :model="searchForm" class="demo-form-inline">
-                  <el-form-item label="服务名称">
-                    <el-input v-model="searchForm.name" size="mini"></el-input>
-                  </el-form-item>
-                  <el-form-item label='服务编码'>
-                    <el-input v-model="searchForm.code" size='mini'></el-input>
-                  </el-form-item>
-                  <el-form-item label='服务路径'>
-                    <el-input v-model="searchForm.url" size='mini'></el-input>
-                  </el-form-item>
-                  <el-form-item>
-                    <el-button type="primary" size='mini' @click='getApiList(false)'>查询</el-button>
-                  </el-form-item>
-                  <el-form-item>
-                    <el-button size='mini' @click='getApiList(true)'>重置</el-button>
-                  </el-form-item>
-                </el-form>
+              <el-form :inline="true" :model="searchForm" class="demo-form-inline">
+                <el-form-item label="服务名称">
+                  <el-input v-model="searchForm.name" size="mini"></el-input>
+                </el-form-item>
+                <el-form-item label="服务编码">
+                  <el-input v-model="searchForm.code" size="mini"></el-input>
+                </el-form-item>
+                <el-form-item label="服务路径">
+                  <el-input v-model="searchForm.url" size="mini"></el-input>
+                </el-form-item>
+                <el-form-item>
+                  <el-button type="primary" size="mini" @click="getApiList(false)">查询</el-button>
+                </el-form-item>
+                <el-form-item>
+                  <el-button size="mini" @click="getApiList(true)">重置</el-button>
+                </el-form-item>
+              </el-form>
             </div>
             <!-- 条件搜索 END -->
+            <el-table :data="apiList" highlight-current-row border style="width: 100%;">
+              <el-table-column type="index" label="序号" width="50"></el-table-column>
 
-            <el-table
-              :data='apiList'
-              highlight-current-row
-              border
-              style='width: 100%;'>
-                <el-table-column
-                  type='index'
-                  label="序号"
-                  width="50">
-                </el-table-column>
+              <el-table-column label="服务名称" property="name"></el-table-column>
+              <el-table-column label="服务编码" property="code" align="center" width="100"></el-table-column>
+              <el-table-column label="授权类型" align="center" width="100">
+                <template slot-scope="scope">{{scope.row.authType | format('authType')}}</template>
+              </el-table-column>
+              <el-table-column label="服务路径" property="url"></el-table-column>
+              <el-table-column label="排序" property="sort" align="center" width="60"></el-table-column>
+              <!-- <el-table-column label='配置' property='url'> -->
+              <!-- <template> -->
+              <!--  暂时不做，后期实现  -->
+              <!-- </template> -->
+              <!-- </el-table-column> -->
+              <el-table-column label="操作">
+                <template slot-scope="scope">
+                  <el-button type="text" @click="editApi(false,scope.row)">编辑</el-button>
 
-                <el-table-column label="服务名称" property='name'></el-table-column>
-                <el-table-column label="服务编码" property='code' align='center' width='100'></el-table-column>
-                <el-table-column label="授权类型" align="center" width='100'>
-                  <template slot-scope='scope'>
-                    {{formatAuthType(scope.row.authType)}}
-                  </template>
-                </el-table-column>
-                <el-table-column label='服务路径' property='url'></el-table-column>
-                <el-table-column label='排序' property='sort' align="center" width="60"></el-table-column>
-                <!-- <el-table-column label='配置' property='url'> -->
-                  <!-- <template> -->
-                    <!--  暂时不做，后期实现  -->
-                  <!-- </template> -->
-                <!-- </el-table-column> -->
-                <el-table-column label='操作'>
-                  <template slot-scope='scope'>
-                    <el-button type='text' @click='editApi(false,scope.row)'>编辑</el-button>
-
-                    <el-popover
-                      style="margin: 0 10px;"
-                      placement="top"
-                      v-model="scope.row.showDelPopOver">
-                      <p>确定删除此机构？</p>
-                      <div style="text-align: right;">
-                        <el-button size="mini" type="text" @click.stop="scope.row.showDelPopOver = false">取消</el-button>
-                        <el-button type="primary" size="mini" @click.stop="delApi(scope.row,scope.$index)">确定</el-button>
-                      </div>
-                      <el-button type="text" slot="reference" v-if='isDevlopment'>删除</el-button>
-                    </el-popover>
-                  </template>
-                </el-table-column>
+                  <el-popover
+                    style="margin: 0 10px;"
+                    placement="top"
+                    v-model="scope.row.showDelPopOver"
+                  >
+                    <p>确定删除此机构？</p>
+                    <div style="text-align: right;">
+                      <el-button
+                        size="mini"
+                        type="text"
+                        @click.stop="scope.row.showDelPopOver = false"
+                      >取消</el-button>
+                      <el-button
+                        type="primary"
+                        size="mini"
+                        @click.stop="delApi(scope.row,scope.$index)"
+                      >确定</el-button>
+                    </div>
+                    <el-button type="text" slot="reference" v-if="isDevlopment">删除</el-button>
+                  </el-popover>
+                </template>
+              </el-table-column>
             </el-table>
             <!-- 服务列表 END -->
-
             <el-pagination
               @size-change="pageSizeChange"
               @current-change="pageCurrentChange"
@@ -109,38 +110,39 @@
               :page-size="page.pageSize"
               layout="total, sizes, prev, pager, next, jumper"
               :total="page.total"
-              style='text-align:right; padding: 11px 15px;'>
-            </el-pagination>
+              style="text-align:right; padding: 11px 15px;"
+            ></el-pagination>
             <!-- 分页 END -->
           </div>
         </div>
-
       </el-col>
       <!-- 详情 END -->
     </el-row>
 
     <!-- 服务类型 -->
     <api-type-edit
-      v-if='dialogs.apiTypeEdit'
-      :parentType='cacheData.parentType'
-      :apiType='cacheData.activeTreeNode'
-      :isNew='cacheData.isNewApiType'
-      @close='dialogs.apiTypeEdit = false'
-      @save='appendApiType2Tree'
-      @delete='deleteApiType'></api-type-edit>
+      v-if="dialogs.apiTypeEdit"
+      :parentType="cacheData.parentType"
+      :apiType="cacheData.activeTreeNode"
+      :isNew="cacheData.isNewApiType"
+      @close="dialogs.apiTypeEdit = false"
+      @save="appendApiType2Tree"
+      @delete="deleteApiType"
+    ></api-type-edit>
     <!-- 服务 -->
     <api-edit
-      v-if='dialogs.apiEdit'
-      :api='cacheData.activeApi'
-      :isNew='cacheData.isNewApi'
-      @save='appendApi2List'
-      @close='dialogs.apiEdit = false'></api-edit>
+      v-if="dialogs.apiEdit"
+      :api="cacheData.activeApi"
+      :isNew="cacheData.isNewApi"
+      @save="appendApi2List"
+      @close="dialogs.apiEdit = false"
+    ></api-edit>
     <!-- 弹框 end -->
   </el-card>
 </template>
 
 <script>
-import Dic from '@/api/mockDictionary';
+import { format } from '@/libs/codeTable';
 import { getApiTypeTree, getApiListByOption, deleteApi } from '@/api/res';
 import { data2treeArr } from '@/libs/utils';
 import ApiTypeEdit from './ApiTypeEdit.vue';
@@ -148,6 +150,9 @@ import ApiEdit from './ApiEdit.vue';
 
 export default {
   name: 'ApiManage',
+  filters: {
+    format,
+  },
   data() {
     return {
       isDevlopment: process.env.NODE_ENV === 'development', // 是否为开发环境
@@ -166,10 +171,6 @@ export default {
         isNewApi: '', // 用于判断 服务是 修改还是新增
         activeApi: null, // 保存选中的服务
         expandedKeys: [-1], // 控制 Tree 展开的目标 key 初始化展开 ROOT 节点
-      },
-      // 数据字典
-      dataDictionary: {
-        authType: Dic.authType,
       },
       // 管理Dialog 状态
       dialogs: {
@@ -384,21 +385,6 @@ export default {
       } else {
         this.cacheData.activeApi = Object.assign(this.cacheData.activeApi, data);
       }
-    },
-    // 过滤收取类型
-    formatAuthType(val) {
-      let targetAuthType = '';
-
-      for (let i = 0, len = this.dataDictionary.authType.length; i < len; i += 1) {
-        const item = this.dataDictionary.authType[i];
-
-        if (item.value === val) {
-          targetAuthType = item.name;
-          break;
-        }
-      }
-
-      return targetAuthType;
     },
   },
 };

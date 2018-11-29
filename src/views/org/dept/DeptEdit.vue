@@ -1,75 +1,88 @@
 <!-- 组织机构编辑页面 -->
 <template>
-  <el-dialog
-    title='组织机构编辑'
-    visible
-    width="30%"
-    :before-close="close"
-    :close-on-click-modal='false'>
-
-    <el-form :model="deptEditForm" :rules="deptEditRules" ref='deptEditForm' size='small' label-width='80px' status-icon>
+  <el-dialog title="组织机构编辑" visible width="30%" :before-close="close" :close-on-click-modal="false">
+    <el-form
+      :model="deptEditForm"
+      :rules="deptEditRules"
+      ref="deptEditForm"
+      size="small"
+      label-width="80px"
+      status-icon
+    >
       <el-row :gutter="30">
-        <el-col :span='12'>
-          <el-form-item label="名称" prop='name'>
+        <el-col :span="12">
+          <el-form-item label="名称" prop="name">
             <el-input v-model="deptEditForm.name" autocomplete="off"></el-input>
           </el-form-item>
         </el-col>
         <!--<el-col :span='12'>-->
-          <!-- <el-form-item label="编码"> -->
-            <!-- 修改是 编码不能修改 -->
-            <!-- 18/11/12 后端要求编码不能填写，后台自动生成 -->
-            <!-- <el-input v-model="deptEditForm.code" :disabled="id ? true : false"></el-input> -->
-            <!-- <el-input v-model="deptEditForm.code" disabled></el-input> -->
-          <!-- </el-form-item> -->
+        <!-- <el-form-item label="编码"> -->
+        <!-- 修改是 编码不能修改 -->
+        <!-- 18/11/12 后端要求编码不能填写，后台自动生成 -->
+        <!-- <el-input v-model="deptEditForm.code" :disabled="id ? true : false"></el-input> -->
+        <!-- <el-input v-model="deptEditForm.code" disabled></el-input> -->
+        <!-- </el-form-item> -->
         <!-- </el-col> -->
-
-        <el-col :span='12'>
+        <el-col :span="12">
           <el-form-item label="上级部门">
             <el-input v-model="deptEditForm.parentName" disabled></el-input>
           </el-form-item>
         </el-col>
 
-        <el-col :span='12'>
+        <el-col :span="12">
           <el-form-item label="是否启用">
             <el-select v-model="deptEditForm.isEnable">
-              <el-option v-for='item in enableStatus' :key='item.id' :value='item.val' :label="item.txt"></el-option>
+              <el-option
+                v-for="item in isEnable"
+                :key="item.value"
+                :value="item.value"
+                :label="item.text"
+              ></el-option>
             </el-select>
           </el-form-item>
         </el-col>
 
-        <el-col :span='12'>
+        <el-col :span="12">
           <el-form-item label="是否法人">
             <el-select v-model="deptEditForm.isCorporation">
-              <el-option label='否' :value='false'></el-option>
-              <el-option label='是' :value='true'></el-option>
+              <el-option
+                v-for="item in isCorporation"
+                :key="item.value"
+                :label="item.text"
+                :value="item.value"
+              ></el-option>
             </el-select>
           </el-form-item>
         </el-col>
 
-        <el-col :span='12'>
+        <el-col :span="12">
           <el-form-item label="排序" prop="sort">
             <el-input v-model.number="deptEditForm.sort"></el-input>
           </el-form-item>
         </el-col>
 
-        <el-col :span='24'>
+        <el-col :span="24">
           <el-form-item label="备注">
-            <el-input type='textarea' :autosize='{ minRows: 4, maxRows: 6}' v-model='deptEditForm.description'></el-input>
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 4, maxRows: 6}"
+              v-model="deptEditForm.description"
+            ></el-input>
           </el-form-item>
         </el-col>
       </el-row>
-
     </el-form>
 
-    <span slot='footer' class='dialog-footer'>
-        <el-button @click='close'>取 消</el-button>
-        <el-button type='primary' @click='save("deptEditForm")'>确 定</el-button>
-      </span>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="close">取 消</el-button>
+      <el-button type="primary" @click="save('deptEditForm')">确 定</el-button>
+    </span>
   </el-dialog>
 </template>
 
 <script>
 import DeptApi from '@/api/dept';
+import { getCodeTable } from '@/libs/codeTable'; // 码表
 
 export default {
   name: 'DeptEdit',
@@ -112,8 +125,8 @@ export default {
         ],
         sort: [{ validator: checkSort, trigger: 'blur' }],
       },
-      // TODO:状态数据字典
-      enableStatus: [{ id: 0, txt: '禁用', val: false }, { id: 1, txt: '启用', val: true }],
+      isEnable: getCodeTable('isEnable'), // 码表是否启用
+      isCorporation: getCodeTable('isCorporation'), // 码表是否法人
     };
   },
 

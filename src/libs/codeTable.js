@@ -58,6 +58,21 @@ export function createFormatter(code) {
 }
 
 /**
+ * 码表文本转换
+ * @param {string} value 码表项值
+ * @param {string} code 码表项代码
+ * @returns {string} 码表项文本
+ */
+export function format(value, code) {
+  // 加载尚未获取的码表数据
+  if (!codeTable[code]) {
+    getCodeTable(code);
+  }
+  const codeItem = (codeTable[code] || []).find(item => item.value === value);
+  return codeItem ? codeItem.text : value;
+}
+
+/**
  * 刷新码表数据
  */
 export function refresh() {

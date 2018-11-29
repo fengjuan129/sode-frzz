@@ -1,58 +1,76 @@
 <!-- 菜单管页面 -->
 <template>
   <div>
-    <el-table style='width: 100%'
-      :data='treeData'
+    <el-table
+      style="width: 100%"
+      :data="treeData"
       :row-style="showTr"
-      @row-click='activeRow'
+      @row-click="activeRow"
       highlight-current-row
-      border>
-
-      <el-table-column v-for='(col,index) in columns'
-        :key='index'
-        :label='col.text'
-        :width='col.width'
-        :align="col.align || 'left'">
-        <template slot-scope='scope'>
-          <span v-if="index === 0 ? true : false" v-for="(space, levelIndex) in scope.row.level" class="ms-tree-space" :key='levelIndex'></span>
-          <span class="button is-outlined is-primary is-small" v-if="toggleIconShow(index,scope.row)">
-            <i v-if="!scope.row.expanded" class="el-icon-arrow-right t-icon" aria-hidden="true"></i>
-            <i v-if="scope.row.expanded" class="el-icon-arrow-down t-icon" aria-hidden="true"></i>
+      border
+      v-loading="loading"
+    >
+      <el-table-column
+        v-for="(col,index) in columns"
+        :key="index"
+        :label="col.text"
+        :width="col.width"
+        :align="col.align || 'left'"
+      >
+        <template slot-scope="scope">
+          <span
+            v-if="index === 0 ? true : false"
+            v-for="(space, levelIndex) in scope.row.level"
+            class="ms-tree-space"
+            :key="levelIndex"
+          ></span>
+          <span
+            class="button is-outlined is-primary is-small"
+            v-if="toggleIconShow(index,scope.row)"
+          >
+            <i
+              :class="scpe.row.expanded ? 'el-icon-arrow-down t-icon' : 'el-icon-arrow-right t-icon'"
+              aria-hidden="true"
+            ></i>
           </span>
 
           <span v-else-if="index === 0" class="ms-tree-space"></span>
 
-          <span v-if='col.key == "isEnable" && scope.row.id !== -1'>
-            <i :class='scope.row[col.key] ?
-                "fs-20 success el-icon-circle-check" : "fs-20 danger el-icon-circle-close"'>
-            </i>
-          </span>
-
-          <span>{{formatColumn(scope.row,col.key)}}</span>
+          <span>{{ scope.row[col.key] | formatDic(col.key) }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" >
-        <template slot-scope='scope' class='t-btns-container'>
-          <el-button type='text' @click.stop='editMenu("new",scope.row)'>新增菜单</el-button>
-          <el-button type='text' @click.stop='editMenu("update",scope.row)' v-if='scope.$index > 0'>编辑</el-button>
-          <el-button type='text' @click.stop='delMenu(scope.row,scope.$index)' v-if='scope.$index > 0'>删除</el-button>
+      <el-table-column label="操作">
+        <template slot-scope="scope" class="t-btns-container">
+          <el-button type="text" @click.stop="editMenu('new',scope.row)">新增菜单</el-button>
+          <el-button
+            type="text"
+            @click.stop="editMenu('update',scope.row)"
+            v-if="scope.$index > 0"
+          >编辑</el-button>
+          <el-button
+            type="text"
+            @click.stop="delMenu(scope.row,scope.$index)"
+            v-if="scope.$index > 0"
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <!-- components -->
-    <MenuEdit v-if='dialogs.menuEdit'
-      :parentMenu='catchData.curMenu.id'
-      :menu='catchData.curMenu.menu'
-      @close='dialogs.menuEdit = false'
-      @save='subMenu'/>
+    <MenuEdit
+      v-if="dialogs.menuEdit"
+      :parentMenu="catchData.curMenu.id"
+      :menu="catchData.curMenu.menu"
+      @close="dialogs.menuEdit = false"
+      @save="subMenu"
+    />
   </div>
 </template>
 
 <script>
 import { getMenuTree, setMenu, deleteMenu } from '@/api/res'; // 接口
-import Dic from '@/api/mockDictionary'; // 假数据字典
+import { format } from '@/libs/codeTable';
 import { data2treeGridArr } from '@/libs/utils';
 import MenuEdit from './MenuEdit.vue';
 
@@ -60,6 +78,7 @@ export default {
   name: 'MenuManage',
   data() {
     return {
+      loading: true,
       columns: [
         { text: '菜单名称', key: 'name', width: 200 },
         { text: '菜单类型', key: 'menuType' },
@@ -84,11 +103,21 @@ export default {
           menu: {},
         },
       },
-      isEnable: Dic.isEnable, // TODO 是否启用为数据字典
-      isVisible: Dic.isVisible, // TODO 是否可见为数据字典
-      authType: Dic.authType, // TODO 授权方式为数据字典
-      menuType: Dic.menuType, // TODO 菜单类型为数据字典
     };
+  },
+
+  filters: {
+    formatDic(value, code) {
+      if (
+        code === 'isEnable' ||
+        code === 'isVisible' ||
+        code === 'authType' ||
+        code === 'menuType'
+      ) {
+        return format(value, code);
+      }
+      return value;
+    },
   },
 
   components: {
@@ -105,7 +134,10 @@ export default {
       .then(res => {
         this.menuList = [...this.menuList, ...res];
       })
-      .catch(this.$errorHandler);
+      .catch(this.$errorHandler)
+      .finally(() => {
+        this.loading = false;
+      });
   },
   methods: {
     // 控制表格显示、隐藏

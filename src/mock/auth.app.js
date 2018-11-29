@@ -7,6 +7,7 @@ const system = [
     name: '院人事信息管理系统',
     code: '@name',
     deptCode: '@name',
+    isEnable: false,
     appId: 'seshr',
   },
   {
@@ -14,6 +15,7 @@ const system = [
     name: '涉密电子会议系统',
     code: '@name',
     deptCode: '@name',
+    isEnable: true,
     appId: 'sems',
   },
   {
@@ -21,12 +23,14 @@ const system = [
     name: '电子公文系统',
     code: '@name',
     deptCode: '@name',
+    isEnable: false,
     appId: 'doc',
   },
   {
     id: 4,
     code: '@name',
     deptCode: '@name',
+    isEnable: false,
     name: 'tttt',
     pid: 1,
   },
@@ -34,6 +38,7 @@ const system = [
     id: 5,
     code: '@name',
     deptCode: '@name',
+    isEnable: false,
     name: 'asd',
     pid: 2,
   },
@@ -41,6 +46,7 @@ const system = [
     id: 6,
     code: '@name',
     deptCode: '@name',
+    isEnable: false,
     name: 'asd',
     pid: 5,
   },
@@ -56,7 +62,7 @@ Mock.mock(new RegExp('^/v1/core/auth/app/menus'), 'get', () => [3]);
 Mock.mock('/v1/core/auth/app/menus', 'put', () => {});
 
 // 根据系统ID 查询系统服务
-Mock.mock(new RegExp('^/v1/core/auth/app/apis'), 'get', () => [1]);
+Mock.mock(new RegExp('^/v1/core/auth/app/apis'), 'get', () => [{ id: 1 }]);
 
 // 保存系统服务
 Mock.mock(new RegExp('^/v1/core/auth/app/apis'), 'put', () => {});

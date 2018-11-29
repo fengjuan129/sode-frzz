@@ -1,81 +1,83 @@
 <!-- 应用系统管理 -->
 <template>
-  <el-card type='box-card'>
+  <el-card type="box-card">
     <div class="search-bar">
-      <el-form :inline='true' :model="formSearch" @submit.native.prevent>
-        <el-button size="mini" @click='createApp(-1)'>新增</el-button>
+      <el-form :inline="true" :model="formSearch" @submit.native.prevent>
+        <el-button size="mini" @click="createApp(-1)">新增</el-button>
 
         <div class="f-r">
           <el-input v-model="formSearch.name" size="mini" placeholder="请输入系统名称">
-            <el-button slot="append" icon='el-icon-search' @click="loadApp"></el-button>
+            <el-button slot="append" icon="el-icon-search" @click="loadApp"></el-button>
           </el-input>
         </div>
       </el-form>
     </div>
     <!-- 搜索 END -->
-
     <el-table
-      style='width: 100%'
+      style="width: 100%"
       highlight-current-row
-      v-loading='loading'
+      v-loading="loading"
       @current-change="onCurrentChange"
-      :data='treeData'>
-
-      <el-table-column type='index' align="center" width="50"></el-table-column>
+      :data="treeData"
+    >
+      <el-table-column type="index" align="center" width="50"></el-table-column>
       <el-table-column label="系统名称">
         <template slot-scope="scope">
-          <span v-for="(space, levelIndex) in scope.row.level" class="ms-tree-space" :key='levelIndex'></span>
+          <span
+            v-for="(space, levelIndex) in scope.row.level"
+            class="ms-tree-space"
+            :key="levelIndex"
+          ></span>
           {{scope.row.name}}
         </template>
       </el-table-column>
-      <el-table-column prop='name' label="系统编码" align='center' width='100'></el-table-column>
-      <el-table-column label="状态" align='center' width='80'>
-        <template slot-scope='scope'>
-          {{scope.row.isEnable ? '启用' : '禁用'}}
-        </template>
+      <el-table-column prop="name" label="系统编码" align="center" width="100"></el-table-column>
+      <el-table-column label="状态" align="center" width="80">
+        <template slot-scope="scope">{{scope.row.isEnable | format('isEnable')}}</template>
       </el-table-column>
-      <el-table-column prop='deptName' label="所属机构" align='center' width='100'></el-table-column>
-      <el-table-column prop='description' label="备注"></el-table-column>
-      <el-table-column prop='sort' label="排序" align='center' width='80'></el-table-column>
+      <el-table-column prop="deptName" label="所属机构" align="center" width="100"></el-table-column>
+      <el-table-column prop="description" label="备注"></el-table-column>
+      <el-table-column prop="sort" label="排序" align="center" width="80"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button type='text' @click='editApp(scope.row)'>编辑</el-button>
-          <el-button type='text' @click='disableApp(scope.row)'>{{scope.row.isEnable ? '禁用' : '启用'}}</el-button>
+          <el-button type="text" @click="editApp(scope.row)">编辑</el-button>
+          <el-button type="text" @click="disableApp(scope.row)">{{scope.row.isEnable ? '禁用' : '启用'}}</el-button>
 
-          <el-dropdown trigger="click" style='margin-left: 10px;' @command="handleBatchCommand">
-            <el-button type='text' class='el-dropdown-link'>
-              更多<i class="el-icon-arrow-down el-icon--right"></i>
+          <el-dropdown trigger="click" style="margin-left: 10px;" @command="handleBatchCommand">
+            <el-button type="text" class="el-dropdown-link">
+              更多
+              <i class="el-icon-arrow-down el-icon--right"></i>
             </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command='deleteApp'>删除</el-dropdown-item>
-              <el-dropdown-item command='createApp'>创建子系统</el-dropdown-item>
-              <el-dropdown-item command='manageAuth'>管理员授权</el-dropdown-item>
+              <el-dropdown-item command="deleteApp">删除</el-dropdown-item>
+              <el-dropdown-item command="createApp">创建子系统</el-dropdown-item>
+              <el-dropdown-item command="manageAuth">管理员授权</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </template>
       </el-table-column>
     </el-table>
     <!-- tabs END -->
-
     <!-- 弹框 -->
     <app-edit
-      v-bind='winEditApp'
-      v-if='winEditApp.visible'
-      @close='winEditApp.visible = false'
-      @save='onAppSaved'>
-    </app-edit>
+      v-bind="winEditApp"
+      v-if="winEditApp.visible"
+      @close="winEditApp.visible = false"
+      @save="onAppSaved"
+    ></app-edit>
 
     <app-admin-auth
-      v-bind='winAdminAuth'
-      v-if='winAdminAuth.visible'
-      @close='winAdminAuth.visible = false'>
-    </app-admin-auth>
+      v-bind="winAdminAuth"
+      v-if="winAdminAuth.visible"
+      @close="winAdminAuth.visible = false"
+    ></app-admin-auth>
   </el-card>
 </template>
 
 <script>
 import * as Utils from '@/libs/utils';
 import * as CoreApp from '@/api/app';
+import { format } from '@/libs/codeTable';
 import AppEdit from './AppEdit.vue';
 import AppAdminAuth from './AppAdminAuth.vue';
 
@@ -83,7 +85,9 @@ export default {
   name: 'AppManage',
 
   components: { AppEdit, AppAdminAuth },
-
+  filters: {
+    format,
+  },
   data() {
     return {
       loading: false,
