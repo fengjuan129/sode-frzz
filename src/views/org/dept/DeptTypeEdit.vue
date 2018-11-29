@@ -1,35 +1,44 @@
 <!-- 组织机构类型编辑页面 -->
 <template>
   <el-dialog
-    title='组织机构类型编辑'
+    title="组织机构类型编辑"
     visible
     width="500px"
-    :close-on-click-modal='false'
-    :before-close="close">
-
-    <el-form :model='deptTypeForm' size='small' label-width='80px' :rules='deptTypeRules' ref='deptTypeForm' status-icon>
+    :close-on-click-modal="false"
+    :before-close="close"
+  >
+    <el-form
+      :model="formDeptType"
+      size="small"
+      label-width="80px"
+      :rules="deptTypeRules"
+      ref="formDeptType"
+      status-icon
+    >
       <el-row :gutter="30">
-        <el-col :span='24'>
-          <el-form-item label='类型名称' prop='typename'>
-            <el-input v-model='deptTypeForm.typename'></el-input>
+        <el-col :span="24">
+          <el-form-item label="类型名称" prop="typename">
+            <el-input v-model="formDeptType.typename"></el-input>
           </el-form-item>
         </el-col>
 
-        <el-col :span='24'>
-          <el-form-item label='备注'>
-            <el-input type='textarea' :autosize='{ minRows: 4, maxRows: 6}' v-model='deptTypeForm.description'></el-input>
+        <el-col :span="24">
+          <el-form-item label="备注">
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 4, maxRows: 6}"
+              v-model="formDeptType.description"
+            ></el-input>
           </el-form-item>
         </el-col>
       </el-row>
-
     </el-form>
-    <!-- deptTypeForm END -->
-
-    <span slot='footer' class='dialog-footer'>
-        <el-button size='mini' style='float: left;' @click='deleteDeptTye' :disabled="!this.id">删除</el-button>
-        <el-button size='mini' @click='close'>取 消</el-button>
-        <el-button size='mini' type='primary' @click='save("deptTypeForm")'>确 定</el-button>
-      </span>
+    <!-- formDeptType END -->
+    <span slot="footer" class="dialog-footer">
+      <el-button size="mini" style="float: left;" @click="deleteDeptTye" :disabled="!this.id">删除</el-button>
+      <el-button size="mini" @click="close">取 消</el-button>
+      <el-button size="mini" type="primary" @click="save">确 定</el-button>
+    </span>
   </el-dialog>
 </template>
 
@@ -45,7 +54,8 @@ export default {
   },
   data() {
     return {
-      deptTypeForm: {},
+      loading: false,
+      formDeptType: {},
       deptTypeRules: {
         typename: [
           { required: true, message: '此项为必填选项', trigger: 'blur' },
@@ -55,7 +65,7 @@ export default {
     };
   },
 
-  mounted() {
+  created() {
     this.loadDepTypeInfo();
   },
 
@@ -65,38 +75,37 @@ export default {
      */
     loadDepTypeInfo() {
       if (!this.id) return;
-      DeptApi.getDeptTypeInfo(this.id).then(res => {
-        this.$set(this, 'deptTypeForm', res);
-      });
+      this.loading = true;
+      DeptApi.getDeptTypeInfo(this.id)
+        .then(res => {
+          this.$set(this, 'formDeptType', res);
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.loading = false;
+        });
     },
 
     /**
      * 编辑机构类型
      */
-    save(deptTypeForm) {
-      this.$refs[deptTypeForm].validate(valid => {
+    save() {
+      this.$refs.formDeptType.validate(valid => {
         if (!valid) return;
-        DeptApi.editDeptType(this.deptTypeForm).then(res => {
-          let message = '';
-          if (this.id) {
-            message = '修改成功';
-          } else {
-            message = '保存成功';
-          }
+        DeptApi.editDeptType(this.formDeptType).then(res => {
           this.$emit('save', res);
           this.close();
-          this.$message({
-            message,
-            type: 'success',
-          });
+          this.$message.success(this.id ? '修改成功' : '保存成功');
         });
       });
     },
+
     close() {
       this.$emit('close');
     },
+
     /**
-     * 删除组织机构
+     * 删除组织机构类型
      */
     deleteDeptTye() {
       this.$confirm('确定删除该组织机构', '提示', {
@@ -105,19 +114,20 @@ export default {
         type: 'warning',
       })
         .then(() => {
+          this.loading = true;
           DeptApi.deleteDeptType(this.id).then(() => {
             this.$message({
               message: '删除成功',
               type: 'success',
             });
             this.$emit('delete', this.id);
-            this.close();
           });
         })
-        .catch();
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.loading = false;
+        });
     },
   },
 };
 </script>
-<style lang='less' scoped>
-</style>

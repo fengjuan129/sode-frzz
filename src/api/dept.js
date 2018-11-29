@@ -4,6 +4,8 @@ export default {
   /**
    * 懒加载组织机构
    * @param {string} parentCode 父组织机构编码
+   * @param {string} typeCode 织机构类型编码
+   * @param {blooean} isEnable 是否全加载
    */
   getLazyTree(typeCode, parentCode, isEnable) {
     return request('/v1/core/org/lazytree', {

@@ -8,6 +8,7 @@
       size="small"
       label-width="80px"
       status-icon
+      v-loading="loading"
     >
       <el-row :gutter="30">
         <el-col :span="12">
@@ -75,7 +76,7 @@
 
     <span slot="footer" class="dialog-footer">
       <el-button @click="close">取 消</el-button>
-      <el-button type="primary" @click="save('deptEditForm')">确 定</el-button>
+      <el-button type="primary" @click="save">确 定</el-button>
     </span>
   </el-dialog>
 </template>
@@ -91,12 +92,15 @@ export default {
       type: String,
     },
     parentCode: {
-      type: String,
+      type: [String, Number],
       required: true,
     },
     parentName: {
       type: String,
       required: true,
+    },
+    deptTypeCode: {
+      type: String,
     },
   },
   data() {
@@ -109,6 +113,7 @@ export default {
     };
 
     return {
+      loading: false,
       deptEditForm: {
         isCorporation: false,
         isEnable: true,
@@ -130,11 +135,15 @@ export default {
     };
   },
 
-  mounted() {
+  created() {
     // 判断新增、修改 有 ID 修改，无 ID 新增
-    if (!this.id && this.parentCode && this.parentName) {
-      this.$set(this.deptEditForm, 'parentCode', this.parentCode);
+    if (!this.id) {
       this.$set(this.deptEditForm, 'parentName', this.parentName);
+      this.deptEditForm.parentCode = this.parentCode;
+      // 后端要求根节点需要参入 code 参数
+      if (this.parentCode === -1) {
+        this.deptEditForm.code = this.deptTypeCode;
+      }
     } else {
       this.loadDeptInfo();
     }
@@ -142,22 +151,30 @@ export default {
 
   methods: {
     loadDeptInfo() {
-      DeptApi.loadDeptInfo(this.id).then(res => {
-        res.parentName = this.parentName;
-        this.deptEditForm = res;
-      });
+      this.loading = true;
+      DeptApi.loadDeptInfo(this.id)
+        .then(res => {
+          res.parentName = this.parentName;
+          this.deptEditForm = res;
+        })
+        .catch(this.$errorHandler)
+        .finally(() => {
+          this.loading = false;
+        });
     },
     save() {
       this.$refs.deptEditForm.validate(valid => {
         if (!valid) return;
-
-        this.$emit('save', this.deptEditForm);
-
-        this.$message({
-          message: '保存成功',
-          type: 'success',
-        });
-        this.close();
+        this.loading = true;
+        DeptApi.editDept(this.deptEditForm)
+          .then(res => {
+            this.$emit('save', res);
+            this.$message.success('保存成功');
+          })
+          .catch(this.$errorHandler)
+          .finally(() => {
+            this.loading = false;
+          });
       });
     },
     close() {

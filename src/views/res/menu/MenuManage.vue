@@ -29,7 +29,7 @@
             v-if="toggleIconShow(index,scope.row)"
           >
             <i
-              :class="scpe.row.expanded ? 'el-icon-arrow-down t-icon' : 'el-icon-arrow-right t-icon'"
+              :class="scope.row.expanded ? 'el-icon-arrow-down t-icon' : 'el-icon-arrow-right t-icon'"
               aria-hidden="true"
             ></i>
           </span>

@@ -64,6 +64,9 @@ export function createFormatter(code) {
  * @returns {string} 码表项文本
  */
 export function format(value, code) {
+  if (value === undefined || code === undefined) {
+    return '';
+  }
   // 加载尚未获取的码表数据
   if (!codeTable[code]) {
     getCodeTable(code);
