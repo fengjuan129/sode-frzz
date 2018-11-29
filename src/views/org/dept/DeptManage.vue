@@ -281,8 +281,16 @@ export default {
      */
     oneDeptTypeSaved(deptType) {
       if (this.winDeptTypeEdit.id) {
-        let activeDept = this.deptTypeList.find(item => item.id === deptType.id);
-        activeDept = Object.assign(activeDept, deptType);
+        // eslint 报错？？？？ is assigned a value but never used （no-unused-vars）
+        // let activeDept = this.deptTypeList.find(item => item.id === deptType.id);
+        // activeDept = Object.assign(activeDept, deptType);
+        for (let i = 0, len = this.deptTypeList.length; i < len; i += 1) {
+          let item = this.deptTypeList[i];
+          if (item.id === deptType.id) {
+            item = Object.assign(item, deptType);
+            break;
+          }
+        }
       } else {
         this.deptTypeList.push({ ...deptType });
         this.activeTabCode = deptType.code;
