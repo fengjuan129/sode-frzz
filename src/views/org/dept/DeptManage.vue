@@ -330,7 +330,8 @@ export default {
             showDelPopOver: false, // 为每行数据添加是否显示确认删除框的标识
           }));
 
-          this.deptList = [...this.deptList, ...res];
+          // 快速点击  tab 切换时防止数据重复加载
+          this.deptList = parentCode === -1 ? res : [...this.deptList, ...res];
         })
         .catch(this.$errorHandler)
         .finally(() => {

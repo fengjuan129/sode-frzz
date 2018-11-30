@@ -1,5 +1,5 @@
 // 组织机构相关数据
-import Mock, { id } from 'mockjs';
+import Mock from 'mockjs';
 
 // 获取 组织机构类型
 Mock.mock('/v1/core/org/types', 'get', () => {

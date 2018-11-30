@@ -7,7 +7,6 @@
       ref="deptEditForm"
       size="small"
       label-width="80px"
-      status-icon
       v-loading="loading"
     >
       <el-row :gutter="30">
@@ -104,14 +103,6 @@ export default {
     },
   },
   data() {
-    const checkSort = (rule, value, callback) => {
-      if (value && !Number.isInteger(value)) {
-        callback(new Error('请输入数字值'));
-      } else {
-        callback();
-      }
-    };
-
     return {
       loading: false,
       deptEditForm: {
@@ -121,14 +112,21 @@ export default {
       // 验证规则
       deptEditRules: {
         name: [
-          { required: true, message: '名称为必填选项', trigger: 'blur' },
-          { max: 32, message: '名称不能超过32位', trigger: 'blur' },
+          { required: true, message: '请填写机构名称' },
+          { max: 32, message: '长度不能超过32个字符' },
         ],
-        code: [
-          { required: true, message: '机构编码为必填选项', trigger: 'blur' },
-          { max: 32, message: '机构编码超过32位', trigger: 'blur' },
+        sort: [
+          {
+            validator(rule, value, callback) {
+              if (value && !Number.isInteger(value)) {
+                callback(new Error('请输入数字值'));
+              } else {
+                callback();
+                this.$refs.sort.clearValidate();
+              }
+            },
+          },
         ],
-        sort: [{ validator: checkSort, trigger: 'blur' }],
       },
       isEnable: getCodeTable('isEnable'), // 码表是否启用
       isCorporation: getCodeTable('isCorporation'), // 码表是否法人

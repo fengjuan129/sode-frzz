@@ -33,6 +33,7 @@
               :props="tree.defaultProps"
               @node-click="treeNodeClick"
               node-key="id"
+              v-loading="treeLoading"
               ref="userLazyTree"
             ></el-tree>
 
@@ -43,6 +44,7 @@
               :props="tree.defaultProps"
               default-expand-all
               highlight-current
+              v-loading="treeLoading"
               @node-click="treeNodeClick"
             ></el-tree>
           </div>
@@ -243,6 +245,7 @@ export default {
     return {
       isDevlopment: process.env.NODE_ENV === 'development', // 是否为开发环境
       loading: false,
+      treeLoading: false,
       tree: {
         keyword: '',
         isLazy: false, // 控制显示 Tree
@@ -362,6 +365,7 @@ export default {
      * 加载第一级tree节点
      */
     lazyTreeInit(resolve) {
+      this.treeLoading = true;
       DeptApi.getLazyTree(this.activeTab, -1, true)
         .then(res => {
           resolve(res);
@@ -373,20 +377,21 @@ export default {
         })
         .catch(this.$errorHandler)
         .finally(() => {
-          this.loading = false;
+          this.treeLoading = false;
         });
     },
     /**
      * 加载子节点
      */
     getLeaf(node, resolve) {
+      this.treeLoading = true;
       DeptApi.getLazyTree(this.activeTab, node.data.code, true)
         .then(res => {
           resolve(res);
         })
         .catch(this.$errorHandler)
         .finally(() => {
-          this.loading = false;
+          this.treeLoading = false;
         });
     },
 
@@ -442,10 +447,11 @@ export default {
      * 切换组织机构时重新渲染懒加载树
      */
     reloadLazyTree() {
-      const children = this.$refs.userLazyTree.root.childNodes;
-      children.splice(0, children.length);
+      this.treeLoading = true;
       DeptApi.getLazyTree(this.activeTab, -1)
         .then(res => {
+          const children = this.$refs.userLazyTree.root.childNodes;
+          children.splice(0, children.length);
           this.$refs.userLazyTree.root.doCreateChildren(res);
           if (res.length) {
             this.$refs.userLazyTree.setCurrentKey(res[0].id);
@@ -456,7 +462,7 @@ export default {
         })
         .catch(this.$errorHandler)
         .finally(() => {
-          this.loading = false;
+          this.treeLoading = false;
         });
     },
 
