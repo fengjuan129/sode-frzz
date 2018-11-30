@@ -60,8 +60,8 @@ export default {
     rootCode: {
       type: String,
     },
-    // 已选账号id数组，此参数不为空时要在界面上勾选或选中对应数据
-    selectedIds: {
+    // 已选账号名称数组，此参数不为空时要在界面上勾选或选中对应数据
+    selectedNames: {
       type: Array,
       default: () => [],
     },
@@ -122,10 +122,10 @@ export default {
       this.loading = true;
       UserApi.getUserByDeptType(this.activeTab, this.keyword)
         .then(res => {
-          this.loading = false;
           /**
            * 11/27 后端返回参数 账户关联字段为 deptCode ，机构类型 关联字段为 parentCode，统一使用 parentCode
            */
+          res = res || [];
           res.forEach(item => {
             if (item.username !== undefined && item.deptCode) {
               item.parentCode = item.deptCode;
@@ -196,15 +196,15 @@ export default {
       const { defaultSelectMap } = this;
 
       select.forEach(item => {
-        if (defaultSelectMap[item.id]) {
-          defaultSelectMap[item.id] = false; // 如果存在，表示不需要做修改操作
+        if (defaultSelectMap[item.username]) {
+          defaultSelectMap[item.username] = false; // 如果存在，表示不需要做修改操作
         } else {
           returnDate.added.push(item); // 新增项
         }
       });
 
       // 获取需要删除的选项
-      returnDate.removed = this.userList.filter(item => defaultSelectMap[item.id] === true);
+      returnDate.removed = this.userList.filter(item => defaultSelectMap[item.username] === true);
       // 单选返回对象
       if (!this.multiple) {
         returnDate.added = { ...returnDate.added[0] };
