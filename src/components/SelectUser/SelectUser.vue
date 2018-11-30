@@ -24,7 +24,7 @@
         <div class="select-user-tree">
           <!-- 全加载 -->
           <el-tree
-            node-key="id"
+            node-key="username"
             :data="treeData"
             :props="defaultProps"
             :show-checkbox="multiple"
@@ -173,7 +173,9 @@ export default {
         return;
       }
 
-      const filterData = this.filterDelAndSaveOption(select);
+      const filterData = this.filterDelAndSaveOption(
+        select.filter(item => item.children === undefined)
+      );
 
       this.$emit('select', select, filterData.added, filterData.removed);
       this.close();

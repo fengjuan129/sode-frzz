@@ -30,7 +30,7 @@
       <!-- 查询栏 -->
       <el-form :inline="true" :model="formSearch" size="mini">
         <el-form-item label="角色名称">
-          <el-input v-model="formSearch.name"></el-input>
+          <el-input v-model="formSearch.name" @keyup.enter.native="searchRoles"></el-input>
         </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="formSearch.isEnable">
@@ -104,6 +104,7 @@ import * as appApi from '@/api/app';
 import * as roleApi from '@/api/role';
 import * as authApi from '@/api/auth.user';
 import { getCodeTable, createFormatter } from '@/libs/codeTable';
+import config from '@/config';
 import RoleEdit from './RoleEdit.vue';
 
 export default {
@@ -126,6 +127,7 @@ export default {
       winEditRole: {
         visible: false, // 编辑窗口是否可见
         role: null, // 传入编辑窗口的角色
+        appCode: config.appCode, // 角色所属应用系统编码（新增时属必填）
       },
     };
   },
@@ -138,7 +140,7 @@ export default {
       }
       // 如果当前账号是运维管理员，标签页显示为应用系统
       if (this.isAdmin) {
-        return this.apps.map(app => ({ name: app.name, key: app.appId }));
+        return this.apps.map(app => ({ name: app.name, key: app.code }));
       }
       // 否则标签页固定显示为公共角色和私有角色（此时为下级小三员使用）
       return [{ name: '公共角色', key: 'public' }, { name: '私有角色', key: 'private' }];
@@ -154,26 +156,28 @@ export default {
       .then(isTopAdmin => {
         // 如果是顶级系统三员
         if (isTopAdmin) {
+          this.isAdmin = false;
           this.activeTabKey = '';
-          // 加载角色列表
-          this.loadRoles();
+          // 加载当前系统的角色列表
+          this.loadRoles(config.appCode);
         } else {
           // 如果不是顶级系统三员，判断当前账号是否为运维管理员
           this.judgeIsAdmin().then(isAdmin => {
+            this.isAdmin = isAdmin;
             // 如果是运维管理员
             if (isAdmin) {
               // 加载应用系统
               this.loadApps().then(apps => {
                 // 标记选中的tab标签页
-                this.activeTabKey = apps[0].appId;
-                // 加载角色列表
+                this.activeTabKey = apps[0].code;
+                // 加载所选应用系统的角色列表
                 this.loadRoles(this.activeTabKey);
               });
             } else {
               // 标记选中的tab标签页
               this.activeTabKey = 'public';
-              // 直接加载公共角色列表
-              this.loadRoles(null, 'public');
+              // 直接加载当前系统的公共角色列表
+              this.loadRoles(config.appCode, 'public');
             }
           });
         }
@@ -210,13 +214,14 @@ export default {
     },
     /**
      * 加载角色列表
-     * @param {String} appId 应用系统id
+     * @param {String} appCode 应用系统id
      * @param {String} roleType 角色类型（public/公开角色 private/私有角色）
      */
-    loadRoles(appId, roleType) {
+    loadRoles(appCode, roleType) {
       this.loading = true;
+      this.winEditRole.appCode = appCode; // 记录当前系统编码，创建角色时将会创建到此系统下
       return roleApi
-        .loadRoles(appId, roleType, this.formSearch)
+        .loadRoles(appCode, roleType, this.formSearch)
         .then(roles => {
           this.roles = roles.map(role => ({
             ...role,
@@ -233,12 +238,12 @@ export default {
      * 查询角色列表
      */
     searchRoles() {
-      // 如果当前账号是运维管理员，按appId查询
+      // 如果当前账号是运维管理员，按appCode查询
       if (this.isAdmin) {
         this.loadRoles(this.activeTabKey);
       } else {
-        // 如果不是，按角色类型查询
-        this.loadRoles(null, this.activeTabKey);
+        // 如果不是，按当前系统的角色类型查询
+        this.loadRoles(config.appCode, this.activeTabKey);
       }
     },
     /**
@@ -263,9 +268,8 @@ export default {
      * 新增角色
      */
     createRole() {
-      this.winEditRole = {
-        visible: true,
-      };
+      this.winEditRole.role = null;
+      this.winEditRole.visible = true;
     },
     /**
      * 编辑角色

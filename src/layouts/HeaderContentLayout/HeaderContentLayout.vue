@@ -2,10 +2,7 @@
   <section class="page-container">
     <header>
       <div class="header-container">
-        <nav-menu
-          mode="horizontal"
-          style="border-bottom: 0px;">
-        </nav-menu>
+        <nav-menu mode="horizontal"></nav-menu>
       </div>
     </header>
     <main>

@@ -17,13 +17,23 @@
             size="default"
           >
             <el-form-item prop="username">
-              <el-input type="text" v-model="formLogin.username" placeholder="用户名">
-                <i slot="prepend" class="el-icon-edit"></i>
+              <el-input
+                type="text"
+                v-model="formLogin.username"
+                placeholder="用户名"
+                @keyup.enter.native="submit"
+              >
+                <font-awesome-icon slot="prepend" icon="user"/>
               </el-input>
             </el-form-item>
             <el-form-item prop="password">
-              <el-input type="password" v-model="formLogin.password" placeholder="密码">
-                <i slot="prepend" class="el-icon-goods"></i>
+              <el-input
+                type="password"
+                v-model="formLogin.password"
+                placeholder="密码"
+                @keyup.enter.native="submit"
+              >
+                <font-awesome-icon slot="prepend" icon="lock"/>
               </el-input>
             </el-form-item>
             <el-button @click="submit" size="default" type="primary" class="button-login">登录</el-button>
@@ -43,7 +53,7 @@ export default {
     return {
       // 表单
       formLogin: {
-        username: '测试加密', // xuw 测试
+        username: 'leiy', // xuw 测试 测试加密 laoli（admin） leiy(顶级系统三员) weid(小三员)
         password: '123456',
       },
       // 校验
