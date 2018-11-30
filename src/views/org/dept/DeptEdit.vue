@@ -56,7 +56,7 @@
         </el-col>
 
         <el-col :span="12">
-          <el-form-item label="排序" prop="sort">
+          <el-form-item label="排序" prop="sort" ref="sort">
             <el-input v-model.number="deptEditForm.sort"></el-input>
           </el-form-item>
         </el-col>
