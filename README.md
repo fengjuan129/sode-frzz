@@ -1,3 +1,5 @@
+[toc]
+
 # 搭建开发环境
 
 ## 安装 Node.js
@@ -5,13 +7,14 @@
 1. 进入[Node.js官网](https://nodejs.org/en/download/)下载 msi 安装包进行安装
 2. 安装完成后在 `cmd`（使用 `WIN + R` 打开运行窗口，输入 `cmd` 打开控制台）中分别输入 `node -v` 和 `npm -v` ，如果都返回一个版本号就表示安装成功了
 3. 修改依赖包安装源：进入系统目录：`C:\Users\[用户名]`，找到文件 `.npmrc`（如果没有则新建一个），打开修改文件内容如下：
-   ```
-   registry=https://registry.npm.taobao.org
-   ELECTRON_MIRROR=http://npm.taobao.org/mirrors/electron/
-   sass_binary_site=https://npm.taobao.org/mirrors/node-sass/
-   phantomjs_cdnurl=http://npm.taobao.org/mirrors/phantomjs
-   chromedriver_cdnurl=https://npm.taobao.org/mirrors/chromedriver
-   ```
+
+```
+registry=https://registry.npm.taobao.org
+ELECTRON_MIRROR=http://npm.taobao.org/mirrors/electron/
+sass_binary_site=https://npm.taobao.org/mirrors/node-sass/
+phantomjs_cdnurl=http://npm.taobao.org/mirrors/phantomjs
+chromedriver_cdnurl=https://npm.taobao.org/mirrors/chromedriver
+```
 
 ## 安装 Git
 
@@ -89,5 +92,5 @@ npm run test:e2e
 
 ### 执行单元测试
 ```
-yarn run test:unit
+npm run test:unit
 ```
