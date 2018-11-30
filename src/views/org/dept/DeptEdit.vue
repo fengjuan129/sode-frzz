@@ -122,7 +122,7 @@ export default {
                 callback(new Error('请输入数字值'));
               } else {
                 callback();
-                this.$refs.sort.clearValidate();
+                // this.$refs.sort.clearValidate();
               }
             },
           },
