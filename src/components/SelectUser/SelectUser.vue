@@ -89,7 +89,7 @@ export default {
     defaultSelectMap() {
       const defaultSelectMap = {};
 
-      this.selectedIds.forEach(item => {
+      this.selectedNames.forEach(item => {
         defaultSelectMap[item] = true;
       });
 
@@ -137,9 +137,9 @@ export default {
           this.userList = res;
 
           // 默认选中
-          if (this.selectedIds.length) {
+          if (this.selectedNames.length) {
             this.$nextTick(() => {
-              this.selectedIds.forEach(item => {
+              this.selectedNames.forEach(item => {
                 if (this.multiple) {
                   this.$refs.selectUserTree.setChecked(item, true, false);
                 } else {
