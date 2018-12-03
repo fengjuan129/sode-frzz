@@ -1,6 +1,7 @@
 // 模拟系统服务相关接口
 import Mock from 'mockjs';
 
+// 获取码表数据
 Mock.mock(new RegExp('^/v1/core/sys/codetable'), 'get', () => ({
   isEnable: [{ text: '启用', value: true }, { text: '禁用', value: false }], // 是否启用
   isVisible: [{ text: '是', value: true }, { text: '否', value: false }], // 是否可见
@@ -23,4 +24,10 @@ Mock.mock(new RegExp('^/v1/core/sys/codetable'), 'get', () => ({
     { text: '秘密', value: '3' },
     { text: '机密', value: '4' },
   ],
+}));
+
+// 获取系统常量
+Mock.mock(new RegExp('^/v1/core/sys/constant'), 'get', () => ({
+  PWD_RULE: '', // 密码验证规则
+  MULTIPLE_ORG: 'true', // 是否启用多维组织机构
 }));
