@@ -76,7 +76,7 @@
                 </el-dropdown-menu>
               </el-dropdown>
 
-              <el-dropdown
+              <!-- <el-dropdown
                 trigger="click"
                 @command="setUp"
                 style="margin-left: 10px;"
@@ -89,10 +89,9 @@
                   </el-button>
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <!-- <el-dropdown-item command='1'>账号锁定规则</el-dropdown-item> -->
                   <el-dropdown-item command="2">密码强度规则</el-dropdown-item>
                 </el-dropdown-menu>
-              </el-dropdown>
+              </el-dropdown>-->
             </div>
             <!-- 操作框 END -->
             <el-form :inline="true" :model="userForm" size="mini">
@@ -143,8 +142,8 @@
                 <el-table-column label="密级" property="securityLevel" :formatter="isSecurityLevel"></el-table-column>
                 <el-table-column label="状态">
                   <template slot-scope="scope">
-                    <!-- 显示规则：锁定有先 -->
-                    {{isStatusFormatter(scope.row.isLocked,scope.row.isEnabled)}}
+                    <!-- 显示规则：锁定优先 -->
+                    {{isStatusFormatter(scope.row.isLocked, scope.row.isEnabled)}}
                   </template>
                 </el-table-column>
                 <el-table-column label="操作">
@@ -200,7 +199,6 @@
       </el-row>
     </el-tabs>
     <!-- tab end -->
-    <!-- <LockRuleConfig v-if='dialogMsg.lockRule' @close='dialogMsg.lockRule = false'/> -->
     <!-- 锁定用户弹框 END 保存成功后刷新列表 -->
     <UserEdit
       :id="curUser.id"
@@ -258,7 +256,7 @@ export default {
       },
       organizationType: [], // 组织机构类型
       activeTab: '', // 当前选中Tab
-      activeDeptName: '', // 18/11/12 保存当前选项卡名称，编辑时传入只组件
+      activeDeptName: '', // 18/11/12 保存当前选项卡名称，编辑时传入子组件
       userForm: {},
       page: {
         // 分页信息
@@ -272,7 +270,6 @@ export default {
       organizationId: null, // 机构ID
       dialogMsg: {
         // 管理弹出框状态
-        lockRule: false,
         userEdit: false,
         userView: false,
         passwordRuleConfig: false,
@@ -294,7 +291,7 @@ export default {
     PasswordRuleConfig,
   },
 
-  mounted() {
+  created() {
     this.judgeIsAdmin();
     this.getOrganizationType();
   },
@@ -507,7 +504,7 @@ export default {
       this.organizationId = user;
     },
     /**
-     * 表格复选框数据改变是获取
+     * 表格复选框数据改变时获取
      */
     tableSelectChange(list) {
       this.curUser = list;
@@ -538,7 +535,7 @@ export default {
     isSecurityLevel: createFormatter('securityLevel'),
 
     /**
-     * 列表显示状态过滤，显示规则 锁定有先
+     * 列表显示状态过滤，显示规则 锁定优先
      */
     isStatusFormatter(isLocked, isEnabled) {
       return isLocked ? '锁定' : this.isEnable.find(item => item.value === isEnabled).text;
@@ -549,9 +546,6 @@ export default {
      */
     setUp(eventType) {
       switch (parseInt(eventType, 10)) {
-        case 1:
-          this.dialogMsg.lockRule = true;
-          break;
         case 2:
           this.dialogMsg.passwordRuleConfig = true;
           break;

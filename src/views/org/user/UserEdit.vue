@@ -97,8 +97,8 @@
       </el-form>
 
       <span slot="footer" class="dialog-footer">
-        <el-button @click="close">取 消</el-button>
-        <el-button type="primary" @click="save('userEditForm')">确 定</el-button>
+        <el-button @click="close">关闭</el-button>
+        <el-button type="primary" @click="save('userEditForm')">保存</el-button>
       </span>
     </el-dialog>
 
@@ -188,7 +188,7 @@ export default {
     },
     setDept(deptMsg) {
       /**
-       * TODO 更具后端返回数据在做处理
+       * TODO 根据后端返回数据再做处理
        */
       this.userEditForm.deptName = deptMsg.name;
       this.userEditForm.orgCode = deptMsg.code;

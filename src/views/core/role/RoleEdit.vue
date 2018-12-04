@@ -49,8 +49,8 @@
 
     <!-- 底部按钮栏 -->
     <span slot="footer" class="dialog-footer">
-      <el-button @click="close">关 闭</el-button>
-      <el-button type="primary" @click="save">保 存</el-button>
+      <el-button @click="close">关闭</el-button>
+      <el-button type="primary" @click="save">保存</el-button>
     </span>
   </el-dialog>
 </template>
