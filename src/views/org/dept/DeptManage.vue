@@ -197,7 +197,7 @@ export default {
     /**
      * 是否为法人单位渲染方法
      */
-    isCorpFormatter: function(row, column, value) {
+    isCorpFormatter(row, column, value) {
       return value ? '√' : '';
     },
 
