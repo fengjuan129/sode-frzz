@@ -6,7 +6,7 @@
       <el-tab-pane v-for="tab in tabs" :label="tab.name" :name="tab.key" :key="tab.key"></el-tab-pane>
 
       <!-- 按钮栏（公共角色不能编辑，此时不显示按钮栏） -->
-      <div v-if="activeTabKey !== 'public'" class="btn-container">
+      <div v-if="showBtnBar" class="btn-container">
         <el-button size="mini" @click="createRole">新增</el-button>
         <el-dropdown
           v-show="showBatchBtn"
@@ -69,7 +69,7 @@
             <el-button
               type="text"
               @click="toggleRoleState(scope.row)"
-            >{{scope.row.isEnable === true ? '禁用' : '启用'}}</el-button>
+            >{{scope.row.isEnable ? '禁用' : '启用'}}</el-button>
             <!-- 开发模式才可执行删除操作 -->
             <el-popover
               v-if="isDevMode"
@@ -149,6 +149,15 @@ export default {
     showBatchBtn() {
       return this.selection.length > 0;
     },
+    // 是否显示按钮栏
+    showBtnBar() {
+      // 如果当前账号是运维管理员，必须有应用系统才能在其下创建角色
+      if (this.isAdmin) {
+        return this.apps.length > 0;
+      }
+      // 公共角色不可编辑，此时不显示按钮栏
+      return this.activeTabKey !== 'public';
+    },
   },
   created() {
     // 判断当前账号是否为顶级系统三员
@@ -159,30 +168,31 @@ export default {
           this.isAdmin = false;
           this.activeTabKey = '';
           // 加载当前系统的角色列表
-          this.loadRoles(config.appCode);
-        } else {
-          // 如果不是顶级系统三员，判断当前账号是否为运维管理员
-          this.judgeIsAdmin().then(isAdmin => {
-            this.isAdmin = isAdmin;
-            // 如果是运维管理员
-            if (isAdmin) {
-              // 加载应用系统
-              this.loadApps().then(apps => {
-                // 标记选中的tab标签页
-                this.activeTabKey = apps[0].code;
-                // 加载所选应用系统的角色列表
-                this.loadRoles(this.activeTabKey);
-              });
-            } else {
-              // 标记选中的tab标签页
-              this.activeTabKey = 'public';
-              // 直接加载当前系统的公共角色列表
-              this.loadRoles(config.appCode, 'public');
-            }
-          });
+          return this.loadRoles(config.appCode);
         }
+        // 如果不是顶级系统三员，判断当前账号是否为运维管理员
+        return this.judgeIsAdmin().then(isAdmin => {
+          this.isAdmin = isAdmin;
+          // 如果是运维管理员
+          if (isAdmin) {
+            // 加载应用系统
+            return this.loadApps().then(apps => {
+              // 标记选中的tab标签页
+              this.activeTabKey = apps.length > 0 ? apps[0].code : '';
+              // 加载所选应用系统的角色列表
+              this.loadRoles(this.activeTabKey);
+            });
+          }
+          // 如果不是运维管理员，标记选中的tab标签页
+          this.activeTabKey = 'public';
+          // 然后直接加载当前系统的公共角色列表
+          return this.loadRoles(config.appCode, 'public');
+        });
       })
-      .catch(this.$errorHandler);
+      .catch(this.$errorHandler)
+      .finally(() => {
+        this.loading = false;
+      });
   },
   methods: {
     /**

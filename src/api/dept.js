@@ -1,126 +1,136 @@
 import request from '../libs/request';
 
-export default {
-  /**
-   * 懒加载组织机构
-   * @param {string} parentCode 父组织机构编码
-   * @param {string} typeCode 织机构类型编码
-   * @param {blooean} isEnable 是否全加载
-   */
-  getLazyTree(typeCode, parentCode, isEnable) {
-    return request('/v1/core/org/lazytree', {
-      method: 'get',
-      params: {
-        typeCode,
-        parentCode,
-        isEnable,
-      },
-    });
-  },
+/**
+ * 懒加载组织机构
+ * @param {string} typeCode 组织机构类型编码
+ * @param {string} parentCode 父组织机构编码
+ * @param {blooean} isEnable 是否启用
+ */
+export function getLazyTree(typeCode, parentCode, isEnable) {
+  return request('/v1/core/org/lazytree', {
+    method: 'get',
+    params: {
+      typeCode,
+      parentCode,
+      isEnable,
+    },
+  });
+}
 
-  /**
-   * 加载组织机构类别
-   */
-  getDeptType() {
-    return request('/v1/core/org/types', {
-      method: 'get',
-    });
-  },
-  /**
-   * 全加载树，搜索使用
-   * @param {string} name 关键词
-   * @param {string} typeCode 机构类型
-   */
-  getTreeByKeyword(name, typeCode, isEnable) {
-    return request('/v1/core/org/tree', {
-      method: 'get',
-      params: {
-        name,
-        typeCode,
-        isEnable,
-      },
-    });
-  },
-  /**
-   * 获取组织机构类别详情
-   * @param { string } id 机构类别 ID
-   */
-  getDeptTypeInfo(id) {
-    return request(`/v1/core/org/type`, {
-      method: 'get',
-      params: {
-        id,
-      },
-    });
-  },
-  /**
-   * 新增组织机构类型
-   * @param {Object} params 名称，编码，备注
-   * 修改提交发放为 PUT  新增为 POST
-   */
-  editDeptType(params) {
-    const { id } = params;
-    return request('/v1/core/org/type', {
-      method: id ? 'put' : 'post',
-      data: params,
-    });
-  },
-  /**
-   * 删除组织机构类型
-   * @param {string} id 组织机构ID
-   */
-  deleteDeptType(id) {
-    return request('/v1/core/org/type', {
-      method: 'delete',
-      data: {
-        id,
-      },
-    });
-  },
-  /**
-   * 加载组织机构详情
-   */
-  loadDeptInfo(id) {
-    return request('/v1/core/org/dept', {
-      method: 'get',
-      params: {
-        id,
-      },
-    });
-  },
+/**
+ * 加载组织机构类别列表
+ */
+export function getDeptTypes() {
+  return request('/v1/core/org/types', {
+    method: 'get',
+  });
+}
 
-  /**
-   * 更新组织机构状态
-   */
-  setDeptDisable(id, state) {
-    return request('/v1/core/org/dept/state', {
-      method: 'put',
-      data: {
-        id,
-        state,
-      },
-    });
-  },
-  /**
-   * 编辑组织机构
-   */
-  editDept(dept) {
-    const { id } = dept;
-    return request('/v1/core/org/dept', {
-      method: id ? 'put' : 'post',
-      data: dept,
-    });
-  },
-  /**
-   * 删除组织机构
-   * @param {string} id 机构ID
-   */
-  deleteDept(id) {
-    return request('/v1/core/org/dept', {
-      method: 'delete',
-      data: {
-        id,
-      },
-    });
-  },
-};
+/**
+ * 全加载树，搜索使用
+ * @param {string} name 组织机构名称
+ * @param {string} typeCode 机构类型
+ * @param {boolean} isEnable 是否启用
+ */
+export function getTreeByKeyword(name, typeCode, isEnable) {
+  return request('/v1/core/org/tree', {
+    method: 'get',
+    params: {
+      name,
+      typeCode,
+      isEnable,
+    },
+  });
+}
+
+/**
+ * 获取组织机构类别详情
+ * @param {string} id 组织机构类别id
+ */
+export function getDeptTypeInfo(id) {
+  return request(`/v1/core/org/type`, {
+    method: 'get',
+    params: {
+      id,
+    },
+  });
+}
+
+/**
+ * 编辑组织机构类型
+ * @param {object} deptType 组织机构类型对象
+ */
+export function editDeptType(deptType) {
+  // 有id为修改，没有为新增
+  const { id } = deptType;
+  return request('/v1/core/org/type', {
+    method: id ? 'put' : 'post',
+    data: deptType,
+  });
+}
+
+/**
+ * 删除组织机构类型
+ * @param {string} id 组织机构类型id
+ */
+export function deleteDeptType(id) {
+  return request('/v1/core/org/type', {
+    method: 'delete',
+    data: {
+      id,
+    },
+  });
+}
+
+/**
+ * 加载组织机构详情
+ * @param {string} id 组织机构id
+ */
+export function loadDeptInfo(id) {
+  return request('/v1/core/org/dept', {
+    method: 'get',
+    params: {
+      id,
+    },
+  });
+}
+
+/**
+ * 切换组织机构状态
+ * @param {string} id 组织机构id
+ * @param {boolean} state 是否启用
+ */
+export function setDeptEnable(id, state) {
+  return request('/v1/core/org/dept/state', {
+    method: 'put',
+    data: {
+      id,
+      state,
+    },
+  });
+}
+
+/**
+ * 编辑组织机构
+ * @param {object} dept 组织机构对象
+ */
+export function editDept(dept) {
+  const { id } = dept;
+  return request('/v1/core/org/dept', {
+    method: id ? 'put' : 'post',
+    data: dept,
+  });
+}
+
+/**
+ * 删除组织机构
+ * @param {string} id 机构id
+ */
+export function deleteDept(id) {
+  return request('/v1/core/org/dept', {
+    method: 'delete',
+    data: {
+      id,
+    },
+  });
+}

@@ -50,7 +50,7 @@ export function getConstants() {
   // TODO: 后端未实现，暂改为本地模拟
   return {
     PWD_RULE: '', // 密码验证规则
-    MULTIPLE_ORG: 'true', // 是否启用多维组织机构
+    MULTIPLE_ORG: false, // 是否启用多维组织机构
   };
   // return syncRequest('/v1/core/sys/constant', {
   //   method: 'get',

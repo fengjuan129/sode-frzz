@@ -45,7 +45,7 @@
 
 <script>
 import UserApi from '@/api/user';
-import DeptApi from '@/api/dept';
+import * as DeptApi from '@/api/dept';
 import { data2treeArr } from '@/libs/utils';
 
 export default {
@@ -106,7 +106,7 @@ export default {
      */
     loadOrganization() {
       this.loading = true;
-      DeptApi.getDeptType()
+      DeptApi.getDeptTypes()
         .then(res => {
           this.tabData = res;
           this.activeTab = this.rootCode || res[0].code;

@@ -18,7 +18,12 @@
     <el-container>
       <el-header>
         <div class="toggle-handler" @click="toggleCollapse">
-          <font-awesome-icon icon="bars" class="toggle-icon" size="lg" :rotation="toggleIconRotation"/>
+          <font-awesome-icon
+            icon="bars"
+            class="toggle-icon"
+            size="lg"
+            :rotation="toggleIconRotation"
+          />
         </div>
         <el-dropdown @command="handleCommand" size="medium" class="user-dropdown">
           <div class="user-info-container">
@@ -82,10 +87,12 @@ export default {
     handleCommand(command) {
       // 退出登录
       if (command === 'exit') {
-        logout().then(() => {
-          setToken('');
-          this.$router.push('/login');
-        });
+        logout()
+          .then(() => {
+            setToken('');
+            this.$router.push('/login');
+          })
+          .catch(this.$errorHandler);
       }
     },
   },

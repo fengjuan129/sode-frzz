@@ -6,6 +6,7 @@ let constants = {};
 
 /**
  * 获取常量数据
+ * ! 同步方法
  * @param {string | array} codes 常量代码字符串或数组
  * @description codes为字符串时返回[{text, value}]；codes为数组时返回{code1:[{text, value}], code2:[{text, value}]}
  * @returns {array | object} 常量数据数组或对象
@@ -33,11 +34,11 @@ export function getConstants(codes) {
   // 返回常量数据
   if (Array.isArray(codes)) {
     return codes.reduce((ret, code) => {
-      ret[code] = [...constants[code]];
+      ret[code] = constants[code];
       return ret;
     }, {});
   }
-  return [...constants[codes]];
+  return constants[codes];
 }
 
 /**

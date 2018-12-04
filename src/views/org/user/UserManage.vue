@@ -97,15 +97,15 @@
             <!-- 操作框 END -->
             <el-form :inline="true" :model="userForm" size="mini">
               <el-form-item label="姓名">
-                <el-input v-model="userForm.realName" placeholder="姓名"></el-input>
+                <el-input v-model="userForm.realName"></el-input>
               </el-form-item>
 
               <el-form-item label="账号">
-                <el-input v-model="userForm.userName" placeholder="账号"></el-input>
+                <el-input v-model="userForm.userName"></el-input>
               </el-form-item>
 
-              <el-form-item label="类型">
-                <el-select v-model="userForm.status" placeholder="类型">
+              <el-form-item label="状态">
+                <el-select v-model="userForm.status">
                   <el-option
                     v-for="item in userStatus"
                     :key="item.id"
@@ -229,7 +229,7 @@
 
 <script>
 import UserApi from '@/api/user'; // 用户管理接口
-import DeptApi from '@/api/dept'; // 组织机构管理接口
+import * as DeptApi from '@/api/dept'; // 组织机构管理接口
 import { getCodeTable, createFormatter } from '@/libs/codeTable';
 import * as authApi from '@/api/auth.user';
 import * as Utils from '@/libs/utils';
@@ -319,7 +319,7 @@ export default {
      * 获取组织机构类型
      */
     getOrganizationType() {
-      DeptApi.getDeptType()
+      DeptApi.getDeptTypes()
         .then(res => {
           this.organizationType = res;
           this.activeTab = res[0].code;
