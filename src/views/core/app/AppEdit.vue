@@ -22,23 +22,17 @@
       >
         <input type="hidden" v-model="formApp.deptCode">
         <el-row :gutter="30">
-          <el-col :span="24">
+          <el-col :span="12">
             <el-form-item :label="isRootApp ? '系统名称' : '子系统名称'" prop="name">
               <el-input type="text" v-model="formApp.name"></el-input>
             </el-form-item>
           </el-col>
 
           <el-col :span="12">
-            <el-form-item label="系统编码" prop="code">
-              <el-input type="text" v-model="formApp.code"></el-input>
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="12">
             <el-form-item prop="deptName">
               <template>
-                <el-button type="text" slot="label" @click="deptVisible = true">部门</el-button>
-                <el-input v-model="formApp.deptName" disabled placeholder="请选择部门"></el-input>
+                <el-button type="text" slot="label" @click="deptVisible = true">所属机构</el-button>
+                <el-input v-model="formApp.deptName" disabled placeholder="请选择系统所属机构"></el-input>
               </template>
             </el-form-item>
           </el-col>
@@ -75,8 +69,8 @@
       </el-form>
 
       <span slot="footer" class="dialog-footer">
-        <el-button size="mini" @click="close">{{formApp.id ? '取 消' : '关闭'}}</el-button>
-        <el-button size="mini" type="primary" @click="save">{{formApp.id ? '确 定' : '保存' }}</el-button>
+        <el-button @click="close">关闭</el-button>
+        <el-button type="primary" @click="save">保存</el-button>
       </span>
     </el-dialog>
 
@@ -126,7 +120,6 @@ export default {
       deptVisible: false,
       formAppRules: {
         name: [{ required: true, message: '请输入系统名称' }],
-        code: [{ required: true, message: '请输入系统编码' }],
         deptName: [{ required: true, message: '请选择所属机构' }],
       },
       isEnableCodeTable: getCodeTable('isEnable'),

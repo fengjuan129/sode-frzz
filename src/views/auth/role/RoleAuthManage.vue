@@ -82,9 +82,9 @@ export default {
       winUser: {
         visible: false, // 是否可见
         multiple: true, // 是否多选
-        selectedIds: [], // 已选账号id数组
+        selectedNames: [], // 已选账号name数组
       },
-      // 账号选择窗口相关配置及数据
+      // 菜单选择窗口相关配置及数据
       winMenu: {
         visible: false, // 是否可见
         multiple: true, // 是否多选
@@ -96,11 +96,11 @@ export default {
         multiple: true, // 是否多选
         selectedIds: [], // 已选服务id数组
       },
-      // 角色账号授权记录（临时数据）
+      // 角色账号授权记录（临时数据，用于选择后对比差异项）
       roleUserAuthRecords: [],
-      // 角色菜单授权记录（临时数据）
+      // 角色菜单授权记录（临时数据，用于选择后对比差异项）
       roleMenuAuthRecords: [],
-      // 角色服务授权记录（临时数据）
+      // 角色服务授权记录（临时数据，用于选择后对比差异项）
       roleApiAuthRecords: [],
     };
   },

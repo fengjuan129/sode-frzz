@@ -5,8 +5,13 @@
       <el-form :inline="true" :model="formSearch" @submit.native.prevent>
         <el-button size="mini" @click="createApp(-1)">新增</el-button>
 
-        <div class="f-r">
-          <el-input v-model="formSearch.name" size="mini" placeholder="请输入系统名称">
+        <div class="fr">
+          <el-input
+            v-model="formSearch.name"
+            @keyup.enter.native="loadApp"
+            size="mini"
+            placeholder="输入系统名称查询"
+          >
             <el-button slot="append" icon="el-icon-search" @click="loadApp"></el-button>
           </el-input>
         </div>
@@ -20,7 +25,7 @@
       @current-change="onCurrentChange"
       :data="treeData"
     >
-      <el-table-column type="index" align="center" width="50"></el-table-column>
+      <el-table-column type="index" align="center" width="50" label="序号"></el-table-column>
       <el-table-column label="系统名称">
         <template slot-scope="scope">
           <span
@@ -76,7 +81,7 @@
 
 <script>
 import * as Utils from '@/libs/utils';
-import * as CoreApp from '@/api/app';
+import * as appApi from '@/api/app';
 import { format } from '@/libs/codeTable';
 import AppEdit from './AppEdit.vue';
 import AppAdminAuth from './AppAdminAuth.vue';
@@ -119,7 +124,10 @@ export default {
     // 加载系统集合
     loadApp() {
       this.loading = true;
-      CoreApp.loadApps(this.formSearch.name)
+      appApi
+        .loadApps({
+          name: this.formSearch.name,
+        })
         .then(res => {
           this.loading = false;
           this.appList = res;
@@ -155,7 +163,7 @@ export default {
         })
           .then(() => {
             this.loading = true;
-            CoreApp.deleteApp(this.selection.id).then(() => {
+            appApi.deleteApp(this.selection.id).then(() => {
               this.loading = false;
               // ! 删除父级引用
               const { parent } = this.selection;
@@ -210,7 +218,7 @@ export default {
       const status = !app.isEnable;
       this.loading = true;
       // 后端接收 Y N
-      CoreApp.toggleAppState(app.id, status ? 'Y' : 'N').then(() => {
+      appApi.toggleAppState(app.id, status ? 'Y' : 'N').then(() => {
         this.loading = false;
         app.isEnable = status;
 
@@ -242,8 +250,5 @@ export default {
   border-bottom: 1px solid #ebeef5;
   padding-bottom: 15px;
   margin-bottom: 15px;
-}
-.f-r {
-  float: right;
 }
 </style>

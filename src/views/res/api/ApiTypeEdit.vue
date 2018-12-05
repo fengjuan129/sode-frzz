@@ -1,42 +1,50 @@
 <!-- 服务类型编辑页面 -->
 <template>
-  <el-dialog title='服务类型编辑' :visible.sync='isVisible' width="30%" :before-close="close">
-
-    <el-form :model='formApiType' size='small' label-width='80px' :rules='apiTypeRules' ref='formApiType' status-icon>
+  <el-dialog title="服务类型编辑" :visible.sync="isVisible" width="30%" :before-close="close">
+    <el-form
+      :model="formApiType"
+      size="small"
+      label-width="80px"
+      :rules="apiTypeRules"
+      ref="formApiType"
+      status-icon
+    >
       <el-row :gutter="30">
-        <el-col :span='12'>
-          <el-form-item label='类型名称' prop='name'>
-            <el-input v-model='formApiType.name'></el-input>
+        <el-col :span="12">
+          <el-form-item label="类型名称" prop="name">
+            <el-input v-model="formApiType.name"></el-input>
           </el-form-item>
         </el-col>
 
-        <el-col :span='12'>
-          <el-form-item label='上级类型'>
-            <el-input v-model='parentType' disabled></el-input>
+        <el-col :span="12">
+          <el-form-item label="上级类型">
+            <el-input v-model="parentType" disabled></el-input>
           </el-form-item>
         </el-col>
 
-        <el-col :span='12'>
+        <el-col :span="12">
           <el-form-item label="排序">
             <el-input v-model="formApiType.sort"></el-input>
           </el-form-item>
         </el-col>
 
-        <el-col :span='24'>
-          <el-form-item label='备注'>
-            <el-input type='textarea' :autosize='{ minRows: 4, maxRows: 6}' v-model='formApiType.description'></el-input>
+        <el-col :span="24">
+          <el-form-item label="备注">
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 4, maxRows: 6}"
+              v-model="formApiType.description"
+            ></el-input>
           </el-form-item>
         </el-col>
       </el-row>
-
     </el-form>
     <!-- formApiType END -->
-
-    <span slot='footer' class='dialog-footer'>
-        <el-button size='mini' style='float: left;' @click='deleteApiTye' :disabled='isNew'>删除</el-button>
-        <el-button size='mini' @click='close'>{{isNew ? '关闭' : '取 消'}}</el-button>
-        <el-button size='mini' type='primary' @click='save'>{{isNew ? '保存' : '确 定' }}</el-button>
-      </span>
+    <span slot="footer" class="dialog-footer">
+      <el-button style="float: left;" @click="deleteApiTye" :disabled="isNew">删除</el-button>
+      <el-button @click="close">关闭</el-button>
+      <el-button type="primary" @click="save">保存</el-button>
+    </span>
   </el-dialog>
 </template>
 
@@ -95,7 +103,7 @@ export default {
             type: 'success',
           });
         })
-        .catch(this.$errorHandle);
+        .catch(this.$errorHandler);
     },
     deleteApiTye() {
       this.$confirm('删除后将无法，确定删除该服务类型?', '提示', { type: 'warning' }).then(() => {
@@ -111,7 +119,7 @@ export default {
             },
             () => {}
           )
-          .catch(this.$errorHandle);
+          .catch(this.$errorHandler);
       });
     },
     close() {

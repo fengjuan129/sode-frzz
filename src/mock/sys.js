@@ -24,10 +24,16 @@ Mock.mock(new RegExp('^/v1/core/sys/codetable'), 'get', () => ({
     { text: '秘密', value: '3' },
     { text: '机密', value: '4' },
   ],
+  requestMethod: [
+    // 请求方法
+    { text: 'POST', value: 'post' },
+    { text: 'GET', value: 'get' },
+    { text: 'PUT', value: 'put' },
+    { text: 'DELETE', value: 'delete' },
+  ],
 }));
 
 // 获取系统常量
 Mock.mock(new RegExp('^/v1/core/sys/constant'), 'get', () => ({
   PWD_RULE: '', // 密码验证规则
-  MULTIPLE_ORG: 'true', // 是否启用多维组织机构
 }));

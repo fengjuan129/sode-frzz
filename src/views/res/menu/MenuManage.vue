@@ -7,7 +7,6 @@
       :row-style="showTr"
       @row-click="activeRow"
       highlight-current-row
-      border
       v-loading="loading"
     >
       <el-table-column

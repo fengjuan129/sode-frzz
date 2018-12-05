@@ -31,6 +31,13 @@ export function getCodeTable() {
       { text: '秘密', value: '3' },
       { text: '机密', value: '4' },
     ],
+    requestMethod: [
+      // 请求方法
+      { text: 'POST', value: 'post' },
+      { text: 'GET', value: 'get' },
+      { text: 'PUT', value: 'put' },
+      { text: 'DELETE', value: 'delete' },
+    ],
   };
   // return syncRequest('/v1/core/sys/codetable', {
   //   method: 'get',

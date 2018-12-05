@@ -26,6 +26,7 @@ export function getCodeTable(codes) {
     // 加载码表数据
     const res = sysApi.getCodeTable(inexistence);
     // 合并新加载的数据至缓存
+    // TODO: 处理codes不存在的情况（现在如果输入了不存在的code会报错）
     codeTable = {
       ...codeTable,
       ...res,

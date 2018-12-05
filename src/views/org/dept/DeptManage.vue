@@ -1,12 +1,7 @@
 <!-- 组织机构管理页面 -->
 <template>
   <div>
-    <el-tabs
-      v-model="curDeptTypeCode"
-      type="border-card"
-      :before-leave="stopTabChange"
-      @tab-click="onTabClick"
-    >
+    <el-tabs v-model="curDeptTypeCode" type="border-card" @tab-click="onTabClick">
       <!-- 组织机构类型标签页（当前账号是运维管理员时才显示） -->
       <template v-if="isAdmin">
         <el-tab-pane v-for="item in deptTypeList" :key="item.code" :name="item.code">
@@ -165,17 +160,18 @@ export default {
 
   created() {
     // 判断当前账号是否是运维管理员
-    this.judgeIsAdmin().then(isAdmin => {
-      // 如果是运维管理员，先加载组织机构类型，再加载组织机构数据
-      if (isAdmin) {
-        this.loadDeptType().then(() => {
-          this.loadDept(-1); // 加载机构第一级数据
-        });
-      } else {
+    this.judgeIsAdmin()
+      .then(isAdmin => {
+        // 如果是运维管理员，先加载组织机构类型，再加载组织机构数据
+        if (isAdmin) {
+          return this.loadDeptType().then(() => {
+            this.loadDept(-1); // 加载机构第一级数据
+          });
+        }
         // 如果不是运维管理员，直接加载组织机构数据
-        this.loadDept(-1);
-      }
-    });
+        return this.loadDept(-1);
+      })
+      .catch(this.$errorHandler);
   },
 
   methods: {
@@ -252,18 +248,6 @@ export default {
         .finally(() => {
           this.loading = false;
         });
-    },
-
-    /**
-     * 阻止添加组织机构类型按钮选中
-     * @param {string} activeName 选项卡name
-     */
-    stopTabChange(activeName) {
-      if (activeName === 'btnAddDeptType') {
-        this.winDeptTypeEdit.id = '';
-        this.winDeptTypeEdit.visible = true;
-      }
-      return !(activeName === 'btnAddDeptType');
     },
 
     /**

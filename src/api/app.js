@@ -3,13 +3,14 @@ import request from '@/libs/request';
 
 /**
  * 加载所有应用系统
+ * @param {object} params 查询条件
+ * @param {string} params.name 系统名称
+ * @param {boolean} params.isEnable 是否启用
  */
-export function loadApps(name) {
+export function loadApps(params) {
   return request('/v1/core/base/apps', {
     method: 'get',
-    params: {
-      name,
-    },
+    params,
   });
 }
 

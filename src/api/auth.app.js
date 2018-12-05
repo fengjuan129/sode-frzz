@@ -2,78 +2,100 @@
 import request from '@/libs/request';
 
 /**
- * 获取应用系统列表
- * @param {string} name 关键词
+ * 查询系统菜单授权记录
+ * @param {string} appId 系统id
  */
-export function getSystemList(params) {
-  return request('/v1/core/base/apps', {
-    method: 'get',
-    params,
-  });
-}
-
-/**
- * 查询授权给某系统的菜单
- * @param {string} id 系统ID
- */
-export function getAuthMenusBySystemId(id) {
+export function loadAppMenuAuth(appId) {
   return request('/v1/core/auth/app/menus', {
     method: 'get',
     params: {
-      id,
+      appId,
     },
   });
 }
 
 /**
- * 保存系统菜单授权、保存系统服务授权
- * @param {object} data 保存对象，菜单、权限 选中集合
- * @param {Array} deleteIds 删除的选项
- * ! 后端接收方式有问题，不能正常拿到 Array ，修改为 路径放 ID
+ * 查询系统服务授权记录
+ * @param {string} appId 系统id
  */
-export function saveAppAuth(data, deleteIds) {
-  return request('/v1/core/auth/app/menus', {
-    method: 'put',
-    data: {
-      ids: deleteIds,
-      appReses: data,
-    },
-  });
-}
-
-/**
- * 查询授权给某系统的服务
- * @param {string} id 系统id
- */
-export function getSystemAuth(id) {
+export function loadAppApiAuth(appId) {
   return request('/v1/core/auth/app/apis', {
     method: 'get',
     params: {
-      id,
+      appId,
     },
   });
 }
 
 /**
- * 查询授权给某系统的代码项（码表）
- * @param {string} id 系统ID
+ * 查询系统码表授权记录
+ * @param {string} appId 系统id
  */
-export function getSystemCodeTables(id) {
+export function loadAppCodeitemAuth(appId) {
   return request('/v1/core/auth/app/codetables', {
     method: 'get',
     params: {
-      id,
+      appId,
     },
   });
+}
+
+/**
+ * 系统资源授权
+ * @param {string} appId 系统id
+ * @param {string} resTypeCode 资源类型编码
+ * @param {array} newResIds 新授权资源id集合
+ * @param {array} removeAuthIds 移除授权的授权记录id集合
+ */
+function appAuthRes(appId, resTypeCode, newResIds, removeAuthIds) {
+  return request('/v1/core/auth/app/menus', {
+    method: 'put',
+    data: {
+      removeAuthIds,
+      newAuthRecords: newResIds.map(resId => ({
+        appId,
+        resourceId: resId,
+        resTypeCode,
+      })),
+    },
+  });
+}
+
+/**
+ * 系统菜单授权
+ * @param {string} appId 系统id
+ * @param {array} newMenuIds 新授权的菜单id数组
+ * @param {array} removeAuthIds 移除授权的授权记录id数组
+ */
+export function appAuthMenu(appId, newMenuIds, removeAuthIds) {
+  return appAuthRes(appId, 'menu', newMenuIds, removeAuthIds);
+}
+
+/**
+ * 系统服务授权
+ * @param {string} appId 系统id
+ * @param {array} newApiIds 新授权的服务id数组
+ * @param {array} removeAuthIds 移除授权的授权记录id数组
+ */
+export function appAuthApi(appId, newApiIds, removeAuthIds) {
+  return appAuthRes(appId, 'api', newApiIds, removeAuthIds);
 }
 
 /**
  * 保存系统代码项（码表）授权
- * @param {object} data 系统ID,码表ID集合
+ * @param {string} appId 系统id
+ * @param {array} newCodeItemIds 新授权码表项id集合
+ * @param {array} removeAuthIds 移除授权的授权记录id集合
  */
-export function saveSystemCodeTables(data) {
+export function appAuthCodeitem(appId, newCodeItemIds, removeAuthIds) {
   return request('/v1/core/auth/app/codetables', {
     method: 'put',
-    params: data,
+    params: {
+      removeAuthIds,
+      newAuthRecords: newCodeItemIds.map(codeItemId => ({
+        appId,
+        codeItemId,
+      })),
+    },
   });
 }

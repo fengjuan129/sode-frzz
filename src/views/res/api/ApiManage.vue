@@ -40,7 +40,7 @@
 
           <div class="pane-container">
             <div class="search-option-container">
-              <el-form :inline="true" :model="searchForm" class="demo-form-inline">
+              <el-form :inline="true" :model="searchForm">
                 <el-form-item label="服务名称">
                   <el-input v-model="searchForm.name" size="mini"></el-input>
                 </el-form-item>
@@ -59,13 +59,21 @@
               </el-form>
             </div>
             <!-- 条件搜索 END -->
-            <el-table :data="apiList" highlight-current-row border style="width: 100%;">
+            <el-table :data="apiList" highlight-current-row>
               <el-table-column type="index" label="序号" width="50"></el-table-column>
 
               <el-table-column label="服务名称" property="name"></el-table-column>
               <el-table-column label="服务编码" property="code" align="center" width="100"></el-table-column>
               <el-table-column label="授权类型" align="center" width="100">
                 <template slot-scope="scope">{{scope.row.authType | format('authType')}}</template>
+              </el-table-column>
+              <el-table-column label="请求类型" property="method">
+                <template slot-scope="{ row: api }">
+                  <el-tag v-if="api.method === 'get'" type="success" disable-transitions>GET</el-tag>
+                  <el-tag v-if="api.method === 'post'" disable-transitions>POST</el-tag>
+                  <el-tag v-if="api.method === 'put'" type="warning" disable-transitions>PUT</el-tag>
+                  <el-tag v-if="api.method === 'delete'" type="danger" disable-transitions>DELETE</el-tag>
+                </template>
               </el-table-column>
               <el-table-column label="服务路径" property="url"></el-table-column>
               <el-table-column label="排序" property="sort" align="center" width="60"></el-table-column>
@@ -202,27 +210,29 @@ export default {
   methods: {
     // 获取服务类型 Tree 数据
     getApiTypeData() {
-      getApiTypeTree().then(res => {
-        res = res.map(item => ({
-          ...item,
-          showDelPopOver: false,
-        }));
-        this.apiTypeList = [...this.apiTypeList, ...res];
-        if (res.length > 0) {
-          const firstObj = res[0];
-          this.cacheData.activeTreeNode = firstObj;
-          this.cacheData.parentType = firstObj.name;
-        } else {
-          const firstObj = this.apiTypeList[0];
-          this.cacheData.activeTreeNode = firstObj;
-          this.cacheData.parentType = firstObj.name;
-        }
-        // ! DOM 更新后才能正常设置 Tree 选中项
-        this.$nextTick(() => {
-          this.$refs.apiTypeTree.setCurrentKey(res.length > 0 ? res[0].id : -1);
-        });
-        this.getApiList();
-      });
+      getApiTypeTree()
+        .then(res => {
+          res = res.map(item => ({
+            ...item,
+            showDelPopOver: false,
+          }));
+          this.apiTypeList = [...this.apiTypeList, ...res];
+          if (res.length > 0) {
+            const firstObj = res[0];
+            this.cacheData.activeTreeNode = firstObj;
+            this.cacheData.parentType = firstObj.name;
+          } else {
+            const firstObj = this.apiTypeList[0];
+            this.cacheData.activeTreeNode = firstObj;
+            this.cacheData.parentType = firstObj.name;
+          }
+          // ! DOM 更新后才能正常设置 Tree 选中项
+          this.$nextTick(() => {
+            this.$refs.apiTypeTree.setCurrentKey(res.length > 0 ? res[0].id : -1);
+          });
+          this.getApiList();
+        })
+        .catch(this.$errorHandler);
     },
     // 点击 tree
     clickTreeNode(data) {
@@ -333,12 +343,14 @@ export default {
         current: this.page.current,
         pageSize: this.page.pageSize,
       });
-      getApiListByOption(searchOption).then(res => {
-        this.page.current = res.current;
-        this.page.total = res.total;
-        this.page.pageSize = res.pageSize;
-        this.apiList = res.resApis;
-      });
+      getApiListByOption(searchOption)
+        .then(res => {
+          this.page.current = res.current;
+          this.page.total = res.total;
+          this.page.pageSize = res.pageSize;
+          this.apiList = res.resApis;
+        })
+        .catch(this.$errorHandler);
     },
     // 监听当前页发生变化
     pageCurrentChange(val) {
@@ -352,19 +364,21 @@ export default {
     },
     // 删除 服务
     delApi(row, index) {
-      deleteApi(row.id).then(() => {
-        this.apiList.splice(index, 1);
-        this.page.total -= 1;
-        if (this.apiList.length === 0 && this.page.current > 1) {
-          this.page.current -= 1;
-          this.getApiList();
-        }
+      deleteApi(row.id)
+        .then(() => {
+          this.apiList.splice(index, 1);
+          this.page.total -= 1;
+          if (this.apiList.length === 0 && this.page.current > 1) {
+            this.page.current -= 1;
+            this.getApiList();
+          }
 
-        this.$message({
-          message: '删除成功',
-          type: 'success',
-        });
-      });
+          this.$message({
+            message: '删除成功',
+            type: 'success',
+          });
+        })
+        .catch(this.$errorHandler);
     },
     // 编辑服务
     editApi(isNew, data) {
