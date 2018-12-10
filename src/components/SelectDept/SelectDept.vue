@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import DeptApi from '@/api/dept';
+import * as DeptApi from '@/api/dept';
 import * as Utils from '@/libs/utils';
 
 export default {
@@ -111,7 +111,7 @@ export default {
     // 获取机构类型
     loadDeptType() {
       this.loading = true;
-      DeptApi.getDeptType()
+      DeptApi.getDeptTypes()
         .then(res => {
           this.deptTypeList = res.map(item => {
             const returnData = {

@@ -16,14 +16,36 @@
             :model="formLogin"
             size="default"
           >
+            <el-form-item>
+              <el-select
+                v-model="formLogin.role"
+                placeholder="请选择登录角色"
+                @change="onRoleChange"
+                style="width: 100%;"
+              >
+                <el-option label="运维管理员" value="admin"></el-option>
+                <el-option label="顶级系统三员" value="topadmin"></el-option>
+                <el-option label="小三员" value="sysadmin"></el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item prop="username">
-              <el-input type="text" v-model="formLogin.username" placeholder="用户名">
-                <i slot="prepend" class="el-icon-edit"></i>
+              <el-input
+                type="text"
+                v-model="formLogin.username"
+                placeholder="用户名"
+                @keyup.enter.native="submit"
+              >
+                <font-awesome-icon slot="prepend" icon="user"/>
               </el-input>
             </el-form-item>
             <el-form-item prop="password">
-              <el-input type="password" v-model="formLogin.password" placeholder="密码">
-                <i slot="prepend" class="el-icon-goods"></i>
+              <el-input
+                type="password"
+                v-model="formLogin.password"
+                placeholder="密码"
+                @keyup.enter.native="submit"
+              >
+                <font-awesome-icon slot="prepend" icon="lock"/>
               </el-input>
             </el-form-item>
             <el-button @click="submit" size="default" type="primary" class="button-login">登录</el-button>
@@ -37,23 +59,44 @@
 <script>
 import { setToken } from '@/libs/token';
 import { login } from '@/api/login';
+import config from '@/config';
 
 export default {
   data() {
     return {
       // 表单
       formLogin: {
-        username: '测试加密', // xuw 测试
+        username: 'admin',
         password: '123456',
+        role: 'admin',
       },
       // 校验
       rules: {
-        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-        password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+        username: [{ required: true, message: '请输入用户名' }],
+        password: [{ required: true, message: '请输入密码' }],
       },
     };
   },
   methods: {
+    onRoleChange(role) {
+      const accountList = {
+        admin: {
+          username: 'admin',
+          appCode: '',
+        },
+        topadmin: {
+          username: '',
+          appCode: '',
+        },
+        sysadmin: {
+          username: '',
+          appCode: '',
+        },
+      };
+      const { username, appCode } = accountList[role];
+      this.formLogin.username = username;
+      config.appCode = appCode;
+    },
     // 调用登录服务实现登录
     submit() {
       this.$refs.loginForm.validate(valid => {

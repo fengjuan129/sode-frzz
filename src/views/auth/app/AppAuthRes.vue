@@ -1,73 +1,65 @@
 <!-- 系统资源分配页面 -->
 <template>
   <el-card class="box-card">
-    <el-form :inline="true" @submit.native.prevent slot="header" class="clearfix">
+    <!-- 查询栏 -->
+    <el-form :inline="true" @submit.native.prevent slot="header">
       <el-form-item label="应用系统名称">
-        <el-input v-model.trim="keyWord" size="mini" @keydown.13.prevent="loadSystem"></el-input>
+        <el-input v-model.trim="keyword" size="mini" @keydown.enter.native="loadApps"></el-input>
       </el-form-item>
-
       <el-form-item>
-        <el-button type="primary" size="mini" @click="loadSystem">查询</el-button>
+        <el-button type="primary" size="mini" @click="loadApps">查询</el-button>
       </el-form-item>
-
       <el-form-item>
-        <el-button size="mini" @click="keyWord = '',loadSystem()">重置</el-button>
+        <el-button size="mini" @click="keyword = '',loadApps()">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-table
-      :data="systemList"
-      style="width: 100%;"
-      border
-      highlight-current-row
-      v-loading="loading"
-    >
-      <el-table-column type="index" width="50" label="序号" align="center"></el-table-column>
+    <!-- 应用系统列表 -->
+    <el-table :data="appTreeData" highlight-current-row v-loading="loading">
+      <el-table-column type="index" width="50" label="序号"></el-table-column>
       <el-table-column label="系统名称" prop="name">
         <template slot-scope="scope">
-          <span class="ms-tree-space" v-for="(item,index) in scope.row.level" :key="index"></span>
-          {{scope.row.name}}
+          <!-- 构造系统名称前部的缩进层级 -->
+          <span class="ms-tree-space" v-for="(item, index) in scope.row.level" :key="index"></span>
+          {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column label="系统编码" prop="code" width="100" align="center"></el-table-column>
-      <el-table-column label="所属机构" prop="deptCode" width="100" align="center"></el-table-column>
+      <el-table-column label="所属机构" prop="deptCode"></el-table-column>
       <el-table-column label="备注" prop="description"></el-table-column>
       <el-table-column label="分配操作">
-        <template slot-scope="scope">
-          <el-button type="text" @click="getSystemMenu(scope.row)">[菜单]</el-button>
-          <el-button type="text" @click="getSystemApi(scope.row)">[服务]</el-button>
-          <el-button type="text" @click="getSystemCodeTable(scope.row)">[码表]</el-button>
+        <template slot-scope="{ row: app}">
+          <el-button type="text" @click="loadAppMenuAuth(app)">[菜单]</el-button>
+          <el-button type="text" @click="loadAppApiAuth(app)">[服务]</el-button>
+          <el-button type="text" @click="loadAppCodeitemAuth(app)">[码表]</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <!-- 公共组件 -->
+    <!-- 菜单选择组件 -->
     <select-menu
-      v-bind="selectMenu"
-      :selectedIds="cacheData.selectedIds"
-      v-if="selectMenu.isVisible"
-      @close="selectMenu.isVisible = false"
-      @select="saveAppAuth"
+      v-bind="winMenu"
+      v-if="winMenu.visible"
+      @close="winMenu.visible = false"
+      @select="onMenuSelect"
     ></select-menu>
-    <!-- 菜单 END -->
+
+    <!-- 服务选择组件 -->
     <select-api
-      v-bind="selectApi"
-      :selectedIds="cacheData.selectedIds"
-      v-if="selectApi.isVisible"
-      @close="selectApi.isVisible = false"
-      @select="saveAppAuth"
+      v-bind="winApi"
+      v-if="winApi.visible"
+      @close="winApi.visible = false"
+      @select="onApiSelect"
     ></select-api>
-    <!-- 服务 END -->
   </el-card>
 </template>
 
 <script>
-import * as Utils from '@/libs/utils';
-import * as AppAuthResApi from '@/api/auth.app';
-
+import * as utils from '@/libs/utils';
+import * as appAuthApi from '@/api/auth.app';
+import * as appApi from '@/api/app';
 import SelectMenu from '@/components/SelectMenu';
 import SelectApi from '@/components/SelectApi';
-// TODO 代码项：@/components/SelectCodeItem.vue（暂缺）
+// TODO: 代码项：@/components/SelectCodeItem.vue（暂缺）
 
 export default {
   name: 'AppAuthRes',
@@ -77,40 +69,51 @@ export default {
   },
   data() {
     return {
-      keyWord: '',
-      loading: false, // 数据加载图标
-      dialogLoading: false,
-      systemList: [], // 系统列表
-      // 选择菜单弹框
-      selectMenu: {
-        isVisible: false,
-        multiple: true,
-        autoCheckParent: true,
+      keyword: '', // 查询关键字（应用系统名称）
+      loading: true, // 是否正在加载
+      apps: [], // 应用系统列表
+      curApp: {}, // 当前选中的应用系统
+      // 菜单选择窗口相关配置及数据
+      winMenu: {
+        visible: false, // 是否可见
+        multiple: true, // 是否多选
+        autoCheckParent: true, // 勾选子节点时是否自动勾选父节点
+        selectedIds: [], // 已选菜单id数组
       },
-      // 选择服务弹框
-      selectApi: {
-        isVisible: false,
-        multiple: true,
+      // 服务选择窗口相关配置及数据
+      winApi: {
+        visible: false, // 是否可见
+        multiple: true, // 是否多选
+        selectedIds: [], // 已选服务id数组
       },
-      cacheData: {
-        curRow: null, // 保存当前选中行
-        selectedIds: [], // 保存授权菜单、服务、码表 对应的资源ID
-        selectedMsg: [], // 保存授权菜单、服务、码表 完整对象，便于保存时查找关联ID
-      },
+      // 系统菜单授权记录（临时数据，用于选择后对比差异项）
+      appMenuAuthRecords: [],
+      // 系统服务授权记录（临时数据，用于选择后对比差异项）
+      appApiAuthRecords: [],
     };
+  },
+  computed: {
+    // 应用系统树形结构数据
+    appTreeData() {
+      return utils.data2treeGridArr(this.apps, 'id', 'pid', true);
+    },
   },
 
   created() {
-    this.loadSystem();
+    this.loadApps();
   },
-  methods: {
-    // 获取系统列表
-    loadSystem() {
-      this.loading = true;
 
-      AppAuthResApi.getSystemList({ name: this.keyWord, isEnable: true })
-        .then(res => {
-          this.systemList = Utils.data2treeGridArr(res, 'id', 'pid', true);
+  methods: {
+    /**
+     * 加载应用系统列表
+     */
+    loadApps() {
+      this.loading = true;
+      // 只加载启用的应用系统
+      appApi
+        .loadApps({ name: this.keyword, isEnable: true })
+        .then(apps => {
+          this.apps = apps;
         })
         .catch(this.$errorHandler)
         .finally(() => {
@@ -118,104 +121,110 @@ export default {
         });
     },
 
-    // 获取系统菜单
-    getSystemMenu(row) {
-      this.cacheData.curRow = row;
-      this.dialogLoading = true;
-
-      AppAuthResApi.getAuthMenusBySystemId(row.id)
-        .then(res => {
-          // 未查询到授权菜单时 后端返回 null，
-          this.cacheData.selectedIds = res ? res.map(item => item.id) : [];
-          this.cacheData.selectedMsg = res || [];
-          this.selectMenu.isVisible = true;
+    /**
+     * 获取系统菜单授权记录
+     * @param {object} app 应用系统
+     */
+    loadAppMenuAuth(app) {
+      // 记录当前选中的系统
+      this.curApp = app;
+      // 加载系统菜单授权记录
+      appAuthApi
+        .loadAppMenuAuth(app.id)
+        .then(records => {
+          // 缓存授权记录
+          this.appMenuAuthRecords = records;
+          // 设置初始勾选菜单信息，打开菜单选择页面
+          this.winMenu.selectedIds = records.map(record => record.resourceId);
+          this.winMenu.visible = true;
         })
-        .catch(this.$errorHandler)
-        .finally(() => {
-          this.dialogLoading = false;
-        });
-    },
-
-    // 保存系统授权
-    saveAppAuth(select, added, removed) {
-      /**
-       * 11/23 resourceId / appId / resTypeCode 后端参数，要求组装成对象
-       * 11/26 后端接收参数修改
-       *       接收删除已勾选对象，新增对象
-       */
-      const appId = this.cacheData.curRow.id;
-      let deleteIds = removed.map(item => item.id);
-
-      const saveData = added.map(item => ({
-        appId,
-        resourceId: item.id,
-        resTypeCode: item.resTypeCode,
-      }));
-
-      // 根据资源ID 查找 系统-资源关联ID
-      deleteIds = this.findContactIdByResId(deleteIds);
-
-      AppAuthResApi.saveAppAuth(saveData, deleteIds)
-        .then(() => {
-          this.$message({
-            message: '保存成功',
-            type: 'success',
-          });
-        })
-        .catch(this.$errorHandler)
-        .finally(() => {
-          this.dialogLoading = false;
-        });
-    },
-
-    // 获取系统服务
-    getSystemApi(row) {
-      this.cacheData.curRow = row;
-      this.dialogLoading = true;
-
-      AppAuthResApi.getSystemAuth(row.id)
-        .then(res => {
-          // 未查询到授权服务时 返回 NULL
-          this.cacheData.selectedIds = res ? res.map(item => item.id) : [];
-          this.cacheData.selectedMsg = res || [];
-          this.dialogLoading = false;
-          this.selectApi.isVisible = true;
-        })
-        .catch(this.$errorHandler)
-        .finally(() => {
-          this.dialogLoading = false;
-        });
-    },
-
-    // 获取系统码表
-    getSystemCodeTable(row) {
-      this.cacheData.curRow = row;
-      // TODO 暂无选中码表公共组件
-    },
-    // 保存系统码表
-    saveSystemCodeTable(selectCodeTable) {
-      // TODO 暂无选中码表公共组件
-      console.log(selectCodeTable);
+        .catch(this.$errorHandler);
     },
 
     /**
-     * 查找关联ID
+     * 获取系统服务授权记录
+     * @param {object} app 应用系统
      */
-    findContactIdByResId(ids) {
-      const map = {};
-      const returnArr = [];
+    loadAppApiAuth(app) {
+      // 记录当前选中的系统
+      this.curApp = app;
+      // 加载系统服务授权记录
+      appAuthApi
+        .loadAppApiAuth(app.id)
+        .then(records => {
+          // 缓存授权记录
+          this.appApiAuthRecords = records;
+          // 设置初始勾选菜单信息，打开菜单选择页面
+          this.winApi.selectedIds = records.map(record => record.resourceId);
+          this.winApi.visible = true;
+        })
+        .catch(this.$errorHandler);
+    },
 
-      this.cacheData.selectedMsg.forEach(item => {
-        map[item.id] = item;
+    /**
+     * 菜单选择完成后，为当前系统分配菜单权限
+     * @param {array} menus 选择的菜单
+     */
+    onMenuSelect(menus, added, removed) {
+      // 获取新授权的菜单id集合
+      const addedMenuIds = added.map(menu => menu.id);
+      // 遍历查找要删除的授权记录id集合
+      const removeAuthIds = removed.map(removedMenu => {
+        // 查找移除的菜单此前是否已有授权记录
+        const authItem = this.appMenuAuthRecords.find(
+          authRecord => authRecord.resourceId === removedMenu.id
+        );
+        return authItem.id;
       });
+      // 保存系统菜单授权
+      appAuthApi
+        .appAuthMenu(this.curApp.id, addedMenuIds, removeAuthIds)
+        .then(() => {
+          this.$message.success('授权成功');
+        })
+        .catch(this.$errorHandler);
+    },
 
-      ids.forEach(item => {
-        if (map[item]) {
-          returnArr.push(map[item].reality); // 添加关联ID
-        }
+    /**
+     * 服务选择完成后，为当前系统分配选择的服务
+     * @param {array} apis 选择的服务
+     */
+    onApiSelect(apis, added, removed) {
+      // 获取新授权的服务id集合
+      const addedApiIds = added.map(api => api.id);
+      // 遍历查找要删除的授权记录id集合
+      const removeAuthIds = removed.map(removedApi => {
+        // 查找移除的服务此前是否已有授权记录
+        const authItem = this.appApiAuthRecords.find(
+          authRecord => authRecord.resourceId === removedApi.id
+        );
+        return authItem.id;
       });
+      // 保存角色服务授权
+      appAuthApi
+        .appAuthApi(this.curApp.id, addedApiIds, removeAuthIds)
+        .then(() => {
+          this.$message.success('授权成功');
+        })
+        .catch(this.$errorHandler);
+    },
 
-      return returnArr;
+    /**
+     * 获取系统码表
+     * @param {object} app 应用系统
+     */
+    loadAppCodeitemAuth(app) {
+      // 记录当前选中的系统
+      this.curApp = app;
+      // TODO: 暂无选中码表公共组件
+    },
+
+    /**
+     * 系统码表授权
+     */
+    saveSystemCodeTable(selectCodeTable) {
+      // TODO: 暂无选中码表公共组件
+      console.log(selectCodeTable);
     },
   },
 };

@@ -1,8 +1,7 @@
 <!-- 角色编辑页面 -->
 <template>
   <!-- 弹出窗口 -->
-  <el-dialog title='角色编辑' visible :before-close="close" :close-on-click-modal="false" width="600px">
-
+  <el-dialog title="角色编辑" visible :before-close="close" :close-on-click-modal="false" width="600px">
     <!-- 角色表单 -->
     <el-form :model="formRole" :rules="rules" ref="formRole" size="mini" label-width="90px">
       <el-col :span="12">
@@ -22,29 +21,37 @@
               v-for="item in isEnableCodeTable"
               :key="item.value"
               :label="item.text"
-              :value="item.value">
-            </el-option>
+              :value="item.value"
+            ></el-option>
           </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="12">
         <el-form-item label="排序" prop="sort">
-          <el-input v-model="formRole.sort"></el-input>
+          <el-input-number
+            v-model="formRole.sort"
+            controls-position="right"
+            :min="0"
+            style="width: 100%;"
+          ></el-input-number>
         </el-form-item>
       </el-col>
-      <el-col :span='24'>
-        <el-form-item label='备注' prop="description">
-          <el-input type='textarea' :autosize='{ minRows: 4, maxRows: 6}' v-model='formRole.description'></el-input>
+      <el-col :span="24">
+        <el-form-item label="备注" prop="description">
+          <el-input
+            type="textarea"
+            :autosize="{ minRows: 4, maxRows: 6}"
+            v-model="formRole.description"
+          ></el-input>
         </el-form-item>
       </el-col>
     </el-form>
 
     <!-- 底部按钮栏 -->
-    <span slot='footer' class='dialog-footer'>
-      <el-button @click='close'>关 闭</el-button>
-      <el-button type='primary' @click='save'>保 存</el-button>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="close">关闭</el-button>
+      <el-button type="primary" @click="save">保存</el-button>
     </span>
-
   </el-dialog>
 </template>
 
@@ -58,6 +65,10 @@ export default {
     // 角色对象（修改时传入）
     role: {
       type: Object,
+    },
+    // 系统编码（新增时传入）
+    appCode: {
+      type: String,
     },
   },
   data() {
@@ -92,6 +103,12 @@ export default {
             message: '角色编码不能超过32个字符',
           },
         ],
+        description: [
+          {
+            max: 255,
+            message: '备注不能超过255个字符',
+          },
+        ],
       },
       isEnableCodeTable: getCodeTable('isEnable'), // 是否启用码表数据
     };
@@ -119,15 +136,29 @@ export default {
       // 验证表单
       this.$refs.formRole.validate(valid => {
         if (valid) {
-          roleApi
-            .saveRole(this.formRole)
-            .then(role => {
-              // 更新表单角色对象
-              this.formRole = { ...role };
-              // 触发保存成功事件
-              this.$emit('save', role);
-            })
-            .catch(this.$errorHandler);
+          if (this.role) {
+            // 如果传入了角色对象，表明为修改模式，此时调用修改角色接口
+            roleApi
+              .editRole(this.formRole)
+              .then(role => {
+                // 更新表单角色对象
+                this.formRole = { ...role };
+                // 触发保存成功事件
+                this.$emit('save', role);
+              })
+              .catch(this.$errorHandler);
+          } else {
+            // 新增模式调用新增角色接口
+            roleApi
+              .createRole(this.formRole, this.appCode)
+              .then(role => {
+                // 更新表单角色对象
+                this.formRole = { ...role };
+                // 触发保存成功事件
+                this.$emit('save', role);
+              })
+              .catch(this.$errorHandler);
+          }
         }
       });
     },

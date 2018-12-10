@@ -4,13 +4,13 @@ import { getUrlParam } from '@/libs/utils';
 
 // 查询角色列表
 Mock.mock(new RegExp('^/v1/core/base/roles'), 'get', ({ url }) => {
-  const appId = getUrlParam(url, 'appId');
-  const roleType = getUrlParam(url, 'roleType');
+  const appCode = getUrlParam(url, 'appCode');
+  const type = getUrlParam(url, 'type');
   const name = getUrlParam(url, 'name');
   const isEnable = getUrlParam(url, 'isEnable');
 
   if (name || isEnable !== '') {
-    if (roleType === 'public') {
+    if (type === 'public') {
       return [
         {
           id: Random.guid(),
@@ -21,7 +21,7 @@ Mock.mock(new RegExp('^/v1/core/base/roles'), 'get', ({ url }) => {
           description: '这条是查询结果',
         },
       ];
-    } else if (roleType === 'private') {
+    } else if (type === 'private') {
       return [
         {
           id: Random.guid(),
@@ -69,7 +69,7 @@ Mock.mock(new RegExp('^/v1/core/base/roles'), 'get', ({ url }) => {
     ];
   }
 
-  if (appId === 'seshr') {
+  if (appCode === 'seshr') {
     return [
       {
         id: Random.guid(),
@@ -96,7 +96,7 @@ Mock.mock(new RegExp('^/v1/core/base/roles'), 'get', ({ url }) => {
         description: '管理授权相关',
       },
     ];
-  } else if (appId === 'sems') {
+  } else if (appCode === 'sems') {
     return [
       {
         id: Random.guid(),
@@ -115,7 +115,7 @@ Mock.mock(new RegExp('^/v1/core/base/roles'), 'get', ({ url }) => {
         description: '管理授权相关',
       },
     ];
-  } else if (appId === 'doc') {
+  } else if (appCode === 'doc') {
     return [
       {
         id: Random.guid(),
@@ -126,7 +126,7 @@ Mock.mock(new RegExp('^/v1/core/base/roles'), 'get', ({ url }) => {
         description: '最大权限',
       },
     ];
-  } else if (roleType === 'public') {
+  } else if (type === 'public') {
     return [
       {
         id: Random.guid(),

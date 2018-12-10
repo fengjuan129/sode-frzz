@@ -34,16 +34,16 @@
       </el-row>
     </el-form>
     <!-- formDeptType END -->
-    <span slot="footer" class="dialog-footer">
-      <el-button size="mini" style="float: left;" @click="deleteDeptTye" :disabled="!this.id">删除</el-button>
-      <el-button size="mini" @click="close">取 消</el-button>
-      <el-button size="mini" type="primary" @click="save">确 定</el-button>
+    <span slot="footer">
+      <el-button style="float: left;" @click="deleteDeptTye" v-if="this.id">删除</el-button>
+      <el-button @click="close">关闭</el-button>
+      <el-button type="primary" @click="save">保存</el-button>
     </span>
   </el-dialog>
 </template>
 
 <script>
-import DeptApi from '@/api/dept';
+import * as DeptApi from '@/api/dept';
 
 export default {
   name: 'DeptTypeEdit',
@@ -108,22 +108,24 @@ export default {
      * 删除组织机构类型
      */
     deleteDeptTye() {
-      this.$confirm('确定删除该组织机构', '提示', {
+      this.$confirm('确定删除此组织机构类型？', '提示', {
         confirmButtonText: '确定',
         cancelButton: '取消',
         type: 'warning',
       })
         .then(() => {
           this.loading = true;
-          DeptApi.deleteDeptType(this.id).then(() => {
-            this.$message({
-              message: '删除成功',
-              type: 'success',
-            });
-            this.$emit('delete', this.id);
-          });
+          DeptApi.deleteDeptType(this.id)
+            .then(() => {
+              this.$message({
+                message: '删除成功',
+                type: 'success',
+              });
+              this.$emit('delete', this.id);
+            })
+            .catch(this.$errorHandler);
         })
-        .catch(this.$errorHandler)
+        .catch(() => {})
         .finally(() => {
           this.loading = false;
         });

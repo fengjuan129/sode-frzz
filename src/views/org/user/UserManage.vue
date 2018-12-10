@@ -71,10 +71,10 @@
            </div>
            <el-form :inline="true" :model="userForm" size="mini">
               <el-form-item label="姓名">
-                <el-input v-model="userForm.realName" placeholder="姓名"></el-input>
+                <el-input v-model="userForm.realName"></el-input>
               </el-form-item>
               <el-form-item label="账号">
-                <el-input v-model="userForm.userName" placeholder="账号"></el-input>
+                <el-input v-model="userForm.userName"></el-input>
               </el-form-item>
               <el-form-item label="类型">
                 <el-select v-model="userForm.status" placeholder="类型">
@@ -326,7 +326,7 @@ export default {
      */
     isSecurityLevel: createFormatter('securityLevel'),
     /**
-     * 列表显示状态过滤，显示规则 锁定有先
+     * 列表显示状态过滤，显示规则 锁定优先
      */
     isStatusFormatter(isLocked, isEnabled) {
       return isLocked ? '锁定' : this.isEnable.find(item => item.value === isEnabled).text;

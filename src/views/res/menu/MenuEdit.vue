@@ -1,12 +1,6 @@
 <!-- 菜单编辑页 -->
 <template>
-  <el-dialog
-    title="菜单编辑"
-    :visible="true"
-    width="500px"
-    :close-on-click-modal="false"
-    :before-close="close"
-  >
+  <el-dialog title="菜单编辑" visible width="700px" :close-on-click-modal="false" :before-close="close">
     <el-form
       :model="menuEditForm"
       ref="menuEditForm"

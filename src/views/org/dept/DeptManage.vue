@@ -1,102 +1,92 @@
 <!-- 组织机构管理页面 -->
 <template>
   <div>
-    <el-tabs
-      v-model="activeTabCode"
-      type="border-card"
-      :before-leave="stopTabChange"
-      @tab-click="onTabClick"
-    >
-      <el-tab-pane v-for="item in deptTypeList" :key="item.code" :name="item.code">
-        <span slot="label">
-          {{item.typename}}
-          <i
-            class="el-icon-edit button-edit-scale"
-            v-show="activeTabCode === item.code"
-            @click.stop="winDeptTypeEdit.id = item.id,winDeptTypeEdit.visible = true"
-          ></i>
-        </span>
-      </el-tab-pane>
+    <el-tabs v-model="curDeptTypeCode" type="border-card" @tab-click="onTabClick">
+      <!-- 组织机构类型标签页（当前账号是运维管理员时才显示） -->
+      <template v-if="isAdmin">
+        <el-tab-pane v-for="item in deptTypeList" :key="item.code" :name="item.code">
+          <span slot="label">
+            {{item.typename}}
+            <!-- 组织机构类型编辑按钮 -->
+            <i
+              class="el-icon-edit"
+              v-show="curDeptTypeCode === item.code"
+              @click.stop="winDeptTypeEdit.id = item.id,winDeptTypeEdit.visible = true"
+            ></i>
+          </span>
+        </el-tab-pane>
+      </template>
 
-      <el-tab-pane name="buttonAddDeptType">
-        <span slot="label" @click.stop="winDeptTypeEdit.id = '',winDeptTypeEdit.visible = true">
+      <!-- 创建组织机构按钮标签（当前账号是运维管理员时才显示） -->
+      <el-tab-pane name="btnAddDeptType" v-if="isAdmin">
+        <span slot="label">
           <i class="el-icon-circle-plus"></i>
         </span>
       </el-tab-pane>
-      <!-- tabs END -->
-      <div class="btn-container">
-        <el-button size="mini" @click="deptEdit">新增</el-button>
+
+      <!-- 操作按钮栏 -->
+      <div class="toolbar">
+        <el-button size="mini" @click="editDept">新增</el-button>
       </div>
-      <!-- 按钮框 END -->
-      <!-- 表格树 -->
+
+      <!-- 组织机构表格树 -->
       <el-table
         :data="treeData"
-        border
-        style="width: 100%"
         highlight-current-row
-        show-overflow-tooltip
         v-loading="loading"
         :row-style="showTr"
-        @current-change="onTabCurrentChange"
+        @current-change="onDeptSelectionChanged"
       >
-        <el-table-column
-          v-for="(column, index) in columns"
-          :key="column.dataIndex"
-          :label="column.text"
-          :align="column.align"
-          :width="column.width"
-          show-overflow-tooltip
-        >
-          <template slot-scope="scope">
-            <span
-              v-if="spaceIconShow(index)"
-              v-for="(space, levelIndex) in scope.row.level"
-              class="ms-tree-space"
-              :key="levelIndex"
-            ></span>
-            <span
-              class="button is-outlined is-primary is-small"
-              @click="loadChildDept(scope.row)"
-              v-if="toggleIconShow(index,scope.row)"
-            >
-              <i
-                :class="scope.row.expanded ? 'el-icon-arrow-down t-icon' : 'el-icon-arrow-right t-icon'"
-                aria-hidden="true"
-              ></i>
+        <el-table-column prop="name" label="名称">
+          <template slot-scope="{ row }">
+            <!-- 生成缩进（顶层节点level为0） -->
+            <span v-for="(val, key) in row.level" :key="key" class="ms-tree-space"></span>
+            <!-- 生成收缩/展开图标 -->
+            <span v-if="toggleIconShow(row)" @click="loadChildDept(row)">
+              <i :class="row.expanded ? 'el-icon-arrow-down icon' : 'el-icon-arrow-right icon'"></i>
             </span>
-            <span v-else-if="index === 0" class="ms-tree-space"></span>
-            <span
-              v-if="column.dataIndex == 'isEnable'"
-            >{{scope.row[column.dataIndex] | format('isEnable')}}</span>
-
-            <span v-else>{{scope.row[column.dataIndex]}}</span>
+            <span :class="toggleIconShow(row) ? 'pl5' : 'pl20'">{{row.name}}</span>
           </template>
         </el-table-column>
-
-        <el-table-column label="操作" align="center">
+        <el-table-column prop="isCorporation" label="法人单位" :formatter="isCorpFormatter"></el-table-column>
+        <el-table-column prop="isEnable" label="状态" :formatter="isEnableFormatter"></el-table-column>
+        <el-table-column prop="sort" label="排序"></el-table-column>
+        <el-table-column prop="description" label="备注"></el-table-column>
+        <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button type="text" @click="deptEdit(scope.row,scope.$index)">修改</el-button>
-
-            <el-popover style="margin: 0 10px;" placement="top" v-model="scope.row.showDelPopOver">
+            <el-button type="text" @click="editDept(scope.row)">编辑</el-button>
+            <el-popover
+              v-model="scope.row.showEnablePopover"
+              style="margin-left: 10px;"
+              placement="top"
+            >
+              <p>确定{{scope.row.isEnable ? '禁用' : '启用'}}此机构？其{{scope.row.isEnable ? '下级' : '上级'}}机构也将一并{{scope.row.isEnable ? '禁用' : '启用'}}</p>
+              <div style="text-align: right;">
+                <el-button size="mini" type="text" @click="scope.row.showEnablePopover = false">取消</el-button>
+                <el-button type="primary" size="mini" @click="toggleDeptState(scope.row)">确定</el-button>
+              </div>
+              <el-button type="text" slot="reference">{{scope.row.isEnable ? '禁用' : '启用'}}</el-button>
+            </el-popover>
+            <!-- 开发模式才可执行删除操作 -->
+            <el-popover
+              v-if="isDevlopment"
+              v-model="scope.row.showDelPopOver"
+              style="margin-left: 10px;"
+              placement="top"
+            >
               <p>确定删除此机构？</p>
               <div style="text-align: right;">
                 <el-button size="mini" type="text" @click="scope.row.showDelPopOver = false">取消</el-button>
                 <el-button type="primary" size="mini" @click="deleteDept(scope.row)">确定</el-button>
               </div>
-              <el-button type="text" slot="reference" v-if="isDevlopment">删除</el-button>
+              <el-button type="text" slot="reference">删除</el-button>
             </el-popover>
-
-            <el-button
-              type="text"
-              @click.stop="disableDept(!scope.row['isEnable'],scope.row,scope.$index)"
-            >{{scope.row["isEnable"] ? '禁用' : '启用'}}</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <!-- 表格树 END -->
     </el-tabs>
-    <!-- 页面主体 END -->
-    <!-- 公共组件 -->
+
+    <!-- 组织机构类型编辑弹出窗口 -->
     <dept-type-edit
       :id="winDeptTypeEdit.id"
       v-if="winDeptTypeEdit.visible"
@@ -104,13 +94,14 @@
       @save="oneDeptTypeSaved"
       @delete="onDeleteDeptType"
     ></dept-type-edit>
-    <!-- 组织机构类型编辑 END -->
+
+    <!-- 组织机构编辑弹出窗口 -->
     <dept-edit
       v-if="winDeptEdit.visible"
       :id="winDeptEdit.dept.id"
       :parentCode="winDeptEdit.dept.parentCode"
       :parentName="winDeptEdit.dept.parentName"
-      :deptTypeCode="activeTabCode"
+      :deptTypeCode="curDeptTypeCode"
       @close="winDeptEdit.visible = false"
       @save="onDeptSaved"
     ></dept-edit>
@@ -118,9 +109,10 @@
 </template>
 
 <script>
-import DeptApi from '@/api/dept';
+import * as deptApi from '@/api/dept';
+import * as authApi from '@/api/auth.user';
 import { data2treeGridArr } from '@/libs/utils';
-import { format } from '@/libs/codeTable';
+import { createFormatter } from '@/libs/codeTable';
 import SelectUser from '@/components/SelectUser';
 import DeptTypeEdit from './DeptTypeEdit.vue';
 import DeptEdit from './DeptEdit.vue';
@@ -137,39 +129,11 @@ export default {
   data() {
     return {
       isDevlopment: process.env.NODE_ENV === 'development', // 是否为开发环境
+      isAdmin: false, // 当前账号是否为运维管理员
       loading: false,
       deptTypeList: [], // 保存组织机构列表
       deptList: [], // 组织机构列表
-      activeTabCode: '', // 当前选中组织机构类型CODE
-      // 表头信息
-      columns: [
-        {
-          text: '名称',
-          dataIndex: 'name',
-          width: 180,
-        },
-        {
-          text: '编码',
-          dataIndex: 'code',
-          width: 80,
-          align: 'center',
-        },
-        {
-          text: '法人单位',
-          dataIndex: 'orgCode',
-          width: 180,
-        },
-        {
-          text: '状态',
-          dataIndex: 'isEnable',
-          width: 100,
-          align: 'center',
-        },
-        {
-          text: '备注',
-          dataIndex: 'description',
-        },
-      ],
+      curDeptTypeCode: '', // 当前选中组织机构类型CODE
       // 组织机构类型弹框
       winDeptTypeEdit: {
         visible: false, // 编辑窗口是否可见
@@ -184,12 +148,8 @@ export default {
           parentName: '', // 父级名称
         },
       },
-      currentRow: null, // 选中行信息
+      currentDept: null, // 选中行信息
     };
-  },
-
-  filters: {
-    format,
   },
 
   computed: {
@@ -199,12 +159,44 @@ export default {
   },
 
   created() {
-    this.loadDeptType().then(() => {
-      this.loadDept(-1); // 加载机构第一级数据
-    });
+    // 判断当前账号是否是运维管理员
+    this.judgeIsAdmin()
+      .then(isAdmin => {
+        // 如果是运维管理员，先加载组织机构类型，再加载组织机构数据
+        if (isAdmin) {
+          return this.loadDeptType().then(() => {
+            this.loadDept(-1); // 加载机构第一级数据
+          });
+        }
+        // 如果不是运维管理员，直接加载组织机构数据
+        return this.loadDept(-1);
+      })
+      .catch(this.$errorHandler);
   },
 
   methods: {
+    /**
+     * 判断当前账号是否为运维管理员
+     */
+    judgeIsAdmin() {
+      return authApi.judgeIsAdmin().then(isAdmin => {
+        this.isAdmin = isAdmin;
+        return isAdmin;
+      });
+    },
+
+    /**
+     * 是否启用渲染方法
+     */
+    isEnableFormatter: createFormatter('isEnable'),
+
+    /**
+     * 是否为法人单位渲染方法
+     */
+    isCorpFormatter(row, column, value) {
+      return value ? '√' : '';
+    },
+
     /**
      * 控制 tree-grid 层级显示
      */
@@ -230,8 +222,8 @@ export default {
     /**
      * 点击展开和关闭的时候，图标的切换
      */
-    toggleIconShow(index, record) {
-      if (index === 0 && (!record.isLoaded || (record.children && record.children.length > 0))) {
+    toggleIconShow(record) {
+      if (!record.isLoaded || (record.children && record.children.length > 0)) {
         return true;
       }
       return false;
@@ -242,15 +234,15 @@ export default {
      */
     loadDeptType() {
       this.loading = true;
-      return DeptApi.getDeptType()
-        .then(res => {
-          // 组织机构 Key 为 name   机构Key 为 typename  添加name属性
-          this.deptTypeList = res.map(item => ({
-            ...item,
-            name: item.typename,
+      return deptApi
+        .getDeptTypes()
+        .then(deptTypes => {
+          // 组织机构key为name，机构Key为typename，添加name属性用于渲染
+          this.deptTypeList = deptTypes.map(dept => ({
+            ...dept,
+            name: dept.typename,
           }));
-
-          this.activeTabCode = res[0].code;
+          this.curDeptTypeCode = deptTypes.length > 0 ? deptTypes[0].code : '';
         })
         .catch(this.$errorHandler)
         .finally(() => {
@@ -259,17 +251,13 @@ export default {
     },
 
     /**
-     * 阻止添加组织机构类型按钮选中
-     * @param {string} activeName 选项卡name
-     */
-    stopTabChange(activeName) {
-      return !(activeName === 'buttonAddDeptType');
-    },
-
-    /**
      * 点击标签页事件
      */
-    onTabClick() {
+    onTabClick(tab) {
+      // 如果点击的是新增标签，不作任何操作
+      if (tab.name === 'btnAddDeptType') {
+        return;
+      }
       this.deptList = [];
       this.loadDept(-1); // 加载机构第一级
     },
@@ -293,7 +281,7 @@ export default {
         }
       } else {
         this.deptTypeList.push({ ...deptType });
-        this.activeTabCode = deptType.code;
+        this.curDeptTypeCode = deptType.code;
         this.deptList = []; // 新增清空组织机构
       }
       this.winDeptTypeEdit.visible = false;
@@ -308,7 +296,7 @@ export default {
       this.deptTypeList = this.deptTypeList.filter(item => item.id !== deptTypeId);
       // 删除后重新先选中
       if (this.deptTypeList.length) {
-        this.activeTabCode = this.deptTypeList[0].code;
+        this.curDeptTypeCode = this.deptTypeList[0].code;
         this.loadDept(-1);
       } else {
         this.deptList = [];
@@ -322,21 +310,29 @@ export default {
      * @param {string} parentCode 父机构Code,根默认为 -1
      */
     loadDept(parentCode) {
+      // 如果当前账号为运维管理员且没有选中的组织机构类型（即组织机构类型为空），不执行加载
+      if (this.idAdmin && !this.curDeptTypeCode) {
+        return Promise.resolve();
+      }
       this.loading = true;
-      return DeptApi.getLazyTree(this.activeTabCode, parentCode)
-        .then(res => {
-          res = res.map(item => ({
-            ...item,
-            showDelPopOver: false, // 为每行数据添加是否显示确认删除框的标识
-          }));
-
-          // 快速点击  tab 切换时防止数据重复加载
-          this.deptList = parentCode === -1 ? res : [...this.deptList, ...res];
-        })
-        .catch(this.$errorHandler)
-        .finally(() => {
-          this.loading = false;
-        });
+      return (
+        deptApi
+          // 当前账号不是运维管理员时，curDeptTypeCode为空
+          .getLazyTree(this.curDeptTypeCode, parentCode)
+          .then(res => {
+            res = res.map(item => ({
+              ...item,
+              showDelPopOver: false, // 为每行数据添加是否显示确认删除框的标识
+              showEnablePopover: false, // 为每行数据添加是否显示确认修改状态框的标识
+            }));
+            // 快速点击  tab 切换时防止数据重复加载
+            this.deptList = parentCode === -1 ? res : [...this.deptList, ...res];
+          })
+          .catch(this.$errorHandler)
+          .finally(() => {
+            this.loading = false;
+          })
+      );
     },
 
     /**
@@ -351,20 +347,20 @@ export default {
     },
 
     // 选中行发生变化时保存选中行信息
-    onTabCurrentChange(curRow) {
-      this.currentRow = curRow;
+    onDeptSelectionChanged(dept) {
+      this.currentDept = dept;
     },
 
     /**
      * 组织机构编辑
      */
-    deptEdit(row) {
-      const { winDeptEdit, currentRow } = this;
-      winDeptEdit.dept.parentCode = currentRow ? currentRow.code : -1;
+    editDept(row) {
+      const { winDeptEdit, currentDept } = this;
+      winDeptEdit.dept.parentCode = currentDept ? currentDept.code : -1;
       if (row.id) {
         winDeptEdit.dept.parentName = row.parent ? row.parent.name : '';
       } else {
-        winDeptEdit.dept.parentName = currentRow ? currentRow.name : '';
+        winDeptEdit.dept.parentName = currentDept ? currentDept.name : '';
       }
       winDeptEdit.dept.id = row.id || '';
       this.winDeptEdit.visible = true;
@@ -377,24 +373,25 @@ export default {
       this.winDeptEdit.visible = false;
       if (this.winDeptEdit.dept.id) {
         // 修改了状态
-        if (dept.isEnable !== this.currentRow.isEnable) {
+        if (dept.isEnable !== this.currentDept.isEnable) {
           if (dept.isEnable) {
-            this.setParentsState(this.currentRow, true);
+            this.setParentsState(this.currentDept, true);
           } else {
-            this.setChildrensState(this.currentRow.children, false);
+            this.setChildrensState(this.currentDept.children, false);
           }
         }
-        this.currentRow = Object.assign(this.currentRow, dept);
+        this.currentDept = Object.assign(this.currentDept, dept);
       } else {
-        // 当前行没加载过,嗲用接口加载，避免重复数据
-        if (this.currentRow && this.currentRow.isLoaded === undefined) {
-          this.loadDept(this.currentRow ? this.currentRow.code : -1).then(() => {
-            this.currentRow.expanded = true;
-            this.currentRow.isLoaded = true;
+        // 当前行没加载过，调用接口加载，避免重复数据
+        if (this.currentDept && this.currentDept.isLoaded === undefined) {
+          this.loadDept(this.currentDept ? this.currentDept.code : -1).then(() => {
+            this.currentDept.expanded = true;
+            this.currentDept.isLoaded = true;
           });
           return;
         }
         this.$set(dept, 'showDelPopOver', false);
+        this.$set(dept, 'showEnablePopover', false);
         this.deptList.push(dept);
       }
     },
@@ -404,7 +401,8 @@ export default {
      */
     deleteDept(row) {
       this.loading = true;
-      DeptApi.deleteDept(row.id)
+      deptApi
+        .deleteDept(row.id)
         .then(() => {
           const { children, parent } = row;
 
@@ -433,30 +431,26 @@ export default {
     },
 
     /**
-     * 禁用组织机构
+     * 切换组织机构状态
+     * @param {object} dept 组织机构对象
      */
-    disableDept(state, row) {
-      // TODO: 必须先将组织机构下所有启用账号迁移到新部门，才能禁用该组织机构; 调用接口判断
-      // 18/11/12 后端判断，不需要条用接口
-
-      this.$confirm(`是否${state ? '启用' : '禁用'}组织机构?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-      }).then(
-        () => {
-          DeptApi.setDeptDisable(row.id, state ? 'Y' : 'N').then(() => {
-            if (state) {
-              this.setParentsState(row, true);
-            } else {
-              this.setChildrensState(row.children, false);
-            }
-            row.isEnable = state;
-
-            this.$message.success(state ? '启用成功' : '禁用成功');
-          });
-        },
-        () => {}
-      );
+    toggleDeptState(dept) {
+      // 隐藏确认提示
+      dept.showEnablePopover = false;
+      // 目标状态
+      const state = !dept.isEnable;
+      deptApi.setDeptEnable(dept.id, state).then(() => {
+        if (state) {
+          // 启用子级机构同时启用父级机构
+          this.setParentsState(dept, true);
+        } else {
+          // 禁用父级机构同时禁用子级机构
+          this.setChildrensState(dept.children, false);
+        }
+        // 变更状态显示
+        dept.isEnable = state;
+        this.$message.success(state ? '启用成功' : '禁用成功');
+      });
     },
 
     /**
@@ -487,7 +481,7 @@ export default {
 };
 </script>
 <style lang='less' scoped>
-.btn-container {
+.toolbar {
   margin-bottom: 15px;
 }
 .ms-tree-space {
@@ -504,23 +498,8 @@ export default {
 .ms-tree-space::before {
   content: '';
 }
-table td {
-  line-height: 26px;
-}
-.t-icon {
+.icon {
+  width: 15px;
   cursor: pointer;
-}
-.button-edit-scale {
-  margin-left: 5px;
-  display: inline-block;
-  opacity: 0.8;
-  -webkit-transition: opacity 0.1s;
-  -moz-transition: opacity 0.1s;
-  -ms-transition: opacity 0.1s;
-  -o-transition: opacity 0.1s;
-  transition: opacity 0.1s;
-  &:hover {
-    opacity: 1;
-  }
 }
 </style>

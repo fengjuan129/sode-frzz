@@ -2,17 +2,16 @@
 <template>
   <div>
     <el-tabs v-model="activeTabKey" @tab-click="loadRoles" type="border-card">
-
       <!-- tab标签栏 -->
       <el-tab-pane v-for="tab in tabs" :label="tab.name" :name="tab.key" :key="tab.key"></el-tab-pane>
 
       <!-- 查询栏 -->
-      <el-form :inline="true" :model="formSearch" size="mini">
+      <el-form :inline="true" :model="formSearch" @submit.native.prevent size="mini">
         <el-form-item label="角色名称">
-          <el-input v-model="formSearch.name"></el-input>
+          <el-input v-model="formSearch.name" @keyup.enter.native="loadRoles"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type='primary' @click="loadRoles">查询</el-button>
+          <el-button type="primary" @click="loadRoles">查询</el-button>
           <el-button @click="resetCondition">重置</el-button>
         </el-form-item>
       </el-form>
@@ -24,10 +23,10 @@
         <el-table-column prop="description" label="备注"></el-table-column>
         <el-table-column label="授权操作">
           <template slot-scope="scope">
-            <el-button type='text' @click="roleAuthUser(scope.row)">[账号]</el-button>
+            <el-button type="text" @click="roleAuthUser(scope.row)">[账号]</el-button>
             <!-- 资源授权操作需满足一定条件 -->
-            <el-button type='text' @click="roleAuthMenu(scope.row)" v-show="canRoleAuthRes">[菜单]</el-button>
-            <el-button type='text' @click="roleAuthApi(scope.row)" v-show="canRoleAuthRes">[服务]</el-button>
+            <el-button type="text" @click="roleAuthMenu(scope.row)" v-show="canRoleAuthRes">[菜单]</el-button>
+            <el-button type="text" @click="roleAuthApi(scope.row)" v-show="canRoleAuthRes">[服务]</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -37,25 +36,24 @@
         v-bind="winUser"
         v-if="winUser.visible"
         @select="onUserSelect"
-        @close="winUser.visible = false">
-      </select-user>
+        @close="winUser.visible = false"
+      ></select-user>
 
       <!-- 菜单选择组件 -->
       <select-menu
         v-bind="winMenu"
         v-if="winMenu.visible"
         @select="onMenuSelect"
-        @close="winMenu.visible = false">
-      </select-menu>
+        @close="winMenu.visible = false"
+      ></select-menu>
 
       <!-- 服务选择组件 -->
       <select-api
         v-bind="winApi"
         v-if="winApi.visible"
         @select="onApiSelect"
-        @close="winApi.visible = false">
-      </select-api>
-
+        @close="winApi.visible = false"
+      ></select-api>
     </el-tabs>
   </div>
 </template>
@@ -67,6 +65,7 @@ import * as userAuthApi from '@/api/auth.user';
 import SelectUser from '@/components/SelectUser';
 import SelectMenu from '@/components/SelectMenu';
 import SelectApi from '@/components/SelectApi';
+import config from '@/config';
 
 export default {
   name: 'RoleAuthManage',
@@ -83,9 +82,9 @@ export default {
       winUser: {
         visible: false, // 是否可见
         multiple: true, // 是否多选
-        selectedIds: [], // 已选账号id数组
+        selectedNames: [], // 已选账号name数组
       },
-      // 账号选择窗口相关配置及数据
+      // 菜单选择窗口相关配置及数据
       winMenu: {
         visible: false, // 是否可见
         multiple: true, // 是否多选
@@ -97,6 +96,12 @@ export default {
         multiple: true, // 是否多选
         selectedIds: [], // 已选服务id数组
       },
+      // 角色账号授权记录（临时数据，用于选择后对比差异项）
+      roleUserAuthRecords: [],
+      // 角色菜单授权记录（临时数据，用于选择后对比差异项）
+      roleMenuAuthRecords: [],
+      // 角色服务授权记录（临时数据，用于选择后对比差异项）
+      roleApiAuthRecords: [],
     };
   },
   computed: {
@@ -137,11 +142,10 @@ export default {
      * 加载角色列表
      */
     loadRoles() {
-      console.log(this.activeTabKey);
       this.loading = true;
-      // 根据查询条件，查询启用的角色
+      // 根据查询条件，查询当前系统启用的角色
       roleApi
-        .loadRoles(null, this.activeTabKey, {
+        .loadRoles(config.appCode, this.activeTabKey, {
           name: this.formSearch.name,
           isEnable: true,
         })
@@ -164,13 +168,14 @@ export default {
      */
     roleAuthUser(role) {
       this.curRole = role;
-      // 加载已授权给角色的账号
+      // 加载授权记录
       roleAuthApi
         .loadRoleUsers(role.id)
-        .then(users => {
-          console.log('获取到账号列表', users);
+        .then(records => {
+          // 缓存授权记录
+          this.roleUserAuthRecords = records;
           // 设置初始勾选账号信息，打开账号选择页面
-          this.winUser.selectedIds = users.map(user => user.id);
+          this.winUser.selectedNames = records.map(record => record.username);
           this.winUser.visible = true;
         })
         .catch(this.$errorHandler);
@@ -181,13 +186,14 @@ export default {
      */
     roleAuthMenu(role) {
       this.curRole = role;
-      // 加载已授权给角色的菜单
+      // 加载授权记录
       roleAuthApi
         .loadRoleMenus(role.id)
-        .then(menus => {
-          console.log('获取到菜单列表', menus);
+        .then(records => {
+          // 缓存授权记录
+          this.roleMenuAuthRecords = records;
           // 设置初始勾选菜单信息，打开菜单选择页面
-          this.winMenu.selectedIds = menus.map(menu => menu.id);
+          this.winMenu.selectedIds = records.map(record => record.resourceId);
           this.winMenu.visible = true;
         })
         .catch(this.$errorHandler);
@@ -198,13 +204,14 @@ export default {
      */
     roleAuthApi(role) {
       this.curRole = role;
-      // 加载已授权给角色的服务
+      // 加载授权记录
       roleAuthApi
         .loadRoleApis(role.id)
-        .then(apis => {
-          console.log('获取到服务列表', apis);
+        .then(records => {
+          // 缓存授权记录
+          this.roleApiAuthRecords = records;
           // 设置初始勾选服务信息，打开服务选择页面
-          this.winApi.selectedIds = apis.map(api => api.id);
+          this.winApi.selectedIds = records.map(record => record.resourceId);
           this.winApi.visible = true;
         })
         .catch(this.$errorHandler);
@@ -213,11 +220,20 @@ export default {
      * 账号选择完成后，将当前角色授予选择的账号
      * @param {array} users 选择的账号
      */
-    onUserSelect(users) {
-      console.log('选择了账号', users);
+    onUserSelect(users, added, removed) {
+      // 获取新授权的账户名集合
+      const addedUserNames = added.map(user => user.username);
+      // 遍历查找要删除的授权记录id集合
+      const removeAuthIds = removed.map(removedUser => {
+        // 查找移除的账号此前是否已有授权记录
+        const authItem = this.roleUserAuthRecords.find(
+          authRecord => authRecord.username === removedUser.username
+        );
+        return authItem.id;
+      });
       // 保存角色账号授权
       roleAuthApi
-        .roleAuthUser(this.curRole.id, users.map(user => user.id))
+        .roleAuthUser(this.curRole.id, addedUserNames, removeAuthIds)
         .then(() => {
           this.$message.success('授权成功');
         })
@@ -227,11 +243,20 @@ export default {
      * 菜单选择完成后，为当前角色授予菜单权限
      * @param {array} menus 选择的菜单
      */
-    onMenuSelect(menus) {
-      console.log('选择了菜单', menus);
+    onMenuSelect(menus, added, removed) {
+      // 获取新授权的菜单id集合
+      const addedMenuIds = added.map(menu => menu.id);
+      // 遍历查找要删除的授权记录id集合
+      const removeAuthIds = removed.map(removedMenu => {
+        // 查找移除的菜单此前是否已有授权记录
+        const authItem = this.roleMenuAuthRecords.find(
+          authRecord => authRecord.resourceId === removedMenu.id
+        );
+        return authItem.id;
+      });
       // 保存角色菜单授权
       roleAuthApi
-        .roleAuthMenu(this.curRole.id, menus.map(menu => menu.id))
+        .roleAuthMenu(this.curRole.id, addedMenuIds, removeAuthIds)
         .then(() => {
           this.$message.success('授权成功');
         })
@@ -241,11 +266,20 @@ export default {
      * 服务选择完成后，将当前角色授予选择的服务
      * @param {array} apis 选择的服务
      */
-    onApiSelect(apis) {
-      console.log('选择了服务', apis);
+    onApiSelect(apis, added, removed) {
+      // 获取新授权的服务id集合
+      const addedApiIds = added.map(api => api.id);
+      // 遍历查找要删除的授权记录id集合
+      const removeAuthIds = removed.map(removedApi => {
+        // 查找移除的服务此前是否已有授权记录
+        const authItem = this.roleApiAuthRecords.find(
+          authRecord => authRecord.resourceId === removedApi.id
+        );
+        return authItem.id;
+      });
       // 保存角色服务授权
       roleAuthApi
-        .roleAuthApi(this.curRole.id, apis.map(api => api.id))
+        .roleAuthApi(this.curRole.id, addedApiIds, removeAuthIds)
         .then(() => {
           this.$message.success('授权成功');
         })

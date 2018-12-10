@@ -3,21 +3,47 @@ import request from '@/libs/request';
 
 /**
  * 加载角色列表
- * @param {string} appId 应用系统id
- * @param {string} roleType 角色类型（公共/public 私有/private）
+ * @param {string} appCode 应用系统编码
+ * @param {string} type 角色类型（公共/public 私有/private）
  * @param {object} params 查询参数
  * @param {string} params.name 角色名称
  * @param {boolean} params.isEnable 是否启用
  */
-export function loadRoles(appId, roleType, params) {
+export function loadRoles(appCode, type, params) {
   return request('/v1/core/base/roles', {
     method: 'get',
     params: {
-      appId,
-      roleType,
+      appCode,
+      type,
       ...params,
     },
   }).then(res => (res.data ? res.data : res));
+}
+
+/**
+ * 创建角色
+ * @param {object} role 角色对象
+ * @param {string} appCode 应用系统编码
+ */
+export function createRole(role, appCode) {
+  return request('/v1/core/base/role', {
+    method: 'post',
+    data: {
+      appCode,
+      role,
+    },
+  });
+}
+
+/**
+ * 修改角色
+ * @param {object} role 角色对象
+ */
+export function editRole(role) {
+  return request('/v1/core/base/role', {
+    method: 'put',
+    data: role,
+  });
 }
 
 /**
@@ -33,14 +59,14 @@ export function saveRole(role) {
 
 /**
  * 启用/禁用角色
- * @param {string} roleId 角色id
+ * @param {string} id 角色id
  * @param {boolean} isEnable 是否启用
  */
-export function setRoleEnable(roleId, isEnable) {
+export function setRoleEnable(id, isEnable) {
   return request(`/v1/core/base/role/state`, {
     method: 'put',
     data: {
-      roleId,
+      id,
       isEnable,
     },
   });
@@ -62,19 +88,6 @@ export function setRolesEnable(roleIds, isEnable) {
 }
 
 /**
- * 删除角色
- * @param {string} roleId 角色id
- */
-export function deleteRole(roleId) {
-  return request(`/v1/core/base/role`, {
-    method: 'delete',
-    data: {
-      roleId,
-    },
-  });
-}
-
-/**
  * 批量删除角色
  * @param {array} roleIds 待删除角色id数组
  */
@@ -83,4 +96,18 @@ export function deleteRoles(roleIds) {
     method: 'delete',
     data: roleIds,
   });
+}
+
+/**
+ * 删除角色
+ * @param {string} roleId 角色id
+ */
+export function deleteRole(roleId) {
+  return deleteRoles([roleId]);
+  // return request(`/v1/core/base/role`, {
+  //   method: 'delete',
+  //   data: {
+  //     roleId,
+  //   },
+  // });
 }

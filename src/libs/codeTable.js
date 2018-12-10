@@ -6,6 +6,7 @@ let codeTable = {};
 
 /**
  * 获取码表数据
+ * ! 同步方法
  * @param {string | array} codes 码表项代码字符串或数组
  * @description codes为字符串时返回[{text, value}]；codes为数组时返回{code1:[{text, value}], code2:[{text, value}]}
  * @returns {array | object} 码表数据数组或对象
@@ -25,6 +26,7 @@ export function getCodeTable(codes) {
     // 加载码表数据
     const res = sysApi.getCodeTable(inexistence);
     // 合并新加载的数据至缓存
+    // TODO: 处理codes不存在的情况（现在如果输入了不存在的code会报错）
     codeTable = {
       ...codeTable,
       ...res,
@@ -77,6 +79,7 @@ export function format(value, code) {
 
 /**
  * 刷新码表数据
+ * ! 同步方法
  */
 export function refresh() {
   // 获取当前已缓存的码表项代码
