@@ -152,8 +152,8 @@
   </div>
 </template>
 <script>
-import UserApi from '@/api/user'; // 用户管理接口
-import DeptApi from '@/api/dept'; // 组织机构管理接口
+import * as UserApi from '@/api/user'; // 用户管理接口
+import * as DeptApi from '@/api/dept'; // 组织机构管理接口
 import { createFormatter } from '@/libs/codeTable';
 // import * as authApi from '@/api/auth.user';
 import * as Utils from '@/libs/utils';
