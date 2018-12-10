@@ -333,12 +333,14 @@ export default {
         current: this.page.current,
         pageSize: this.page.pageSize,
       });
-      getApiListByOption(searchOption).then(res => {
-        this.page.current = res.current;
-        this.page.total = res.total;
-        this.page.pageSize = res.pageSize;
-        this.apiList = res.resApis;
-      });
+      getApiListByOption(searchOption)
+        .then(res => {
+          this.page.current = res.pageIndex;
+          this.page.total = res.recordCount;
+          this.page.pageSize = res.pageSize;
+          this.apiList = res.data;
+        })
+        .catch(this.$errorHandler);
     },
     // 监听当前页发生变化
     pageCurrentChange(val) {

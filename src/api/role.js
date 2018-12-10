@@ -17,7 +17,7 @@ export function loadRoles(appId, roleType, params) {
       roleType,
       ...params,
     },
-  }).then(res => (res.roles ? res.roles : res));
+  }).then(res => (res.data ? res.data : res));
 }
 
 /**

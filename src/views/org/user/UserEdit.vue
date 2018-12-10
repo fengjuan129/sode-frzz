@@ -1,131 +1,95 @@
-<!-- 账号编辑页面 -->
 <template>
   <div>
     <el-dialog
-      title="设置 - 账号编辑"
-      visible
-      :before-close="close"
-      :close-on-click-modal="false"
-      width="600px"
+       :title="title"
+       width="600px"
+        visible
     >
-      <el-form
-        :model="userEditForm"
-        size="small"
-        label-width="80px"
-        :rules="userEditRules"
-        ref="userEditForm"
-        v-loading="loading"
-      >
-        <input type="hidden" v-model="userEditForm.orgCode">
-        <el-col :span="12">
-          <el-form-item label="姓名" prop="realName">
-            <el-input v-model="userEditForm.realName"></el-input>
-          </el-form-item>
-        </el-col>
+      <div class="content">
+        <el-form v-model="acountForm" size="small" label-width="80px" :rules="userEditRules">
+          <!-- <el-input v-model="acountForm.deptCode" type="hidden" ></el-input>
+          <el-input v-model="acountForm.orgCode" type="hidden"></el-input> -->
+          <el-col :span="12">
+            <el-form-item label="姓名" prop="realName">
+              <el-input v-model="acountForm.realName"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="账号" prop="userName">
+              <el-input v-model="acountForm.userName"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="部门" prop="deptName" disabled>
+              <el-input v-model="acountForm.deptName" disabled ></el-input>
 
-        <el-col :span="12">
-          <el-form-item label="账号" prop="username">
-            <el-input v-model="userEditForm.username" :disabled="id ? true : false"></el-input>
-          </el-form-item>
-        </el-col>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="单位" prop="orgCode" disabled>
+              <el-input v-model="acountForm.orgCode" disabled></el-input>
 
-        <el-col :span="12">
-          <el-form-item prop="deptName" class="t-select-dep">
-            <template>
-              <el-button type="text" slot="label" @click="dialogState = true">部门</el-button>
-              <el-input v-model="userEditForm.deptName" disabled placeholder="请选择部门"></el-input>
-            </template>
-            <!--<el-input v-model='userEditForm.deptCode' :disabled="id ? true : false"></el-input>
-            <div class='t-mask' @click='selectDep' v-if='id ? false : true'></div>-->
-          </el-form-item>
-        </el-col>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="证件号" prop="certId" >
+              <el-input v-model="acountForm.certId"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="密级" prop="securityLevel">
+              <el-select v-model="acountForm.securityLevel">
+                <el-option v-for="item in securityLevelData" :label="item.text" :value="item.value" :key="item.value"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="是否启用" prop="isEnabled">
+              <el-input v-model="acountForm.isEnabled"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="排序" prop="order">
+              <el-input v-model="acountForm.order"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="备用" prop="description">
+              <el-input type="textarea" v-model="acountForm.description" height="100"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-input v-model="acountForm.deptCode" type="hidden" ></el-input>
+          </el-col>
+           <el-col :span="12">
+            <el-input v-model="acountForm.orgCode" type="hidden"></el-input>
+          </el-col>
+        </el-form>
+      </div>
 
-        <el-col :span="12">
-          <el-form-item label="单位">
-            <el-input v-model="userEditForm.orgCode" disabled></el-input>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="12">
-          <el-form-item label="证件号" prop="certId">
-            <el-input v-model="userEditForm.certId"></el-input>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="12">
-          <el-form-item label="密级">
-            <el-select v-model="userEditForm.securityLevel">
-              <el-option
-                v-for="item in securityLevel"
-                :key="item.value"
-                :label="item.text"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="12">
-          <el-form-item label="是否启用">
-            <el-select v-model="userEditForm.isEnabled">
-              <el-option
-                v-for="item in isEnable"
-                :key="item.value"
-                :label="item.text"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="12">
-          <el-form-item label="排序">
-            <el-input v-model="userEditForm.order"></el-input>
-          </el-form-item>
-        </el-col>
-
-        <el-col :span="24">
-          <el-form-item label="备注">
-            <el-input
-              type="textarea"
-              :autosize="{ minRows: 4, maxRows: 6}"
-              v-model="userEditForm.description"
-              placeholder
-            ></el-input>
-          </el-form-item>
-        </el-col>
-      </el-form>
-
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="close">取 消</el-button>
-        <el-button type="primary" @click="save('userEditForm')">确 定</el-button>
+      <span slot="footer">
+        <el-button @click="close">取消</el-button>
+        <el-button type="primary" @click="save">确定</el-button>
       </span>
-    </el-dialog>
 
-    <select-dept @close="dialogState = false" @select="setDept" v-if="dialogState"></select-dept>
+    </el-dialog>
   </div>
 </template>
-
 <script>
-import UserApi from '@/api/user';
-import { getCodeTable } from '@/libs/codeTable';
-import SelectDept from '@/components/SelectDept';
-
 export default {
-  props: ['id', 'rootName'],
+  name: 'UserEdit',
+  props: {
+    title: String,
+  },
   data() {
     return {
-      loading: false,
-      dialogState: false,
-      userEditForm: {
-        isEnabled: true,
-      },
+      acountForm: {},
+      securityLevelData: [],
       /**
        * 表单验证规则
-       * ! 验证规则的 key 需要与 表单的valueKey 对应。。。。
        */
       userEditRules: {
-        username: [
+        userName: [
           { required: true, message: '此项为必填选项', trigger: 'blur' },
           {
             max: 32,
@@ -139,77 +103,15 @@ export default {
         ],
         deptName: [{ required: true, message: '此项为必填选项', trigger: 'change' }],
         certId: [{ required: true, message: '此项为必填选项', trigger: 'blur' }],
+        securityLevel: [{ required: true, message: '此项为必填选项', trigger: 'blur' }],
       },
-      // 数据字典 密级
-      securityLevel: getCodeTable('securityLevel'),
-      // 数据字典 是否启用
-      isEnable: getCodeTable('isEnable'),
     };
   },
-  components: {
-    SelectDept,
-  },
-  mounted() {
-    this.getUserById();
-  },
   methods: {
-    getUserById() {
-      /**
-       * 有 ID 为修改
-       */
-      if (!this.id) return;
-      this.loading = true;
-      UserApi.getUserMsg(this.id)
-        .then(res => {
-          // console.log(res);
-          // this.$refs['userEditForm'].resetFields();
-          this.userEditForm = res;
-          this.userEditForm.deptName = this.rootName; // 后端为提供部门名称，父组件传入
-        })
-        .catch(this.$errorHandler)
-        .finally(() => {
-          this.loading = false;
-        });
-    },
-
-    save(userEditForm) {
-      this.$refs[userEditForm].validate(valid => {
-        if (!valid) return;
-
-        UserApi.userEdit(Object.assign(this.userEditForm, { id: this.id })).then(res => {
-          this.$emit('save', res);
-          this.$message({
-            message: '保存成功',
-            type: 'success',
-          });
-          this.close();
-        });
-      });
-    },
-    setDept(deptMsg) {
-      /**
-       * TODO 更具后端返回数据在做处理
-       */
-      this.userEditForm.deptName = deptMsg.name;
-      this.userEditForm.orgCode = deptMsg.code;
-      this.userEditForm.deptCode = deptMsg.code;
-    },
-    close() {
-      this.$emit('close');
-    },
+    save() {},
+    close() {},
   },
 };
 </script>
-<style lang='less' scoped>
-.t-select-dep {
-  position: relative;
-  .t-mask {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    cursor: pointer;
-  }
-}
+<style lang="scss" scoped>
 </style>
