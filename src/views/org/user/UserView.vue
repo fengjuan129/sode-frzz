@@ -65,7 +65,7 @@
 </template>
 
 <script>
-import UserApi from '@/api/user';
+import * as UserApi from '@/api/user';
 import { format, getCodeTable } from '@/libs/codeTable';
 
 export default {

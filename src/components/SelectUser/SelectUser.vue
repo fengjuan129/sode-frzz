@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import UserApi from '@/api/user';
+import * as UserApi from '@/api/user';
 import * as DeptApi from '@/api/dept';
 import { data2treeArr } from '@/libs/utils';
 

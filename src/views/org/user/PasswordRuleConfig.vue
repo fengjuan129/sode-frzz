@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import UserApi from '@/api/user';
+import * as UserApi from '@/api/user';
 
 export default {
   props: ['isOpen'],
