@@ -8,7 +8,7 @@
       :before-close="close"
       :close-on-click-modal="false"
     >
-      <el-form :model="userMsg" size="small" label-width="80px" v-loading="loading">
+      <el-form :model="userMsg" size="small" label-width="80px">
         <el-col :span="12">
           <el-form-item label="姓名:">{{userMsg.realName}}</el-form-item>
         </el-col>
@@ -18,11 +18,11 @@
         </el-col>
 
         <el-col :span="12">
-          <el-form-item label="部门:">{{userMsg.deptCode}}</el-form-item>
+          <el-form-item label="部门:">{{userMsg.deptName}}</el-form-item>
         </el-col>
 
         <el-col :span="12">
-          <el-form-item label="单位:">{{userMsg.orgCode}}</el-form-item>
+          <el-form-item label="单位:">{{userMsg.orgName}}</el-form-item>
         </el-col>
 
         <el-col :span="12">
@@ -46,13 +46,7 @@
 
         <el-col :span="24">
           <el-form-item label="备注:">
-            <el-input
-              type="textarea"
-              :autosize="{ minRows: 4, maxRows: 6}"
-              v-model="userMsg.description"
-              placeholder
-              disabled
-            ></el-input>
+            {{userMsg.description}}
           </el-form-item>
         </el-col>
       </el-form>
@@ -65,36 +59,21 @@
 </template>
 
 <script>
-import * as UserApi from '@/api/user';
 import { format, getCodeTable } from '@/libs/codeTable';
 
 export default {
   name: 'UserView',
   props: {
-    id: {
-      type: String,
-      requirde: true,
-    },
+    user: Object,
   },
   data() {
     return {
-      loading: true,
-      userMsg: {},
+      userMsg: { ...this.user },
       isEnable: getCodeTable('isEnable'),
     };
   },
   filters: {
     format,
-  },
-  created() {
-    UserApi.getUserMsg(this.id)
-      .then(res => {
-        this.userMsg = res;
-      })
-      .catch(this.$errorHandler)
-      .finally(() => {
-        this.loading = false;
-      });
   },
   methods: {
     formatIsEnable(isLocked, isEnabled) {

@@ -74,9 +74,7 @@ export function lockUser(userIds, isLocked) {
 export function resetPwd(userIds) {
   return request('/v1/core/account/user/reset', {
     method: 'put',
-    data: {
-      id: userIds,
-    },
+    data: userIds,
   });
 }
 
@@ -119,9 +117,7 @@ export function moveUsers(ids, deptCode) {
 export function deleteUser(ids) {
   return request('/v1/core/account/user', {
     method: 'delete',
-    data: {
-      ids,
-    },
+    data: ids,
   });
 }
 

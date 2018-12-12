@@ -1,20 +1,20 @@
 <!-- 账号管理页面 -->
 <template>
   <div>
-    <el-tabs type="border-card" @tab-click='changeTab'>
+    <el-tabs type="border-card" @tab-click='changeTab' >
       <el-tab-pane v-for='item in organizationType'
         :key='item.id'
         :label="item.typename"
         :code='item.code'
-        v-if='organizationType.length > 1'>
+        v-if='organizationType.length > 1&& isAdmin'>
       </el-tab-pane>
 
-      <el-row :gutter="30">
+      <el-row :gutter="10">
           <el-col :span='4'>
             <div class='select-user-search-bar'>
             <el-input v-model="tree.keyword"
               placeholder="输入关键词"
-              style='width: 70%'
+              style='width: 60%'
               size='mini'
               @keydown.13.native="getTree"></el-input>
             <el-button type='primary' style='float: right;' size='mini ' @click='getTree'>查询</el-button>
@@ -29,7 +29,8 @@
               v-if='organizationType.length'
               :props="tree.defaultProps"
               @node-click='treeNodeClick'
-              node-key='id'
+              @current-change="changeNode"
+              node-key='code'
               ref='userLazyTree'>
             </el-tree>
 
@@ -51,16 +52,16 @@
               <div class='btns-container'>
                 <el-button size='mini' @click='addUser' :disabled="!organizationId">新增</el-button>
 
-                  <el-dropdown trigger="click" style="margin-left: 10px;" @command='updateMore' v-if='curUser.length > 1'>
+                  <el-dropdown trigger="click" style="margin-left: 10px;" @command='updateMore' v-if='selectUsers.length > 0'>
                     <span class="el-dropdown-link">
                       <el-button size='mini'>批量操作<i class="el-icon-arrow-down el-icon--right"></i></el-button>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item command='1'>启用</el-dropdown-item>
-                      <el-dropdown-item command='2'>禁用</el-dropdown-item>
-                      <el-dropdown-item command='3'>解锁</el-dropdown-item>
-                      <el-dropdown-item command='5'>账号迁移</el-dropdown-item>
-                      <el-dropdown-item command='6' v-if='isDevlopment'>删除</el-dropdown-item>
+                      <el-dropdown-item command='enable'>启用</el-dropdown-item>
+                      <el-dropdown-item command='disable'>禁用</el-dropdown-item>
+                      <el-dropdown-item command='unlock'>解锁</el-dropdown-item>
+                      <el-dropdown-item command='accountTransfer'>账号迁移</el-dropdown-item>
+                      <el-dropdown-item command='delete' v-if='isDevlopment'>删除</el-dropdown-item>
                     </el-dropdown-menu>
                   </el-dropdown>
 
@@ -80,12 +81,12 @@
                 </el-form-item>
 
                 <el-form-item label='账号'>
-                  <el-input v-model="userForm.userName" placeholder="账号"></el-input>
+                  <el-input v-model="userForm.username" placeholder="账号"></el-input>
                 </el-form-item>
 
                 <el-form-item label='类型'>
                   <el-select v-model="userForm.status" placeholder="类型">
-                    <el-option v-for='item in userStatus' :key='item.id' :label="item.tit" :value='item.value'></el-option>
+                    <el-option v-for='item in userStatus' :key='item.value' :label="item.text" :value='item.value'></el-option>
                     <el-option label='锁定' value='locked'></el-option>
                   </el-select>
                 </el-form-item>
@@ -101,7 +102,7 @@
             <div class="user-list-table-container">
 
               <div class="user-list-table">
-                <el-table ref='userListTable' :data='userList' style='width: 100%;' max-height="550" stripe @selection-change='tableSelectChange'>
+                <el-table ref='userListTable' :data='userList' style='width: 100%;' max-height="550" highlight-current-row stripe @selection-change='tableSelectChange'>
                   <el-table-column type="selection" width="55"><!-- 复选框--></el-table-column>
                   <el-table-column type='index' width="55" label="序号"></el-table-column>
                   <el-table-column label="姓名" property='realName'></el-table-column>
@@ -115,13 +116,13 @@
                         </span>
                     </template>
                   </el-table-column>
-                  <el-table-column label="操作">
-                    <template slot-scope="scope" @click='curUser = scope.row'>
+                  <el-table-column label="操作" width="200">
+                    <template slot-scope="scope" @click='selectUsers = scope.row'>
                       <el-button type='text' @click='seeUser(scope)'>查看</el-button>
                       <el-button type='text' @click='updateUser(scope)'>编辑</el-button>
 
                       <el-dropdown trigger="click" style='margin: 0 10px;' @command='updateRow'>
-                        <a href="javascript: void(0)" class="el-dropdown-link el-button--text" @click='curUser = scope.row'>
+                        <a href="javascript: void(0)" class="el-dropdown-link el-button--text" @click='selectUsers = scope.row'>
                           更多<i class="el-icon-arrow-down el-icon--right"></i>
                         </a>
                         <el-dropdown-menu slot="dropdown">
@@ -162,13 +163,14 @@
     <!-- <LockRuleConfig v-if='dialogMsg.lockRule' @close='dialogMsg.lockRule = false'/> -->
     <!-- 锁定用户弹框 END 保存成功后刷新列表 -->
     <UserEdit
-      :id='curUser.id'
       @save='getUserListByOption'
       @close='dialogMsg.userEdit = false'
       :rootName='activeTabName'
-      v-if='dialogMsg.userEdit'/>
+      v-if='dialogMsg.userEdit'
+      :user='userData'
+      />
     <!-- 修改用户信息 弹框 END -->
-    <UserView v-if='dialogMsg.userView' :id='seeCurUser.id' @close='dialogMsg.userView = false'/>
+    <UserView v-if='dialogMsg.userView' :user='seeselectUsers' @close='dialogMsg.userView = false'/>
     <!-- 查看用户信息 END -->
     <PasswordRuleConfig v-if='dialogMsg.passwordRuleConfig' @close='dialogMsg.passwordRuleConfig = false'/>
     <!-- 密码强度规则编辑页面 END -->
@@ -186,6 +188,7 @@ import * as UserApi from '@/api/user'; // 用户管理接口
 import * as DeptApi from '@/api/dept'; // 组织机构管理接口
 import * as authApi from '@/api/auth.user';
 import * as Utils from '@/libs/utils';
+import { getCodeTable, createFormatter } from '@/libs/codeTable';
 import SelectDept from '@/components/SelectDept';
 import LockRuleConfig from './LockRuleConfig.vue';
 import UserEdit from './UserEdit.vue';
@@ -200,8 +203,7 @@ export default {
       tree: {
         keyword: '',
         isLazy: false, // 控制显示 Tree
-        lazyTreeData: [],
-        searchTreeData: [],
+        searchTreeData: [], // 树的查询条件
         defaultProps: {
           children: 'children',
           label: 'name',
@@ -210,23 +212,16 @@ export default {
       organizationType: [], // 组织机构类型
       activeTab: '', // 当前选中Tab
       activeTabName: '', // 18/11/12 保存当前选项卡名称，编辑时传入只组件
-      userForm: {},
+      userForm: {}, // 查询框数据
       page: {
         // 分页信息
         current: 0,
         pageSize: 0,
         total: 0,
       },
-      // TODO: userType,secretLev 为数据字典
-      userStatus: [{ id: 1, tit: '启用', value: true }, { id: 2, tit: '禁用', value: false }],
-      secretLev: [
-        { id: 1, tit: '公开' },
-        { id: 2, tit: '秘密' },
-        { id: 3, tit: '绝密' },
-        { id: 4, tit: '秘密1' },
-        { id: 5, tit: '公开2' },
-      ],
-      userList: [],
+      userStatus: getCodeTable('isEnable'), // 启用禁用数据字典
+      secretLev: getCodeTable('securityLevel'), // 密级数据字典
+      userList: [], // 账号列表
       organizationId: null, // 机构ID
       dialogMsg: {
         // 管理弹出框状态
@@ -236,8 +231,9 @@ export default {
         passwordRuleConfig: false,
         selectDept: false,
       },
-      curUser: '', // 当前选中用户
-      seeCurUser: '', // 保存查看用户选中用户，与修改、新增不同数据对象。避免不能正确触发子组件 watch 方法
+      userData: {}, // 传给编辑界面的数据
+      seeselectUsers: {}, // 传给查看界面的用户信息
+      selectUsers: {}, // 当前选中的用户
       testLazyTree: 1,
       moveUsersMsg: {}, // 保存
       isAdmin: false, // 是否为运维管理员
@@ -289,7 +285,8 @@ export default {
         DeptApi.getTreeByKeyword(tree.keyword, this.activeTab).then(res => {
           tree.searchTreeData = Utils.data2treeArr(res);
           if (tree.searchTreeData.length === 0) return;
-          this.$refs.userLazyTree.setCurrentKey(tree.searchTreeData[0].id);
+          this.$refs.userLazyTree.setCurrentKey(tree.searchTreeData[0].code);
+          this.getUserListByOption();
           this.organizationId = tree.searchTreeData[0].code;
         });
       } else {
@@ -311,7 +308,8 @@ export default {
       DeptApi.getLazyTree(this.activeTab, -1, true).then(res => {
         resolve(res);
         if (res.length === 0) return;
-        this.$refs.userLazyTree.setCurrentKey(res[0].id);
+        this.$refs.userLazyTree.setCurrentKey(res[0].code);
+        this.getUserListByOption();
         this.organizationId = res[0].code;
       });
     },
@@ -332,11 +330,18 @@ export default {
       this.organizationId = node.code; // 触发 watch
     },
     /**
+     * 组织机构节点选中事件
+     */
+    changeNode() {
+      this.getUserListByOption();
+    },
+    /**
      * 用户列表
      * @param {Boolean} isClear 是否清空搜索项
      * @param {object} page 分页条件
      */
     getUserListByOption(isClear, page = { pageSize: 20, current: 1 }) {
+      this.organizationId = this.$refs.userLazyTree.getCurrentKey();
       const searchOption = {}; // 18/11/14 处理eslint 不能使用 delete 删除属性，保存搜索条件
       if (isClear) {
         this.userForm = {};
@@ -357,13 +362,12 @@ export default {
           searchOption.isEnabled = status;
         }
       }
-
       UserApi.loadUserList(
         Object.assign({}, searchOption, { deptCode: this.organizationId }, page)
       ).then(res => {
-        this.userList = res.users;
-        this.page.current = res.current;
-        this.page.total = res.total;
+        this.userList = res.data;
+        this.page.current = res.pageIndex;
+        this.page.total = res.recordCount;
         this.page.pageSize = res.pageSize;
       });
     },
@@ -376,10 +380,17 @@ export default {
       DeptApi.getLazyTree(this.activeTab, -1).then(res => {
         this.$refs.userLazyTree.root.doCreateChildren(res);
         if (res.length) {
-          this.$refs.userLazyTree.setCurrentKey(res[0].id);
+          this.$refs.userLazyTree.setCurrentKey(res[0].code);
+          this.getUserListByOption();
           this.organizationId = res[0].code;
         } else {
           this.userList = [];
+          this.page = {
+            // 分页信息
+            current: 0,
+            pageSize: 0,
+            total: 0,
+          };
         }
       });
     },
@@ -388,29 +399,64 @@ export default {
      * 新增用户
      */
     addUser() {
-      this.curUser = {};
+      this.userData = {};
+      this.userData = { ...this.getDeptinfoBySelectTree() };
       this.dialogMsg.userEdit = true;
     },
+
     /**
      * 查看用户信息
      */
     seeUser(scope) {
-      this.seeCurUser = scope.row;
-      this.dialogMsg.userView = true;
+      if (scope.row.id) {
+        this.seeselectUsers = { ...this.getDeptinfoBySelectTree(), ...scope.row };
+        this.dialogMsg.userView = true;
+      }
     },
     /**
      * 修改用户信息
      */
     updateUser(scope) {
-      if (this.curUser.id !== scope.row.id) {
-        this.curUser = scope.row;
+      if (scope.row.id) {
+        this.userData = {};
+        this.userData = { ...this.getDeptinfoBySelectTree(), ...scope.row };
+        this.dialogMsg.userEdit = true;
       }
-      this.dialogMsg.userEdit = true;
+    },
+    /**
+     * 获取组织结构树中选中的部门及其单位信息
+     */
+    getDeptinfoBySelectTree() {
+      const node = this.$refs.userLazyTree.getCurrentNode();
+      const { isCorporation, parentCode } = node;
+      let org = {};
+      if (!isCorporation) {
+        org = this.recursionTree(parentCode);
+      } else {
+        org = { orgCode: node.code, orgName: node.name };
+      }
+      return {
+        ...org,
+        deptCode: node.code,
+        deptName: node.name,
+      };
+    },
+    /**
+     * 通过选中的节点递归寻找单位
+     * @param {string} pCode 父节点code
+     */
+    recursionTree(pCode) {
+      const { isCorporation, parentCode, code, name } = this.$refs.userLazyTree.getNode(pCode).data;
+      if (!isCorporation) {
+        return this.recursionTree(parentCode);
+      }
+      return { orgCode: code, orgName: name };
     },
     /**
      * tabs 组件点击时触发,重新加载Tree，显示懒加载树
      */
     changeTab(tab) {
+      this.organizationId = null;
       this.tree.keyword = '';
       this.activeTab = tab.$attrs.code;
       this.reloadLazyTree();
@@ -419,16 +465,10 @@ export default {
       this.activeTabName = tab.label;
     },
     /**
-     * 接收 SelectUser 子组件信息
-     */
-    getSelect(user) {
-      this.organizationId = user;
-    },
-    /**
      * 表格复选框数据改变是获取
      */
     tableSelectChange(list) {
-      this.curUser = list;
+      this.selectUsers = list;
     },
     /**
      * 分页组件 页数发生变化时
@@ -449,14 +489,10 @@ export default {
         pageSize: this.page.pageSize,
       });
     },
-
-    filterSecretLev(row) {
-      if (row.securityLevel) {
-        return this.secretLev.find(item => `${item.id}` === row.securityLevel).tit;
-      }
-      return '';
-    },
-
+    /**
+     * 密级转码
+     */
+    filterSecretLev: createFormatter('securityLevel'),
     /**
      * 设置
      * @param eventType 1: 账号锁定规则
@@ -480,19 +516,19 @@ export default {
     updateRow(eventType) {
       switch (parseInt(eventType, 10)) {
         case 1:
-          this.disableUser('enable', [this.curUser.id], [this.curUser]);
+          this.disableUser('enable', [this.selectUsers.id], [this.selectUsers]);
           break;
         case 2:
-          this.disableUser('disable', [this.curUser.id], [this.curUser]);
+          this.disableUser('disable', [this.selectUsers.id], [this.selectUsers]);
           break;
         case 3:
-          this.unlockUser([this.curUser.id], [this.curUser]);
+          this.unlockUser([this.selectUsers.id], [this.selectUsers]);
           break;
         case 4:
-          this.resetPwd([this.curUser.id]);
+          this.resetPwd(this.selectUsers.id);
           break;
         case 5:
-          this.moveUser([this.curUser.id], [this.curUser]);
+          this.moveUser([this.selectUsers.id], [this.selectUsers]);
           break;
         default:
       }
@@ -504,40 +540,40 @@ export default {
      */
     filterSelectOptionByType(type) {
       // ids 选中ID
-      // curArr 选中项，保存成功后使用
-      const [idsArr, curArr] = [[], []];
+      // selectArr 选中项，保存成功后使用
+      const [idsArr, selectArr] = [[], []];
 
-      if (this.curUser.length) {
-        this.curUser.forEach(item => {
+      if (this.selectUsers.length) {
+        this.selectUsers.forEach(item => {
           switch (parseInt(type, 10)) {
             case 1: // 只添加 状态为禁用的选项
               if (item.isEnabled === false && item.isLocked !== true) {
                 idsArr.push(item.id);
-                curArr.push(item);
+                selectArr.push(item);
               }
               break;
             case 2: // 只添加状态为启用的选项
               if (item.isEnabled === true && item.isLocked !== true) {
                 idsArr.push(item.id);
-                curArr.push(item);
+                selectArr.push(item);
               }
               break;
             case 3: // 只添加状态为锁定的选项
               if (item.isLocked === true) {
                 idsArr.push(item.id);
-                curArr.push(item);
+                selectArr.push(item);
               }
               break;
             default:
               idsArr.push(item.id);
-              curArr.push(item);
+              selectArr.push(item);
           }
         });
       }
 
       return {
         idsArr,
-        curArr,
+        selectArr,
       };
     },
     /**
@@ -548,7 +584,6 @@ export default {
       const filterList = this.filterSelectOptionByType(eventType);
       const { idsArr } = filterList;
       const len = idsArr.length;
-
       if (!len) {
         this.$message({
           message: '未找到可设置选项,请重新选择',
@@ -556,21 +591,20 @@ export default {
         });
         return;
       }
-
-      switch (parseInt(eventType, 10)) {
-        case 1:
-          this.disableUser('enable', idsArr, filterList.curArr);
+      switch (eventType) {
+        case 'enable':
+          this.disableUser('enable', idsArr, filterList.selectArr);
           break;
-        case 2:
-          this.disableUser('disable', idsArr, filterList.curArr);
+        case 'disable':
+          this.disableUser('disable', idsArr, filterList.selectArr);
           break;
-        case 3:
-          this.unlockUser(idsArr, filterList.curArr);
+        case 'unlock':
+          this.unlockUser(idsArr, filterList.selectArr);
           break;
-        case 5:
-          this.moveUser(idsArr, filterList.curArr);
+        case 'accountTransfer':
+          this.moveUser(idsArr, filterList.selectArr);
           break;
-        case 6:
+        case 'delete':
           this.deleteUser(idsArr);
           break;
         default:
@@ -587,17 +621,13 @@ export default {
         return;
       }
       if (!idsArr.length) return;
-      /**
-       * TODO: 调用删除接口
-       */
-      this.$confirm('确定删除已选项？', '提示', {
+      this.$confirm(`确定删除勾选的账号？`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
       })
         .then(() => {
           UserApi.deleteUser(idsArr).then(() => {
             this.removeUsers(idsArr);
-
             this.$message({
               message: '删除成功',
               type: 'success',
@@ -651,7 +681,7 @@ export default {
             });
           });
         })
-        .catch(() => {});
+        .catch(this.$errorHandler);
     },
     // 重置密码
     resetPwd(ids) {
@@ -668,7 +698,7 @@ export default {
             });
           });
         })
-        .catch(() => {});
+        .catch(this.$errorHandler);
     },
     /**
      * 获取目标组织机构
@@ -696,14 +726,14 @@ export default {
     /**
      * 编辑 !刷新列表
      */
-    editUser(userMsg) {
-      if (this.curUser.id) {
-        this.curUser = Object.assign(this.curUser, userMsg);
-      } else {
-        this.userList.unshift(userMsg);
-        this.page.total += 1;
-      }
-    },
+    // editUser(userMsg) {
+    //   if (this.selectUsers.id) {
+    //     this.selectUsers = Object.assign(this.selectUsers, userMsg);
+    //   } else {
+    //     this.userList.unshift(userMsg);
+    //     this.page.total += 1;
+    //   }
+    // },
     /**
      * 删除缓存用户
      */
@@ -718,12 +748,6 @@ export default {
           }
         }
       });
-    },
-  },
-
-  watch: {
-    organizationId() {
-      this.getUserListByOption();
     },
   },
 };
