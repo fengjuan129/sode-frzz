@@ -30,6 +30,7 @@
         </template>
         <el-menu-item index="/auth/app">系统资源分配</el-menu-item>
         <el-menu-item index="/auth/role">角色授权管理</el-menu-item>
+        <el-menu-item index="/auth/template">模板三员授权管理</el-menu-item>
       </el-submenu>
     </el-menu>
   </div>

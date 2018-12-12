@@ -15,4 +15,12 @@ export default [
       type: 'private',
     },
   },
+  // 模板三员授权管理
+  {
+    path: '/auth/template',
+    component: () => import('@/views/auth/template/TemplateAuthManage.vue'),
+    meta: {
+      type: 'private',
+    },
+  },
 ];
