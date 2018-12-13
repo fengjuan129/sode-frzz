@@ -1,6 +1,12 @@
 import Vue from 'vue';
+import { format } from '@/libs/codeTable';
 
-// TODO: 添加码表转换filter
+/**
+ * 码表转换filter
+ * @param {any} value 码表项的值
+ * @param {string} code 码表项代码
+ */
+Vue.filter('code2text', (value, code) => format(value, code));
 
 /**
  * 文件大小转换filter
