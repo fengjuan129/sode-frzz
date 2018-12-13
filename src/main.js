@@ -3,6 +3,7 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 import './plugins';
+import './filters';
 
 // 如果当前不是生产环境且启用了本地mock功能，加载本地mock配置
 if (

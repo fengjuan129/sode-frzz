@@ -1,32 +1,22 @@
 <template>
-  <div>
-    <label>count is : {{ count }}</label>
-    <br>
-    <label>count*2 is : {{ doubleCount }}</label>
-    <br>
-    <button @click="increament">increase</button>
-    <button @click="asyncIncreament">increase after 1 second</button>
-  </div>
+  <file-uploader :objectId="objectId" showUploadButton @upload-finished="onUploadFinished"/>
 </template>
 
 <script>
-import { createNamespacedHelpers } from 'vuex';
-
-const { mapState, mapActions, mapMutations, mapGetters } = createNamespacedHelpers('demo');
+import FileUploader from '@/components/FileUploader';
 
 export default {
+  name: 'demo',
+  components: { FileUploader },
   data() {
-    return {};
-  },
-  computed: {
-    ...mapState({
-      count: state => state.count,
-    }),
-    ...mapGetters(['doubleCount']),
+    return {
+      objectId: 'xxxxxxx',
+    };
   },
   methods: {
-    ...mapMutations(['increament']),
-    ...mapActions(['asyncIncreament']),
+    onUploadFinished(files) {
+      console.log('业务组件接收到所有文件上传完成事件', files);
+    },
   },
 };
 </script>

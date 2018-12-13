@@ -1,13 +1,30 @@
+.fl {
+  float: left;
+}
+
 .fr {
   float: right;
+}
+
+.clearfix {
+  overflow: hidden;
+  _zoom: 1;
 }
 
 .ml5 {
   margin-left: 5px;
 }
 
+.ml10 {
+  margin-left: 10px;
+}
+
 .mr5 {
   margin-right: 5px;
+}
+
+.mr10 {
+  margin-right: 10px;
 }
 
 .pl5 {
