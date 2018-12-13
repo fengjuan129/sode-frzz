@@ -47,6 +47,7 @@
           </el-col>
           <el-col :span='20'>
             <div class='t-header'>
+              <!-- 操作框-->
               <div class='btns-container'>
                 <el-button size='mini' @click='addUser' :disabled="!organizationId">新增</el-button>
                   <el-dropdown trigger="click" style="margin-left: 10px;" @command='updateMore' v-if='selectUsers.length > 0'>
@@ -56,7 +57,7 @@
                     <el-dropdown-menu slot="dropdown">
                       <el-dropdown-item command='enable'>启用</el-dropdown-item>
                       <el-dropdown-item command='disable'>禁用</el-dropdown-item>
-                      <el-dropdown-item command='unlock'>解锁</el-dropdown-item>
+                      <!-- <el-dropdown-item command='unlock'>解锁</el-dropdown-item> -->
                       <el-dropdown-item command='accountTransfer'>账号迁移</el-dropdown-item>
                       <el-dropdown-item command='delete' v-if='isDevlopment'>删除</el-dropdown-item>
                     </el-dropdown-menu>
@@ -69,7 +70,8 @@
                     </el-dropdown-menu>
                   </el-dropdown>
               </div>
-              <!-- 操作框 END -->
+
+              <!-- 条件查询框-->
               <el-form :inline="true" :model='userForm' size="mini">
                 <el-form-item label='姓名'>
                   <el-input v-model="userForm.realName" placeholder="姓名"></el-input>
@@ -91,10 +93,11 @@
                 </el-form-item>
               </el-form>
             </div>
-            <!-- 条件查询框 END -->
+
+             <!-- 用户列表-->
             <div class="user-list-table-container">
               <div class="user-list-table">
-                <el-table ref='userListTable' :data='userList' style='width: 100%;' max-height="550" highlight-current-row stripe @selection-change='tableSelectChange'>
+                <el-table ref='userListTable' :data='userList' style='width: 100%;' highlight-current-row stripe @selection-change='tableSelectChange'>
                   <el-table-column type="selection" width="55"><!-- 复选框--></el-table-column>
                   <el-table-column type='index' width="55" label="序号"></el-table-column>
                   <el-table-column label="姓名" property='realName'></el-table-column>
@@ -103,8 +106,8 @@
                   <el-table-column label="状态">
                     <template slot-scope="scope">
                         <!-- 显示规则：锁定有先 -->
-                        <span>{{ scope.row.isLocked == true ? '锁定' :
-                                  scope.row.isEnabled == true ? '启用': '禁用'}}
+                        <span>{{ scope.row.isLocked ? '锁定' :
+                                  scope.row.isEnabled? '启用': '禁用'}}
                         </span>
                     </template>
                   </el-table-column>
@@ -120,9 +123,9 @@
                         <el-dropdown-menu slot="dropdown">
                           <!-- command 属性不能修改，固定写法 -->
                           <!--isEnabled: false 禁用 isEnabled： true 启用   isLocked：true 锁定 false 未锁定-->
-                          <el-dropdown-item command='enable' v-if='scope.row.isEnabled == false && scope.row.isLocked != true'>启用</el-dropdown-item>
-                          <el-dropdown-item command='disable' v-if='scope.row.isEnabled == true && scope.row.isLocked != true'>禁用</el-dropdown-item>
-                          <el-dropdown-item command='unlock' v-if='scope.row.isLocked == true'>解锁</el-dropdown-item>
+                          <el-dropdown-item command='enable' v-if='!scope.row.isEnabled && !scope.row.isLocked '>启用</el-dropdown-item>
+                          <el-dropdown-item command='disable' v-if='scope.row.isEnabled && !scope.row.isLocked'>禁用</el-dropdown-item>
+                          <el-dropdown-item command='unlock' v-if='scope.row.isLocked'>解锁</el-dropdown-item>
                           <el-dropdown-item command='resetPwd'>重置密码</el-dropdown-item>
                           <el-dropdown-item command='accountTransfer'>账号迁移</el-dropdown-item>
                         </el-dropdown-menu>
@@ -132,8 +135,8 @@
                   </el-table-column>
                 </el-table>
               </div>
-              <!-- 用户列表 END -->
 
+               <!-- 分页信息 -->
               <div class="pagination-contianer">
                 <el-pagination
                   @size-change="pageSizeChange"
@@ -146,31 +149,39 @@
                   style='float: right; padding-top: 15px;'>
                 </el-pagination>
               </div>
-              <!-- 分页信息 -->
+
             </div>
           </el-col>
         </el-row>
     </el-tabs>
     <!-- tab end -->
-    <!-- <LockRuleConfig v-if='dialogMsg.lockRule' @close='dialogMsg.lockRule = false'/> -->
-    <!-- 锁定用户弹框 END 保存成功后刷新列表 -->
+    <!-- 修改用户信息 弹框  -->
     <UserEdit
+      v-if='winEdit.userEdit'
       @save='getUserListByOption'
-      @close='dialogMsg.userEdit = false'
+      @close='winEdit.userEdit = false'
       :rootName='activeTabName'
-      v-if='dialogMsg.userEdit'
-      :user='userData'
+      :user='winEdit.userData'
       />
-    <!-- 修改用户信息 弹框 END -->
-    <UserView v-if='dialogMsg.userView' :user='seeselectUsers' @close='dialogMsg.userView = false'/>
-    <!-- 查看用户信息 END -->
-    <PasswordRuleConfig v-if='dialogMsg.passwordRuleConfig' @close='dialogMsg.passwordRuleConfig = false'/>
-    <!-- 密码强度规则编辑页面 END -->
 
+    <!-- 查看用户信息  -->
+    <UserView
+      v-if='winView.userView'
+      :user='winView.seeselectUsers'
+      @close='winView.userView = false'
+      />
+
+    <!-- 密码强度规则编辑页面 -->
+    <PasswordRuleConfig
+      v-if='winPasswordRule.passwordRuleConfig'
+       @close='winPasswordRule.passwordRuleConfig = false'
+    />
+
+    <!-- 部门选择界面 -->
     <SelectDept :multiple='false'
-      v-if='dialogMsg.selectDept'
+      v-if='winSelectDept.selectDept'
       :rootCode='activeTab'
-      @close='dialogMsg.selectDept = false'
+      @close='winSelectDept.selectDept = false'
       @select="moveUser2Dept"/>
   </div>
 </template>
@@ -202,29 +213,49 @@ export default {
         },
       },
       organizationType: [], // 组织机构类型
+      organizationId: null, // 机构ID
       activeTab: '', // 当前选中Tab
       activeTabName: '', // 18/11/12 保存当前选项卡名称，编辑时传入只组件
-      userForm: {}, // 查询框数据
       page: {
         // 分页信息
         current: 0,
         pageSize: 0,
         total: 0,
       },
+      userForm: {}, // 查询框数据
+      userList: [], // 账号列表
       userStatus: getCodeTable('isEnable'), // 启用禁用数据字典
       secretLev: getCodeTable('securityLevel'), // 密级数据字典
-      userList: [], // 账号列表
-      organizationId: null, // 机构ID
       dialogMsg: {
         // 管理弹出框状态
         lockRule: false,
+      },
+      /**
+       * 编辑窗口相关配置及数据
+       */
+      winEdit: {
         userEdit: false,
+        userData: {}, // 传给编辑界面的数据
+      },
+      /**
+       * 查询窗口相关配置及数据
+       */
+      winView: {
         userView: false,
+        seeselectUsers: {}, // 传给查看界面的用户信息
+      },
+      /**
+       * 密码规则窗口相关配置及数据
+       */
+      winPasswordRule: {
         passwordRuleConfig: false,
+      },
+      /**
+       * 部门选择窗口相关配置及数据
+       */
+      winSelectDept: {
         selectDept: false,
       },
-      userData: {}, // 传给编辑界面的数据
-      seeselectUsers: {}, // 传给查看界面的用户信息
       selectUsers: {}, // 当前选中的用户
       testLazyTree: 1,
       moveUsersMsg: {}, // 保存
@@ -391,9 +422,9 @@ export default {
      * 新增用户
      */
     addUser() {
-      this.userData = {};
-      this.userData = { ...this.getDeptinfoBySelectTree() };
-      this.dialogMsg.userEdit = true;
+      //  this.winEdit.userData = {};
+      this.winEdit.userData = { ...this.getDeptinfoBySelectTree() };
+      this.winEdit.userEdit = true;
     },
 
     /**
@@ -401,8 +432,8 @@ export default {
      */
     seeUser(scope) {
       if (scope.row.id) {
-        this.seeselectUsers = { ...this.getDeptinfoBySelectTree(), ...scope.row };
-        this.dialogMsg.userView = true;
+        this.winView.seeselectUsers = { ...this.getDeptinfoBySelectTree(), ...scope.row };
+        this.winView.userView = true;
       }
     },
     /**
@@ -410,9 +441,9 @@ export default {
      */
     updateUser(scope) {
       if (scope.row.id) {
-        this.userData = {};
-        this.userData = { ...this.getDeptinfoBySelectTree(), ...scope.row };
-        this.dialogMsg.userEdit = true;
+        // this.userData = {};
+        this.winEdit.userData = { ...this.getDeptinfoBySelectTree(), ...scope.row };
+        this.winEdit.userEdit = true;
       }
     },
     /**
@@ -495,7 +526,7 @@ export default {
           this.dialogMsg.lockRule = true;
           break;
         case 2:
-          this.dialogMsg.passwordRuleConfig = true;
+          this.winPasswordRule.passwordRuleConfig = true;
           break;
         default:
       }
@@ -639,13 +670,13 @@ export default {
      * @param {array} curList 选中项
      */
     disableUser(disableType, ids, curList) {
-      const status = disableType === 'enable' ? 'Y' : 'N';
+      const status = disableType === 'enable';
       UserApi.disableUser(ids, status).then(() => {
         /**
          * 更新视图
          */
         curList.forEach(item => {
-          item.isEnabled = status === 'Y';
+          item.isEnabled = status === true;
         });
 
         this.$message({
@@ -663,12 +694,12 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          UserApi.lockUser(ids, 'N').then(() => {
+          UserApi.lockUser(ids).then(() => {
             curList.forEach(item => {
               item.isLocked = false;
             });
             this.$message({
-              message: '修改成功',
+              message: '解锁成功',
               type: 'success',
             });
           });
@@ -708,7 +739,7 @@ export default {
     },
     // 账号迁移
     moveUser(ids, curList) {
-      this.dialogMsg.selectDept = true;
+      this.winSelectDept.selectDept = true;
       this.moveUsersMsg = {
         ids,
         curList,

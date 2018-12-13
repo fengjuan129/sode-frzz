@@ -7,5 +7,5 @@ import request from '@/libs/request';
 export function loadPemplateroles() {
   return request(`/v1/core/base/templateroles`, {
     methods: 'get',
-  }).then(res => res || []);
+  }).then(roles => roles || []);
 }

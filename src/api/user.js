@@ -58,13 +58,10 @@ export function updateUserState(userIds, state) {
  * @param {array} userIds 要解锁状态的账号id数组
  * @param {boolean} isLocked 是否解锁
  */
-export function lockUser(userIds, isLocked) {
+export function lockUser(userIds) {
   return request('/v1/core/account/users/unlock', {
     method: 'put',
-    data: {
-      ids: userIds,
-      isLocked,
-    },
+    data: userIds,
   });
 }
 /**
