@@ -45,13 +45,10 @@
             </el-tree>
           </div>
           </el-col>
-
           <el-col :span='20'>
             <div class='t-header'>
-
               <div class='btns-container'>
                 <el-button size='mini' @click='addUser' :disabled="!organizationId">新增</el-button>
-
                   <el-dropdown trigger="click" style="margin-left: 10px;" @command='updateMore' v-if='selectUsers.length > 0'>
                     <span class="el-dropdown-link">
                       <el-button size='mini'>批量操作<i class="el-icon-arrow-down el-icon--right"></i></el-button>
@@ -64,8 +61,6 @@
                       <el-dropdown-item command='delete' v-if='isDevlopment'>删除</el-dropdown-item>
                     </el-dropdown-menu>
                   </el-dropdown>
-
-
                   <el-dropdown trigger="click" @command='setUp' style="margin-left: 10px;" v-if='isAdmin'>
                     <span class="el-dropdown-link"><el-button size='mini'>设置<i class="el-icon-arrow-down el-icon--right"></i></el-button></span>
                     <el-dropdown-menu slot="dropdown">
@@ -90,7 +85,6 @@
                     <el-option label='锁定' value='locked'></el-option>
                   </el-select>
                 </el-form-item>
-
                 <el-form-item>
                   <el-button type='primary' @click='getUserListByOption(false)'>查询</el-button>
                   <el-button @click='getUserListByOption(true)'>重置</el-button>
@@ -98,9 +92,7 @@
               </el-form>
             </div>
             <!-- 条件查询框 END -->
-
             <div class="user-list-table-container">
-
               <div class="user-list-table">
                 <el-table ref='userListTable' :data='userList' style='width: 100%;' max-height="550" highlight-current-row stripe @selection-change='tableSelectChange'>
                   <el-table-column type="selection" width="55"><!-- 复选框--></el-table-column>
@@ -128,11 +120,11 @@
                         <el-dropdown-menu slot="dropdown">
                           <!-- command 属性不能修改，固定写法 -->
                           <!--isEnabled: false 禁用 isEnabled： true 启用   isLocked：true 锁定 false 未锁定-->
-                          <el-dropdown-item command='1' v-if='scope.row.isEnabled == false && scope.row.isLocked != true'>启用</el-dropdown-item>
-                          <el-dropdown-item command='2' v-if='scope.row.isEnabled == true && scope.row.isLocked != true'>禁用</el-dropdown-item>
-                          <el-dropdown-item command='3' v-if='scope.row.isLocked == true'>解锁</el-dropdown-item>
-                          <el-dropdown-item command='4'>重置密码</el-dropdown-item>
-                          <el-dropdown-item command='5'>账号迁移</el-dropdown-item>
+                          <el-dropdown-item command='enable' v-if='scope.row.isEnabled == false && scope.row.isLocked != true'>启用</el-dropdown-item>
+                          <el-dropdown-item command='disable' v-if='scope.row.isEnabled == true && scope.row.isLocked != true'>禁用</el-dropdown-item>
+                          <el-dropdown-item command='unlock' v-if='scope.row.isLocked == true'>解锁</el-dropdown-item>
+                          <el-dropdown-item command='resetPwd'>重置密码</el-dropdown-item>
+                          <el-dropdown-item command='accountTransfer'>账号迁移</el-dropdown-item>
                         </el-dropdown-menu>
                       </el-dropdown>
 
@@ -511,23 +503,23 @@ export default {
 
     /**
      * updateRow
-     * @param eventType 1：启用 2：禁用 3：解锁 4：重置密码 5：账号迁移
+     * @param eventType enable：启用 disable：禁用 unlock：解锁 resetPwd：重置密码 accountTransfer：账号迁移
      */
     updateRow(eventType) {
-      switch (parseInt(eventType, 10)) {
-        case 1:
+      switch (eventType) {
+        case 'enable':
           this.disableUser('enable', [this.selectUsers.id], [this.selectUsers]);
           break;
-        case 2:
+        case 'disable':
           this.disableUser('disable', [this.selectUsers.id], [this.selectUsers]);
           break;
-        case 3:
+        case 'unlock':
           this.unlockUser([this.selectUsers.id], [this.selectUsers]);
           break;
-        case 4:
+        case 'resetPwd':
           this.resetPwd(this.selectUsers.id);
           break;
-        case 5:
+        case 'accountTransfer':
           this.moveUser([this.selectUsers.id], [this.selectUsers]);
           break;
         default:
