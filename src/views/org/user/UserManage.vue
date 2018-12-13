@@ -1,188 +1,232 @@
 <!-- 账号管理页面 -->
 <template>
   <div>
-    <el-tabs type="border-card" @tab-click='changeTab' >
-      <el-tab-pane v-for='item in organizationType'
-        :key='item.id'
+    <el-tabs type="border-card" @tab-click="changeTab">
+      <el-tab-pane
+        v-for="item in organizationType"
+        :key="item.id"
         :label="item.typename"
-        :code='item.code'
-        v-if='organizationType.length > 1&& isAdmin'>
-      </el-tab-pane>
+        :code="item.code"
+        v-if="organizationType.length > 1&& isAdmin"
+      ></el-tab-pane>
 
       <el-row :gutter="10">
-          <el-col :span='4'>
-            <div class='select-user-search-bar'>
-            <el-input v-model="tree.keyword"
+        <el-col :span="4">
+          <div class="select-user-search-bar">
+            <el-input
+              v-model="tree.keyword"
               placeholder="输入关键词"
-              style='width: 60%'
-              size='mini'
-              @keydown.13.native="getTree"></el-input>
-            <el-button type='primary' style='float: right;' size='mini ' @click='getTree'>查询</el-button>
+              style="width: 60%"
+              size="mini"
+              @keydown.13.native="getTree"
+            ></el-input>
+            <el-button type="primary" style="float: right;" size="mini " @click="getTree">查询</el-button>
           </div>
-          <div class='select-user-tree'>
+          <div class="select-user-tree">
             <!-- 懒加载加载 不能使 v-IF -->
             <el-tree
-              v-show='tree.isLazy'
+              v-show="tree.isLazy"
               lazy
-              :load='loadTreeChild'
+              :load="loadTreeChild"
               highlight-current
-              v-if='organizationType.length'
+              v-if="organizationType.length"
               :props="tree.defaultProps"
-              @node-click='treeNodeClick'
+              @node-click="treeNodeClick"
               @current-change="changeNode"
-              node-key='code'
-              ref='userLazyTree'>
-            </el-tree>
+              node-key="code"
+              ref="userLazyTree"
+            ></el-tree>
 
             <!-- 全加载 -->
             <el-tree
-              v-show='!tree.isLazy'
-              :data='tree.searchTreeData'
+              v-show="!tree.isLazy"
+              :data="tree.searchTreeData"
               :props="tree.defaultProps"
               default-expand-all
               highlight-current
-              @node-click='treeNodeClick'>
-            </el-tree>
+              @node-click="treeNodeClick"
+            ></el-tree>
           </div>
-          </el-col>
-          <el-col :span='20'>
-            <div class='t-header'>
-              <!-- 操作框-->
-              <div class='btns-container'>
-                <el-button size='mini' @click='addUser' :disabled="!organizationId">新增</el-button>
-                  <el-dropdown trigger="click" style="margin-left: 10px;" @command='updateMore' v-if='selectUsers.length > 0'>
-                    <span class="el-dropdown-link">
-                      <el-button size='mini'>批量操作<i class="el-icon-arrow-down el-icon--right"></i></el-button>
+        </el-col>
+        <el-col :span="20">
+          <div class="t-header">
+            <!-- 操作框-->
+            <div class="btns-container">
+              <el-button size="mini" @click="addUser" :disabled="!organizationId">新增</el-button>
+              <el-dropdown
+                trigger="click"
+                style="margin-left: 10px;"
+                @command="updateMore"
+                v-if="selectUsers.length > 0"
+              >
+                <span class="el-dropdown-link">
+                  <el-button size="mini">批量操作
+                    <i class="el-icon-arrow-down el-icon--right"></i>
+                  </el-button>
+                </span>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item command="enable">启用</el-dropdown-item>
+                  <el-dropdown-item command="disable">禁用</el-dropdown-item>
+                  <!-- <el-dropdown-item command='unlock'>解锁</el-dropdown-item> -->
+                  <el-dropdown-item command="accountTransfer">账号迁移</el-dropdown-item>
+                  <el-dropdown-item command="delete" v-if="isDevlopment">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+              <el-dropdown
+                trigger="click"
+                @command="setUp"
+                style="margin-left: 10px;"
+                v-if="isAdmin"
+              >
+                <span class="el-dropdown-link">
+                  <el-button size="mini">设置
+                    <i class="el-icon-arrow-down el-icon--right"></i>
+                  </el-button>
+                </span>
+                <el-dropdown-menu slot="dropdown">
+                  <!-- <el-dropdown-item command='1'>账号锁定规则</el-dropdown-item> -->
+                  <el-dropdown-item command="2">密码强度规则</el-dropdown-item>
+                </el-dropdown-menu>
+              </el-dropdown>
+            </div>
+
+            <!-- 条件查询框-->
+            <el-form :inline="true" :model="userForm" size="mini">
+              <el-form-item label="姓名">
+                <el-input v-model="userForm.realName" placeholder="姓名"></el-input>
+              </el-form-item>
+
+              <el-form-item label="账号">
+                <el-input v-model="userForm.username" placeholder="账号"></el-input>
+              </el-form-item>
+
+              <el-form-item label="类型">
+                <el-select v-model="userForm.status" placeholder="类型">
+                  <el-option
+                    v-for="item in userStatus"
+                    :key="item.value"
+                    :label="item.text"
+                    :value="item.value"
+                  ></el-option>
+                  <el-option label="锁定" value="locked"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="getUserListByOption(false)">查询</el-button>
+                <el-button @click="getUserListByOption(true)">重置</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+
+          <!-- 用户列表-->
+          <div class="user-list-table-container">
+            <div class="user-list-table">
+              <el-table
+                ref="userListTable"
+                :data="userList"
+                style="width: 100%;"
+                highlight-current-row
+                stripe
+                @selection-change="tableSelectChange"
+              >
+                <el-table-column type="selection" width="55">
+                  <!-- 复选框-->
+                </el-table-column>
+                <el-table-column type="index" width="55" label="序号"></el-table-column>
+                <el-table-column label="姓名" property="realName"></el-table-column>
+                <el-table-column label="账号" property="username"></el-table-column>
+                <el-table-column label="密级" property="securityLevel" :formatter="filterSecretLev"></el-table-column>
+                <el-table-column label="状态">
+                  <template slot-scope="scope">
+                    <!-- 显示规则：锁定有先 -->
+                    <span>
+                      {{ scope.row.isLocked ? '锁定' :
+                      scope.row.isEnabled? '启用': '禁用'}}
                     </span>
-                    <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item command='enable'>启用</el-dropdown-item>
-                      <el-dropdown-item command='disable'>禁用</el-dropdown-item>
-                      <!-- <el-dropdown-item command='unlock'>解锁</el-dropdown-item> -->
-                      <el-dropdown-item command='accountTransfer'>账号迁移</el-dropdown-item>
-                      <el-dropdown-item command='delete' v-if='isDevlopment'>删除</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </el-dropdown>
-                  <el-dropdown trigger="click" @command='setUp' style="margin-left: 10px;" v-if='isAdmin'>
-                    <span class="el-dropdown-link"><el-button size='mini'>设置<i class="el-icon-arrow-down el-icon--right"></i></el-button></span>
-                    <el-dropdown-menu slot="dropdown">
-                      <!-- <el-dropdown-item command='1'>账号锁定规则</el-dropdown-item> -->
-                      <el-dropdown-item command='2'>密码强度规则</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </el-dropdown>
-              </div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="200">
+                  <template slot-scope="scope" @click="selectUsers = scope.row">
+                    <el-button type="text" @click="seeUser(scope)">查看</el-button>
+                    <el-button type="text" @click="updateUser(scope)">编辑</el-button>
 
-              <!-- 条件查询框-->
-              <el-form :inline="true" :model='userForm' size="mini">
-                <el-form-item label='姓名'>
-                  <el-input v-model="userForm.realName" placeholder="姓名"></el-input>
-                </el-form-item>
-
-                <el-form-item label='账号'>
-                  <el-input v-model="userForm.username" placeholder="账号"></el-input>
-                </el-form-item>
-
-                <el-form-item label='类型'>
-                  <el-select v-model="userForm.status" placeholder="类型">
-                    <el-option v-for='item in userStatus' :key='item.value' :label="item.text" :value='item.value'></el-option>
-                    <el-option label='锁定' value='locked'></el-option>
-                  </el-select>
-                </el-form-item>
-                <el-form-item>
-                  <el-button type='primary' @click='getUserListByOption(false)'>查询</el-button>
-                  <el-button @click='getUserListByOption(true)'>重置</el-button>
-                </el-form-item>
-              </el-form>
+                    <el-dropdown trigger="click" style="margin: 0 10px;" @command="updateRow">
+                      <a
+                        href="javascript: void(0)"
+                        class="el-dropdown-link el-button--text"
+                        @click="selectUsers = scope.row"
+                      >更多
+                        <i class="el-icon-arrow-down el-icon--right"></i>
+                      </a>
+                      <el-dropdown-menu slot="dropdown">
+                        <!-- command 属性不能修改，固定写法 -->
+                        <!--isEnabled: false 禁用 isEnabled： true 启用   isLocked：true 锁定 false 未锁定-->
+                        <el-dropdown-item
+                          command="enable"
+                          v-if="!scope.row.isEnabled && !scope.row.isLocked "
+                        >启用</el-dropdown-item>
+                        <el-dropdown-item
+                          command="disable"
+                          v-if="scope.row.isEnabled && !scope.row.isLocked"
+                        >禁用</el-dropdown-item>
+                        <el-dropdown-item command="unlock" v-if="scope.row.isLocked">解锁</el-dropdown-item>
+                        <el-dropdown-item command="resetPwd">重置密码</el-dropdown-item>
+                        <el-dropdown-item command="accountTransfer">账号迁移</el-dropdown-item>
+                      </el-dropdown-menu>
+                    </el-dropdown>
+                  </template>
+                </el-table-column>
+              </el-table>
             </div>
 
-             <!-- 用户列表-->
-            <div class="user-list-table-container">
-              <div class="user-list-table">
-                <el-table ref='userListTable' :data='userList' style='width: 100%;' highlight-current-row stripe @selection-change='tableSelectChange'>
-                  <el-table-column type="selection" width="55"><!-- 复选框--></el-table-column>
-                  <el-table-column type='index' width="55" label="序号"></el-table-column>
-                  <el-table-column label="姓名" property='realName'></el-table-column>
-                  <el-table-column label='账号' property='username'></el-table-column>
-                  <el-table-column label="密级" property='securityLevel' :formatter="filterSecretLev"></el-table-column>
-                  <el-table-column label="状态">
-                    <template slot-scope="scope">
-                        <!-- 显示规则：锁定有先 -->
-                        <span>{{ scope.row.isLocked ? '锁定' :
-                                  scope.row.isEnabled? '启用': '禁用'}}
-                        </span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column label="操作" width="200">
-                    <template slot-scope="scope" @click='selectUsers = scope.row'>
-                      <el-button type='text' @click='seeUser(scope)'>查看</el-button>
-                      <el-button type='text' @click='updateUser(scope)'>编辑</el-button>
-
-                      <el-dropdown trigger="click" style='margin: 0 10px;' @command='updateRow'>
-                        <a href="javascript: void(0)" class="el-dropdown-link el-button--text" @click='selectUsers = scope.row'>
-                          更多<i class="el-icon-arrow-down el-icon--right"></i>
-                        </a>
-                        <el-dropdown-menu slot="dropdown">
-                          <!-- command 属性不能修改，固定写法 -->
-                          <!--isEnabled: false 禁用 isEnabled： true 启用   isLocked：true 锁定 false 未锁定-->
-                          <el-dropdown-item command='enable' v-if='!scope.row.isEnabled && !scope.row.isLocked '>启用</el-dropdown-item>
-                          <el-dropdown-item command='disable' v-if='scope.row.isEnabled && !scope.row.isLocked'>禁用</el-dropdown-item>
-                          <el-dropdown-item command='unlock' v-if='scope.row.isLocked'>解锁</el-dropdown-item>
-                          <el-dropdown-item command='resetPwd'>重置密码</el-dropdown-item>
-                          <el-dropdown-item command='accountTransfer'>账号迁移</el-dropdown-item>
-                        </el-dropdown-menu>
-                      </el-dropdown>
-
-                    </template>
-                  </el-table-column>
-                </el-table>
-              </div>
-
-               <!-- 分页信息 -->
-              <div class="pagination-contianer">
-                <el-pagination
-                  @size-change="pageSizeChange"
-                  @current-change="curPageChange"
-                  :current-page="page.current"
-                  :page-sizes="[10, 20, 30, 50]"
-                  :page-size="page.pageSize"
-                  layout="total, sizes, prev, pager, next, jumper"
-                  :total="page.total"
-                  style='float: right; padding-top: 15px;'>
-                </el-pagination>
-              </div>
-
+            <!-- 分页信息 -->
+            <div class="pagination-contianer">
+              <el-pagination
+                @size-change="pageSizeChange"
+                @current-change="curPageChange"
+                :current-page="page.current"
+                :page-sizes="[10, 20, 30, 50]"
+                :page-size="page.pageSize"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="page.total"
+                style="float: right; padding-top: 15px;"
+              ></el-pagination>
             </div>
-          </el-col>
-        </el-row>
+          </div>
+        </el-col>
+      </el-row>
     </el-tabs>
     <!-- tab end -->
     <!-- 修改用户信息 弹框  -->
     <UserEdit
-      v-if='winEdit.userEdit'
-      @save='getUserListByOption'
-      @close='winEdit.userEdit = false'
-      :rootName='activeTabName'
-      :user='winEdit.userData'
-      />
+      v-if="winEdit.userEdit"
+      @save="getUserListByOption"
+      @close="winEdit.userEdit = false"
+      :rootName="activeTabName"
+      :user="winEdit.userData"
+    />
 
     <!-- 查看用户信息  -->
     <UserView
-      v-if='winView.userView'
-      :user='winView.seeselectUsers'
-      @close='winView.userView = false'
-      />
+      v-if="winView.userView"
+      :user="winView.seeselectUsers"
+      @close="winView.userView = false"
+    />
 
     <!-- 密码强度规则编辑页面 -->
     <PasswordRuleConfig
-      v-if='winPasswordRule.passwordRuleConfig'
-       @close='winPasswordRule.passwordRuleConfig = false'
+      v-if="winPasswordRule.passwordRuleConfig"
+      @close="winPasswordRule.passwordRuleConfig = false"
     />
 
     <!-- 部门选择界面 -->
-    <SelectDept :multiple='false'
-      v-if='winSelectDept.selectDept'
-      :rootCode='activeTab'
-      @close='winSelectDept.selectDept = false'
-      @select="moveUser2Dept"/>
+    <SelectDept
+      :multiple="false"
+      v-if="winSelectDept.selectDept"
+      :rootCode="activeTab"
+      @close="winSelectDept.selectDept = false"
+      @select="moveUser2Dept"
+    />
   </div>
 </template>
 
@@ -281,22 +325,27 @@ export default {
      * 判断当前登录人员是否为运维管理员
      */
     judgeIsAdmin() {
-      return authApi.judgeIsAdmin().then(isAdmin => {
-        this.isAdmin = isAdmin;
-        return isAdmin;
-      });
+      return authApi
+        .judgeIsAdmin()
+        .then(isAdmin => {
+          this.isAdmin = isAdmin;
+          return isAdmin;
+        })
+        .catch(this.$errorHandler);
     },
     /**
      * 获取组织机构类型
      */
     getOrganizationType() {
-      DeptApi.getDeptTypes().then(res => {
-        this.organizationType = res;
-        this.activeTab = res[0].code;
-        this.activeTabName = res[0].typename;
+      DeptApi.getDeptTypes()
+        .then(res => {
+          this.organizationType = res;
+          this.activeTab = res[0].code;
+          this.activeTabName = res[0].typename;
 
-        this.getTree();
-      });
+          this.getTree();
+        })
+        .catch(this.$errorHandler);
     },
     /**
      *  获取Tree列表
@@ -305,13 +354,15 @@ export default {
       const { tree } = this;
       if (tree.keyword) {
         tree.isLazy = false;
-        DeptApi.getTreeByKeyword(tree.keyword, this.activeTab).then(res => {
-          tree.searchTreeData = Utils.data2treeArr(res);
-          if (tree.searchTreeData.length === 0) return;
-          this.$refs.userLazyTree.setCurrentKey(tree.searchTreeData[0].code);
-          this.getUserListByOption();
-          this.organizationId = tree.searchTreeData[0].code;
-        });
+        DeptApi.getTreeByKeyword(tree.keyword, this.activeTab)
+          .then(res => {
+            tree.searchTreeData = Utils.data2treeArr(res);
+            if (tree.searchTreeData.length === 0) return;
+            this.$refs.userLazyTree.setCurrentKey(tree.searchTreeData[0].code);
+            this.getUserListByOption();
+            this.organizationId = tree.searchTreeData[0].code;
+          })
+          .catch(this.$errorHandler);
       } else {
         tree.isLazy = true;
       }
@@ -328,21 +379,25 @@ export default {
      * 加载第一级tree节点
      */
     lazyTreeInit(resolve) {
-      DeptApi.getLazyTree(this.activeTab, -1, true).then(res => {
-        resolve(res);
-        if (res.length === 0) return;
-        this.$refs.userLazyTree.setCurrentKey(res[0].code);
-        this.getUserListByOption();
-        this.organizationId = res[0].code;
-      });
+      DeptApi.getLazyTree(this.activeTab, -1, true)
+        .then(res => {
+          resolve(res);
+          if (res.length === 0) return;
+          this.$refs.userLazyTree.setCurrentKey(res[0].code);
+          this.getUserListByOption();
+          this.organizationId = res[0].code;
+        })
+        .catch(this.$errorHandler);
     },
     /**
      * 加载子节点
      */
     getLeaf(node, resolve) {
-      DeptApi.getLazyTree(this.activeTab, node.data.code, true).then(res => {
-        resolve(res);
-      });
+      DeptApi.getLazyTree(this.activeTab, node.data.code, true)
+        .then(res => {
+          resolve(res);
+        })
+        .catch(this.$errorHandler);
     },
 
     /**
@@ -400,22 +455,24 @@ export default {
     reloadLazyTree() {
       const children = this.$refs.userLazyTree.root.childNodes;
       children.splice(0, children.length);
-      DeptApi.getLazyTree(this.activeTab, -1).then(res => {
-        this.$refs.userLazyTree.root.doCreateChildren(res);
-        if (res.length) {
-          this.$refs.userLazyTree.setCurrentKey(res[0].code);
-          this.getUserListByOption();
-          this.organizationId = res[0].code;
-        } else {
-          this.userList = [];
-          this.page = {
-            // 分页信息
-            current: 0,
-            pageSize: 0,
-            total: 0,
-          };
-        }
-      });
+      DeptApi.getLazyTree(this.activeTab, -1)
+        .then(res => {
+          this.$refs.userLazyTree.root.doCreateChildren(res);
+          if (res.length) {
+            this.$refs.userLazyTree.setCurrentKey(res[0].code);
+            this.getUserListByOption();
+            this.organizationId = res[0].code;
+          } else {
+            this.userList = [];
+            this.page = {
+              // 分页信息
+              current: 0,
+              pageSize: 0,
+              total: 0,
+            };
+          }
+        })
+        .catch(this.$errorHandler);
     },
 
     /**
@@ -649,17 +706,19 @@ export default {
         cancelButtonText: '取消',
       })
         .then(() => {
-          UserApi.deleteUser(idsArr).then(() => {
-            this.removeUsers(idsArr);
-            this.$message({
-              message: '删除成功',
-              type: 'success',
-            });
-            // 本页全删除后，重新获取列表
-            if (this.userList.length === 0) {
-              this.getUserListByOption();
-            }
-          });
+          UserApi.deleteUser(idsArr)
+            .then(() => {
+              this.removeUsers(idsArr);
+              this.$message({
+                message: '删除成功',
+                type: 'success',
+              });
+              // 本页全删除后，重新获取列表
+              if (this.userList.length === 0) {
+                this.getUserListByOption();
+              }
+            })
+            .catch(this.$errorHandler);
         })
         .catch();
     },
@@ -671,19 +730,21 @@ export default {
      */
     disableUser(disableType, ids, curList) {
       const status = disableType === 'enable';
-      UserApi.disableUser(ids, status).then(() => {
-        /**
-         * 更新视图
-         */
-        curList.forEach(item => {
-          item.isEnabled = status === true;
-        });
+      UserApi.disableUser(ids, status)
+        .then(() => {
+          /**
+           * 更新视图
+           */
+          curList.forEach(item => {
+            item.isEnabled = status === true;
+          });
 
-        this.$message({
-          message: '操作成功',
-          type: 'success',
-        });
-      });
+          this.$message({
+            message: '操作成功',
+            type: 'success',
+          });
+        })
+        .catch(this.$errorHandler);
     },
 
     // 解锁
@@ -694,15 +755,17 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          UserApi.lockUser(ids).then(() => {
-            curList.forEach(item => {
-              item.isLocked = false;
-            });
-            this.$message({
-              message: '解锁成功',
-              type: 'success',
-            });
-          });
+          UserApi.lockUser(ids)
+            .then(() => {
+              curList.forEach(item => {
+                item.isLocked = false;
+              });
+              this.$message({
+                message: '解锁成功',
+                type: 'success',
+              });
+            })
+            .catch(this.$errorHandler);
         })
         .catch(this.$errorHandler);
     },
@@ -714,12 +777,14 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          UserApi.resetPwd(ids).then(() => {
-            this.$message({
-              message: '重置成功',
-              type: 'success',
-            });
-          });
+          UserApi.resetPwd(ids)
+            .then(() => {
+              this.$message({
+                message: '重置成功',
+                type: 'success',
+              });
+            })
+            .catch(this.$errorHandler);
         })
         .catch(this.$errorHandler);
     },

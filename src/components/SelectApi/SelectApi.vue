@@ -3,7 +3,7 @@
   <el-dialog
     :title="title"
     visible
-    width="900px"
+    width="1000px"
     :before-close="close"
     :close-on-click-modal="false"
   >
@@ -13,7 +13,7 @@
           <el-input v-model.trim="formApi.name" size="mini"></el-input>
         </el-form-item>
 
-        <el-form-item label="服务编码">
+        <el-form-item label="服务编码" v-show="false">
           <el-input v-model.trim="formApi.code" size="mini"></el-input>
         </el-form-item>
 
@@ -31,7 +31,6 @@
       :data="treeData"
       width="100%"
       highlight-current-row
-      border
       @row-click="onClickCacheRow"
       v-loading="loading"
       ref="tbaleApi"
@@ -49,7 +48,14 @@
           {{scope.row.name}}
         </template>
       </el-table-column>
-      <el-table-column label="服务编码" prop="code"></el-table-column>
+      <el-table-column label="请求类型" prop="method" width="100px">
+        <template slot-scope="{row: api}">
+          <el-tag v-if="api.method === 'get'" type="success" disable-transitions>GET</el-tag>
+          <el-tag v-if="api.method === 'post'" disable-transitions>POST</el-tag>
+          <el-tag v-if="api.method === 'put'" type="warning" disable-transitions>PUT</el-tag>
+          <el-tag v-if="api.method === 'delete'" type="danger" disable-transitions>DELETE</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="服务路径" prop="url"></el-table-column>
     </el-table>
     <!-- tree grid end -->

@@ -97,14 +97,17 @@ export default {
       this.formLogin.username = username;
       config.appCode = appCode;
     },
-    // 调用登录服务实现登录
+    // 提交登录
     submit() {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           const { username, password } = this.formLogin;
+          // 调用登录服务
           login(username, password)
             .then(tokenData => {
+              // 登录成功后将token数据保存在本地
               setToken(tokenData);
+              // 页面重定向至首页
               this.$router.replace('/');
             })
             .catch(this.$errorHandler);

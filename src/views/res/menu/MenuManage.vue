@@ -35,7 +35,8 @@
 
           <span v-else-if="index === 0" class="ms-tree-space"></span>
 
-          <span>{{ scope.row[col.key] | formatDic(col.key) }}</span>
+          <i v-if="col.key === 'icon'" :class="scope.row.icon"></i>
+          <span v-else>{{ scope.row[col.key] | formatDic(col.key) }}</span>
         </template>
       </el-table-column>
 
@@ -83,7 +84,7 @@ export default {
         { text: '菜单类型', key: 'menuType' },
         { text: '授权方式', key: 'authType' },
         { text: '菜单路径', key: 'url', width: 200 },
-        { text: '图标', key: 'imagePath', width: 50, align: 'center' },
+        { text: '图标', key: 'icon', width: 50, align: 'center' },
         { text: '是否启用', key: 'isEnable', width: 80, align: 'center' },
         { text: '是否显示', key: 'isVisible' },
         { text: '排序', key: 'sort', width: 50, align: 'center' },

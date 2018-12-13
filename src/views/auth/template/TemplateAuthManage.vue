@@ -1,21 +1,20 @@
 <template>
   <div>
     <el-table :data="templateList" highlight-current-row>
-      <el-table-column width='50' type='index' label="序号"></el-table-column>
+      <el-table-column width="50" type="index" label="序号"></el-table-column>
       <el-table-column label="角色名称" prop="name"></el-table-column>
       <el-table-column label="备注" prop="description"></el-table-column>
-      <el-table-column label="授权操作" prop="">
+      <el-table-column label="授权操作" prop>
         <template slot-scope="scope">
           <el-button type="text" @click="tRoleAuthMenu(scope.row)">[菜单]</el-button>
           <el-button type="text" @click="tRoleAuthApi(scope.row)">[服务]</el-button>
         </template>
       </el-table-column>
-
     </el-table>
     <!-- 菜单选择组件 -->
     <select-menu
-      v-if='winMenu.visible'
-      v-bind ='winMenu'
+      v-if="winMenu.visible"
+      v-bind="winMenu"
       @select="onMenuSelect"
       @close="winMenu.visible = false"
     />
@@ -44,6 +43,7 @@ export default {
       winMenu: {
         visible: false, // 是否可见
         multiple: true, // 是否多选
+        autoCheckParent: true, // 自动选中父节点
         selectedIds: [], // 已选菜单id数组
       },
       // 服务选择窗口相关配置及数据

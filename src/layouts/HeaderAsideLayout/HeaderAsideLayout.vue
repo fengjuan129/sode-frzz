@@ -3,7 +3,7 @@
     <!-- 侧栏 -->
     <el-aside :width="asideWidth">
       <!-- 侧栏导航菜单 -->
-      <nav-menu v-bind="menuConfig">
+      <nav-menu v-bind="menuConfig" :menus="menuData">
         <template slot="header">
           <div class="logo-wrapper" :title="system">
             <router-link to="/">
@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters, mapMutations } from 'vuex';
+import { mapState, mapGetters, mapMutations, mapActions } from 'vuex';
 import NavMenu from '@/components/NavMenu';
 import { setToken } from '@/libs/token';
 import { logout } from '@/api/login';
@@ -70,6 +70,8 @@ export default {
     ...mapState('global', {
       collapse: state => state.layout.collapse,
     }),
+    // 侧栏菜单数据
+    ...mapGetters('user', ['menuData']),
     // 获取侧栏宽度、菜单配置
     ...mapGetters('global', ['asideWidth', 'menuConfig']),
     // 切换侧栏折叠按钮旋转角度
@@ -77,9 +79,15 @@ export default {
       return this.collapse ? 270 : 180;
     },
   },
+  created() {
+    // 加载菜单数据
+    this.loadCurUserMenus();
+  },
   methods: {
     // 将切换侧栏收缩状态方法绑定到当前组件
     ...mapMutations('global', ['toggleCollapse']),
+    // 将加载当前账号菜单方法绑定到当前组件
+    ...mapActions('user', ['loadCurUserMenus']),
     /**
      * 处理下拉菜单操作
      * @param {string} command 操作类型

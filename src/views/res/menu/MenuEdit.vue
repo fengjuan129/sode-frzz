@@ -50,7 +50,7 @@
         <el-col :span="12">
           <!-- TODO 后期实现为选择字体图标 没有字段 -->
           <el-form-item label="菜单图标">
-            <el-input autocomplete="off" v-model="menuEditForm.imagePath" placeholder="请输入图标类名"></el-input>
+            <el-input autocomplete="off" v-model="menuEditForm.icon" placeholder="请输入图标类名"></el-input>
           </el-form-item>
         </el-col>
 

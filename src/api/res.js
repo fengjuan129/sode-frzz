@@ -1,6 +1,16 @@
 import request from '../libs/request';
 
 /**
+ * 加载授权给当前账号的菜单列表
+ * @returns {Promise} 菜单列表
+ */
+export function loadCurUserMenus() {
+  return request('/v1/core/res/menus/own', {
+    method: 'get',
+  }).then(menus => menus || []);
+}
+
+/**
  * 获取菜单 Tree
  */
 export function getMenuTree(params) {

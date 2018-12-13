@@ -11,7 +11,7 @@ export function getCodeTable() {
   // TODO: 后端未实现，暂改为本地模拟
   return {
     isEnable: [{ text: '启用', value: true }, { text: '禁用', value: false }], // 是否启用
-    isVisible: [{ text: '是', value: true }, { text: '否', value: false }], // 是否可见
+    isVisible: [{ text: '显示', value: true }, { text: '隐藏', value: false }], // 是否可见
     authType: [
       // 菜单授权方式
       { text: '公开', value: 'public' },
