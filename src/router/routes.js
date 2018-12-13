@@ -34,6 +34,10 @@ export default [
       ...res,
       ...auth,
       ...error,
+      {
+        path: '/demo',
+        component: () => import('../views/demo/index.vue'),
+      },
       // 未匹配到任何路由时，默认返回404
       // !此路由只能配置在路由表最后，顺序不可改变
       {
