@@ -33,7 +33,7 @@ export default {
       return require(`./img/${this.type}.svg`); // eslint-disable-line import/no-dynamic-require
     },
     btnText() {
-      return this.type === 404 ? '返回首页' : '重新加载';
+      return this.type === 500 ? '重新加载' : '返回首页';
     },
   },
   methods: {
@@ -41,11 +41,11 @@ export default {
      * 路由重定向
      */
     redirect() {
-      // 如果当前是404错误，返回首页；如果是其他错误，返回原页面
-      if (this.type === 404) {
-        this.$router.replace('/');
-      } else {
+      // 如果当前是500错误，返回原页面；如果是其他错误，返回首页
+      if (this.type === 500) {
         this.$router.back();
+      } else {
+        this.$router.replace('/');
       }
     },
   },
