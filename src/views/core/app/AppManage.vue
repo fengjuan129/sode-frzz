@@ -153,7 +153,10 @@ export default {
     onCurrentChange(selection) {
       this.selection = selection;
     },
-    // 批量操作
+    /**
+     * 批量操作
+     * @param command deleteApp删除  createApp：创建子系统 manageAuth ：管理员授权
+     */
     handleBatchCommand(command) {
       if (command === 'deleteApp') {
         this.$confirm(`确定删除【${this.selection.name}】?`, '提示', {
@@ -172,15 +175,8 @@ export default {
                   item => item.id !== this.selection.id
                 );
               }
-
-              for (let i = 0, len = this.appList.length; i < len; i += 1) {
-                const item = this.appList[i];
-                if (item.id === this.selection.id) {
-                  this.appList.splice(i, 1);
-                  break;
-                }
-              }
-
+              const index = this.appList.findIndex(item => item.id === this.selection.id);
+              this.appList.splice(index, 1);
               this.$message({
                 message: '删除成功',
                 type: 'success',
@@ -218,7 +214,7 @@ export default {
       const status = !app.isEnable;
       this.loading = true;
       // 后端接收 Y N
-      appApi.toggleAppState(app.id, status ? 'Y' : 'N').then(() => {
+      appApi.toggleAppState(app.id, status).then(() => {
         this.loading = false;
         app.isEnable = status;
 

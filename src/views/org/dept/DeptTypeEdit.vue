@@ -23,7 +23,7 @@
         </el-col>
 
         <el-col :span="24">
-          <el-form-item label="备注">
+          <el-form-item label="备注" prop='description'>
             <el-input
               type="textarea"
               :autosize="{ minRows: 4, maxRows: 6}"
@@ -61,6 +61,7 @@ export default {
           { required: true, message: '此项为必填选项', trigger: 'blur' },
           { max: 32, message: '长度不能超过32位', trigger: 'blur' },
         ],
+        description: [{ max: 255, message: '长度不能超过32位', trigger: 'blur' }],
       },
     };
   },

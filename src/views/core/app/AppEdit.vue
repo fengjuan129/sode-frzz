@@ -57,7 +57,7 @@
           </el-col>
 
           <el-col :span="24">
-            <el-form-item label="备注">
+            <el-form-item label="备注" prop="description">
               <el-input
                 type="textarea"
                 :autosize="{ minRows: 4, maxRows: 6}"
@@ -119,8 +119,12 @@ export default {
       },
       deptVisible: false,
       formAppRules: {
-        name: [{ required: true, message: '请输入系统名称' }],
+        name: [
+          { required: true, message: '请输入系统名称' },
+          { max: 32, message: '长度不能超过32个字符' },
+        ],
         deptName: [{ required: true, message: '请选择所属机构' }],
+        description: [{ max: 256, message: '长度不能超过256个字符' }],
       },
       isEnableCodeTable: getCodeTable('isEnable'),
     };
@@ -157,8 +161,6 @@ export default {
         }
         AppApi.editApp(this.formApp)
           .then(res => {
-            console.log(res);
-
             this.$emit('save', res);
             this.close();
           })

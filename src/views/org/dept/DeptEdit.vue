@@ -1,6 +1,6 @@
 <!-- 组织机构编辑页面 -->
 <template>
-  <el-dialog title="组织机构编辑" visible width="30%" :before-close="close" :close-on-click-modal="false">
+  <el-dialog title="组织机构编辑" visible width="300" :before-close="close" :close-on-click-modal="false">
     <el-form
       :model="deptEditForm"
       :rules="deptEditRules"
@@ -62,7 +62,7 @@
         </el-col>
 
         <el-col :span="24">
-          <el-form-item label="备注">
+          <el-form-item label="备注" prop="description">
             <el-input
               type="textarea"
               :autosize="{ minRows: 4, maxRows: 6}"
@@ -130,6 +130,7 @@ export default {
       },
       isEnable: getCodeTable('isEnable'), // 码表是否启用
       isCorporation: getCodeTable('isCorporation'), // 码表是否法人
+      description: [{ max: 255, message: '长度不能超过32个字符' }],
     };
   },
 

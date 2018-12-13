@@ -33,9 +33,7 @@ export function editApp(app) {
 export function deleteApp(id) {
   return request('/v1/core/base/app', {
     method: 'delete',
-    data: {
-      id,
-    },
+    data: id,
   });
 }
 

@@ -20,7 +20,7 @@
       <!-- 创建组织机构按钮标签（当前账号是运维管理员时才显示） -->
       <el-tab-pane name="btnAddDeptType" v-if="isAdmin">
         <span slot="label">
-          <i class="el-icon-circle-plus"></i>
+          <i class="el-icon-circle-plus" @click.stop="winDeptTypeEdit.visible = true"></i>
         </span>
       </el-tab-pane>
 
@@ -48,9 +48,9 @@
             <span :class="toggleIconShow(row) ? 'pl5' : 'pl20'">{{row.name}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="isCorporation" label="法人单位" :formatter="isCorpFormatter"></el-table-column>
-        <el-table-column prop="isEnable" label="状态" :formatter="isEnableFormatter"></el-table-column>
-        <el-table-column prop="sort" label="排序"></el-table-column>
+        <el-table-column prop="isCorporation" label="法人单位" :formatter="isCorpFormatter" ></el-table-column>
+        <el-table-column prop="isEnable" label="状态" :formatter="isEnableFormatter" width="60"></el-table-column>
+        <el-table-column prop="sort" label="排序" width="60"></el-table-column>
         <el-table-column prop="description" label="备注"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
