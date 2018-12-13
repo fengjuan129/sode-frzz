@@ -527,7 +527,7 @@ export default {
     },
     /**
      * 批量操作时，按照状态过滤
-     * @param type 1：启用 2：禁用 3：解锁  5：账号迁移 6: 删除
+     * @param type enable：启用 disable：禁用 unlock：解锁  accountTransfer：账号迁移 delete: 删除功能
      * @returns 选中的 ID列表
      */
     filterSelectOptionByType(type) {
@@ -538,19 +538,19 @@ export default {
       if (this.selectUsers.length) {
         this.selectUsers.forEach(item => {
           switch (parseInt(type, 10)) {
-            case 1: // 只添加 状态为禁用的选项
+            case 'enable': // 只添加 状态为禁用的选项
               if (item.isEnabled === false && item.isLocked !== true) {
                 idsArr.push(item.id);
                 selectArr.push(item);
               }
               break;
-            case 2: // 只添加状态为启用的选项
+            case 'disable': // 只添加状态为启用的选项
               if (item.isEnabled === true && item.isLocked !== true) {
                 idsArr.push(item.id);
                 selectArr.push(item);
               }
               break;
-            case 3: // 只添加状态为锁定的选项
+            case 'unlock': // 只添加状态为锁定的选项
               if (item.isLocked === true) {
                 idsArr.push(item.id);
                 selectArr.push(item);
@@ -570,7 +570,7 @@ export default {
     },
     /**
      * 批量操作
-     * @param eventType 1：启用 2：禁用 3：解锁  5：账号迁移 6: 删除功能
+     * @param eventType enable：启用 disable：禁用 unlock：解锁  accountTransfer：账号迁移 delete: 删除功能
      */
     updateMore(eventType) {
       const filterList = this.filterSelectOptionByType(eventType);
